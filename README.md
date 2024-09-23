@@ -31,3 +31,8 @@ Sukurti sistemą kurioje naudotojai galės pasirinkti norimą Lietuvos universit
   
 7. Saugumas ir privatumas
    - Sistema turi užtikrinti, kad vartotojų duomenys būtų saugiai laikomi ir apsaugoti
+
+
+### Naudojamos technologijos
+Frontend: JavaScript naudojant ReactJS karkasą
+Backend: PHP naudojant Laravel karkasą
