@@ -1,0 +1,9 @@
+@use "imports.scss";
+
+a.nav-link {
+    @extend .text-primary, .pe-2;
+
+    &.active {
+        font-weight: 100;
+    }
+}
