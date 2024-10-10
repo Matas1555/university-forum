@@ -48,6 +48,18 @@ class AuthController extends Controller
             'password' => Hash::make($data['password']),
         ]);
 
+        $profile = Profile::create([
+            'user_id' => $user->id,
+            'username' => $data['username'],
+            'email' => $data['email'],
+            'university' => $data['university'] ?? null, 
+            'status' => $data['status'] ?? null,
+            'yearOfGraduation' => $data['yearOfGraduation'] ?? null,
+            'avatar' => $data['avatar'] ?? null,
+            'bio' => $data['bio'] ?? null,
+        ]);
+
+
         $token = $user->createToken('main')->plainTextToken;
 
         return response()->json([

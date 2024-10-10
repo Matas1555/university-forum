@@ -20,7 +20,12 @@ class RegisterRequest extends FormRequest
             'password' => [
                 'required',
                 RulesPassword::min(8) ->letters()
-            ]
+            ],
+            'university' => 'nullable|integer|exists:universities,id',
+            'status' => 'nullable|integer|exists:status,id',
+            'yearOfGraduation' => 'nullable|date',
+            'avatar' => 'nullable|string',
+            'bio' => 'nullable|string',
         ];
     }
 }

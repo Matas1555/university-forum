@@ -13,7 +13,7 @@ export default function DefaultLayout(){
         <NavBar/>
         <div>
             <div>
-                Default
+             
             </div>
             <Outlet/>
         </div>

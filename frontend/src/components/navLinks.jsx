@@ -7,7 +7,7 @@ import API from "../API";
 import profilePicture from "../assets/profile-default-icon.png";
 
 
-const NavButtons = ({ openLoginDialog, openRegisterDialog }) => {
+const NavButtons = ({ openLoginDialog}) => {
     const {user, token, setUser, setToken} = useStateContext();
 
     const onLogout = () => {
@@ -22,13 +22,15 @@ const NavButtons = ({ openLoginDialog, openRegisterDialog }) => {
         <>
             {(user && token) ? (
                 <>
-                    <div className="flex flex-row gap-3 border-2 border-blue p-2 border-slate-300 rounded-md">
-                        <img 
-                        src={profilePicture} 
-                        className="w-15 h-10"
-                        />
-                        <h1 className="mt-2 mr-1"  style={{fontFamily: "Inter", fontWeight:300, fontSize:"1em"}}>{user.username}</h1>
-                    </div>
+                    <NavLink to='/profile'>
+                        <div className="flex flex-row gap-3 border-2 border-blue p-2 border-slate-300 rounded-md  hover:bg-blue hover:text-lightest-blue duration-300 transition-colors">
+                            <img 
+                            src={profilePicture} 
+                            className="w-15 h-10"
+                            />
+                            <h1 className="mt-2 mr-1"  style={{fontFamily: "Inter", fontWeight:300, fontSize:"1em"}}>{user.username}</h1>
+                        </div>
+                    </NavLink>
                     <button 
                         className="pl-4 pr-4 pt-1 pb-2 text-center bg-lightest-blue border-blue rounded-md border-2 border-slate-300 text-blue text-xl hover:bg-blue hover:text-lightest-blue duration-300 transition-colors" 
                         onClick={onLogout}
@@ -44,12 +46,11 @@ const NavButtons = ({ openLoginDialog, openRegisterDialog }) => {
                         >
                         Prisijungti
                     </button>
-                    <button 
+                    <NavLink to='/register'
                         className="pl-4 pr-4 pt-1 pb-2 text-center bg-lightest-blue border-blue rounded-md border-2 border-slate-300 text-blue text-xl hover:bg-blue hover:text-lightest-blue duration-300 transition-colors" 
-                        onClick={openRegisterDialog}
                         >
                         Registruotis
-                    </button>
+                    </NavLink>
                 </>
             )}
         </>
@@ -77,10 +78,9 @@ const NavLinks = () => {
         <>
             <nav className="w-1/6 flex justify-end">
                 <div className="hidden flex justify-between md:flex gap-4">
-                    <NavButtons openLoginDialog={openLoginDialog} openRegisterDialog={openRegisterDialog}/>
+                    <NavButtons openLoginDialog={openLoginDialog}/>
                 </div>
                 <LogIn isOpen={isLoginOpen} setIsOpen={setIsLoginOpen} />
-                <Register isOpen={isRegsiterOpen} setIsOpen={setIsRegisterOpen} />
 
                 <div className="md:hidden">
                     <button onClick={toggleNavBar}>{isOpen ? 
@@ -96,7 +96,7 @@ const NavLinks = () => {
             </nav>
             {isOpen && (
                 <div className="flex basis-full gap-2 flex-col items-center">
-                    <NavButtons openLoginDialog={openLoginDialog} openRegisterDialog={openRegisterDialog}></NavButtons>
+                    <NavButtons openLoginDialog={openLoginDialog}></NavButtons>
                 </div>
             )
 

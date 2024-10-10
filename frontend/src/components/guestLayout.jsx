@@ -13,7 +13,7 @@ export default function GuestLayout(){
         <NavBar/>
         <div>
             <div>
-                Guest
+               
             </div>
             <Outlet/>
         </div>
