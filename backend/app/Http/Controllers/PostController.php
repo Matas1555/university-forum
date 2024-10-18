@@ -99,13 +99,13 @@ class PostController extends Controller
         }
 
         return response()->json([
-            'forum_name' => $forum->name,
+            'forum_name' => $forum->title,
             'posts' => $postData,
         ], 200);
     }
 
 
-    //POST CRUD
+    //----------------------------------------POST CRUD-----------------------------------------------------
     /**
      * @OA\Get(
      *     path="/posts",
@@ -118,15 +118,15 @@ class PostController extends Controller
      *         description="List of posts",
      *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Post"))
      *     )
+     *     @OA\Response(
+     *         response=404,
+     *         description="Posts not found"
+     *     )
      * )
      */
     public function index(Request $request)
     {
         $query = Post::query();
-
-        if ($request->has('university_id')) {
-            $query->where('university', $request->input('university_id'));
-        }
 
         if ($request->has('forum_id')) {
             $query->where('forum', $request->input('forum_id'));
@@ -171,14 +171,12 @@ class PostController extends Controller
                 'title' => 'required|string|max:255',
                 'description' => 'required|string',
                 'forum_id' => 'required|integer|exists:forums,id',
-                'university_id' => 'required|integer|exists:universities,id',
             ]);
 
             $post = Post::create([
                 'title' => $validatedData['title'],
                 'description' => $validatedData['description'],
                 'forum' => $validatedData['forum_id'],
-                'university' => $validatedData['university_id'],
                 'user' => 19,
             ]);
 
@@ -186,7 +184,6 @@ class PostController extends Controller
         } catch(\Illuminate\Validation\ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
-
 
     }
 
@@ -267,13 +264,17 @@ class PostController extends Controller
             return response()->json(['message' => 'Post not found'], 404);
         }
 
-        // Validate the request data
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-        ]);
+        try{
+            // Validate the request data
+            $validatedData = $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'required|string',
+            ]);
 
-        $post->update($validatedData);
+            $post->update($validatedData);
+        } catch(\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
 
         return response()->json(['message' => 'Post updated successfully', 'post' => $post], 200);
     }
@@ -310,13 +311,15 @@ class PostController extends Controller
             return response()->json(['message' => 'Post not found'], 404);
         }
 
+        Comment::where('post', $post->id)->delete();
+
         $post->delete();
 
         return response()->json(['message' => 'Post deleted successfully'], 200);
     }
 
 
-    //FORUM CRUD
+    //--------------------------------------FORUM CRUD-------------------------------------------------
     /**
      * @OA\Get(
      *     path="/forums",
@@ -328,6 +331,10 @@ class PostController extends Controller
      *         response=200,
      *         description="List of forums",
      *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Forum"))
+     *     )
+     *     @OA\Response(
+     *         response=404,
+     *         description="Forums not found"
      *     )
      * )
      */
@@ -367,6 +374,12 @@ class PostController extends Controller
 
         if (!$forum) {
             return response()->json(['message' => 'Forum not found'], 404);
+        }
+
+        $posts = Post::where('forum', $forum->id)->get();
+        foreach ($posts as $post) {
+            Comment::where('post', $post->id)->delete();
+            $post->delete();
         }
 
         $forum->delete();
@@ -414,13 +427,16 @@ class PostController extends Controller
             return response()->json(['message' => 'Forum not found'], 404);
         }
 
-        // Validate the request data
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'university' => 'required|integer',
-        ]);
+        try{
+            $validatedData = $request->validate([
+                'title' => 'required|string|max:255',
+                'university' => 'required|integer|exists:universities,id',
+            ]);
 
-        $forum->update($validatedData);
+            $forum->update($validatedData);
+        } catch(\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
 
         return response()->json(['message' => 'Forum updated successfully', 'forum' => $forum], 200);
     }
@@ -452,22 +468,25 @@ class PostController extends Controller
      */
     public function insertForum(Request $request)
     {
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'university' => 'required|integer',
-        ]);
+        try{
+            $validatedData = $request->validate([
+                'title' => 'required|string|max:255',
+                'university' => 'required|integer',
+            ]);
 
-        $forum = Forum::create([
-            'title' => $validatedData['title'],
-            'university' => $validatedData['university'],
-        ]);
+            $forum = Forum::create([
+                'title' => $validatedData['title'],
+                'university' => $validatedData['university'],
+            ]);
+        } catch(\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
 
         return response()->json(['message' => 'Forum created successfully', 'forum' => $forum], 201);
     }
 
 
-    //Comment CRUD
-
+    //--------------------------------------Comment CRUD------------------------------------------------------------
     /**
      * @OA\Get(
      *     path="/comments",
@@ -479,6 +498,10 @@ class PostController extends Controller
      *         response=200,
      *         description="List of comments",
      *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Comment"))
+     *     )
+     *     @OA\Response(
+     *         response=404,
+     *         description="Comments not found"
      *     )
      * )
      */
@@ -565,12 +588,16 @@ class PostController extends Controller
             return response()->json(['message' => 'Comment not found'], 404);
         }
 
-        // Validate the request data
-        $validatedData = $request->validate([
-            'text' => 'required|string',
-            'post_id' => 'required|integer',
-            'user' => 'required|integer',
-        ]);
+        try{
+            // Validate the request data
+            $validatedData = $request->validate([
+                'text' => 'required|string',
+                'post_id' => 'required|integer',
+                'user' => 'required|integer',
+            ]);
+        } catch(\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
 
         $comment->update($validatedData);
 
@@ -604,16 +631,20 @@ class PostController extends Controller
      */
     public function insertComment(Request $request)
     {
-        $validatedData = $request->validate([
-            'text' => 'required|string',
-            'post_id' => 'required|integer|exists:posts,id',
-        ]);
+        try{
+            $validatedData = $request->validate([
+                'text' => 'required|string',
+                'post_id' => 'required|integer|exists:posts,id',
+            ]);
 
-        $comment = Comment::create([
-            'text' => $validatedData['text'],
-            'post' => $validatedData['post_id'],
-            'user' => 19,
-        ]);
+            $comment = Comment::create([
+                'text' => $validatedData['text'],
+                'post' => $validatedData['post_id'],
+                'user' => 19,
+            ]);
+        } catch(\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
 
         return response()->json(['message' => 'Comment created successfully', 'comment' => $comment], 201);
     }
