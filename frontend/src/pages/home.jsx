@@ -15,7 +15,7 @@ const Home = () => {
             width: 0;
             height: 2px;
             background-color: #176B87; 
-            transition: width 0.3s ease-in;
+            transition: width 0.2s ease-in;
           }
 
           .tab-underline:hover::after {
@@ -28,15 +28,15 @@ const Home = () => {
         `}
       </style>
 
-      <div className="flex h-screen w-full justify-center pt-20 px-4">
-        <TabGroup>
-          <TabList className="flex flex-row gap-40">
+      <div className="flex h-screen w-full h-full justify-center pt-8 px-4">
+        <TabGroup className="w-full h-full">
+          <TabList className="flex flex-row gap-40 justify-center">
             {/* Use the selected state from Headless UI to add the selected class */}
             <Tab style={{fontFamily: "Inter", fontWeight:400, fontSize:"1.5em"}}
               className={({ selected }) =>
                 selected
-                  ? "tab-underline tab-underline-selected text-blue pb-2 "
-                  : "tab-underline text-blue-500 pb-2"
+                  ? "tab-underline tab-underline-selected text-blue pb-2 outline-none"
+                  : "tab-underline text-blue-500 pb-2 outline-none"
               }
             >
               Įrašai
@@ -44,8 +44,8 @@ const Home = () => {
             <Tab style={{fontFamily: "Inter", fontWeight:400, fontSize:"1.5em"}}
               className={({ selected }) =>
                 selected
-                  ? "tab-underline tab-underline-selected text-blue pb-2"
-                  : "tab-underline text-blue-500 pb-2"
+                  ? "tab-underline tab-underline-selected text-blue pb-2 outline-none"
+                  : "tab-underline text-blue-500 pb-2 outline-none"
               }
             >
               Universitetai
@@ -53,8 +53,8 @@ const Home = () => {
             <Tab style={{fontFamily: "Inter", fontWeight:400, fontSize:"1.5em"}}
               className={({ selected }) =>
                 selected
-                  ? "tab-underline tab-underline-selected text-blue pb-2"
-                  : "tab-underline text-blue-500 pb-2"
+                  ? "tab-underline tab-underline-selected text-blue pb-2 outline-none"
+                  : "tab-underline text-blue-500 pb-2 outline-none"
               }
             >
               Kategorijos

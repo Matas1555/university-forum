@@ -4,7 +4,7 @@ import LogIn from "../pages/login"; // Assuming the LogIn component is in the sa
 import Register from "../pages/register";
 import { useStateContext } from "../context/contextProvider";
 import API from "../API";
-import profilePicture from "../assets/profile-default-icon.png";
+import profilePicture from "../../public/assets/profile-default-icon.png";
 
 
 const NavButtons = ({ openLoginDialog}) => {
@@ -23,12 +23,12 @@ const NavButtons = ({ openLoginDialog}) => {
             {(user && token) ? (
                 <>
                     <NavLink to='/profile'>
-                        <div className="flex flex-row gap-3 border-2 border-blue p-2 border-slate-300 rounded-md  hover:bg-blue hover:text-lightest-blue duration-300 transition-colors">
+                        <div className="pl-4 pr-4 pt-1 pb-1 flex flex-row gap-3 border-2 border-blue  border-slate-300 rounded-md  hover:bg-blue hover:text-lightest-blue duration-300 transition-colors">
                             <img 
                             src={profilePicture} 
-                            className="w-15 h-10"
+                            className="w-8 h-8"
                             />
-                            <h1 className="mt-2 mr-1"  style={{fontFamily: "Inter", fontWeight:300, fontSize:"1em"}}>{user.username}</h1>
+                            <h1 className="text-center align-middle text-blue"  style={{fontFamily: "Inter", fontWeight:600, fontSize:"1em", alignContent:"center"}}>{user.username}</h1>
                         </div>
                     </NavLink>
                     <button 

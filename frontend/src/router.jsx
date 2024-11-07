@@ -12,6 +12,7 @@ const router = createBrowserRouter ([
         element: <DefaultLayout/>,
         children: [
             {
+
                 path: '/home',
                 element: <Home/>,
                 errorElement: <div>Error loading home page!</div>,
@@ -21,7 +22,12 @@ const router = createBrowserRouter ([
                 element: <Profile/>,
                 errorElement: <div>Error loading profile page!</div>,
             },
-
+            {
+                
+                path: '/',
+                element: <Home/>,
+                errorElement: <div>Error loading home page!</div>,
+            },
         ],
     },
     {

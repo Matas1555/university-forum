@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\User;
+use App\Models\Profile;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use Illuminate\Http\Request;
@@ -40,24 +41,29 @@ class AuthController extends Controller
 
     public function register(RegisterRequest $request): \Illuminate\Http\JsonResponse
     {
-        $data = $request->validated();
+        try{
+            $data = $request->validated();
 
-        $user = User::create([
-            'username' => $data['username'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
+            $user = User::create([
+                'username' => $data['username'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+            ]);
 
-        $profile = Profile::create([
-            'user_id' => $user->id,
-            'username' => $data['username'],
-            'email' => $data['email'],
-            'university' => $data['university'] ?? null, 
-            'status' => $data['status'] ?? null,
-            'yearOfGraduation' => $data['yearOfGraduation'] ?? null,
-            'avatar' => $data['avatar'] ?? null,
-            'bio' => $data['bio'] ?? null,
-        ]);
+            Profile::create([
+                'user_id' => $user->id,
+                'username' => $data['username'],
+                'email' => $data['email'],
+                'university' => $data['university'] ?? null,
+                'status' => $data['status'] ?? null,
+                'yearOfGraduation' => $data['yearOfGraduation'] ?? null,
+                'avatar' => $data['avatar'] ?? null,
+                'bio' => $data['bio'] ?? null,
+            ]);
+        } catch(\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+
 
 
         $token = $user->createToken('main')->plainTextToken;

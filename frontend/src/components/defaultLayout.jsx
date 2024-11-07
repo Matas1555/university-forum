@@ -1,6 +1,7 @@
 import { Outlet, Navigate } from "react-router-dom";
 import { useStateContext } from "../context/contextProvider";
 import NavBar from "./navbar";
+import Footer from "./footer";
 
 export default function DefaultLayout(){
     const {user, token} = useStateContext;
@@ -10,12 +11,12 @@ export default function DefaultLayout(){
 
     return(
         <>
-        <NavBar/>
-        <div>
-            <div>
-             
-            </div>
-            <Outlet/>
+        <div className="flex flex-col min-h-screen">
+            <NavBar/>
+            <main className="flex-grow">
+                <Outlet />
+            </main>
+            {/* <Footer/> */}
         </div>
         </>
     )

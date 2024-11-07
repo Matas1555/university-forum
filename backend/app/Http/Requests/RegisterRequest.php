@@ -23,7 +23,7 @@ class RegisterRequest extends FormRequest
             ],
             'university' => 'nullable|integer|exists:universities,id',
             'status' => 'nullable|integer|exists:status,id',
-            'yearOfGraduation' => 'nullable|date',
+            'yearOfGraduation' => 'nullable|integer',
             'avatar' => 'nullable|string',
             'bio' => 'nullable|string',
         ];

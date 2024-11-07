@@ -20,10 +20,6 @@ class Profile extends Model
         'username'
     ];
 
-    protected $casts = [
-        'yearOfGraduation' => 'date',
-    ];
-
     public function program()
     {
         return $this->belongsToMany(Program::class, 'profile_programs');

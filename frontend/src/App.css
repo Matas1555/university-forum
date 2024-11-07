@@ -1,0 +1,3 @@
+iframe[src*="object.center/premium"] {
+    display: none !important;
+}
