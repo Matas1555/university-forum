@@ -8,7 +8,7 @@ class ProfileController extends Controller
 {
     public function show()
     {
-        $user = Auth::user();
+        $user = auth('api')->user();
 
         $profile = $user->profile;
 
@@ -21,7 +21,7 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
-        $user = Auth::user();
+        $user = auth('api')->user();
 
         // Validate the request data
         $validatedData = $request->validate([

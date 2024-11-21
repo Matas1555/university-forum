@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import LogIn from "../pages/login"; // Assuming the LogIn component is in the same folder
 import Register from "../pages/register";
@@ -8,14 +8,19 @@ import profilePicture from "../../public/assets/profile-default-icon.png";
 
 
 const NavButtons = ({ openLoginDialog}) => {
-    const {user, token, setUser, setToken} = useStateContext();
+    const {user, token, setUser, setToken, setRefreshToken} = useStateContext();
+    const navigate = useNavigate();
 
-    const onLogout = () => {
-        API.get('/logout')
-        .then(({}) => {
-           setUser(null);
-           setToken(null);
-        })
+    const onLogout = async () => {
+        try {
+            await API.post('/logout');
+            setUser({});
+            setToken();
+            setRefreshToken();
+            navigate('/home');
+        } catch (error) {
+            console.error("Logout failed", error.response?.data || error.message);
+        }
     }
 
     return (

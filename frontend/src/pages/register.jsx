@@ -26,7 +26,7 @@ function Register() {
 
     const navigate = useNavigate();
 
-    const {setUser, setToken} = useStateContext();
+    const {setUser, setToken, setRefreshToken} = useStateContext();
 
 
     useEffect(() => {
@@ -77,11 +77,11 @@ function Register() {
             const response = await API.post("/register", payload);
             console.log("Response from server:", response);
     
-            if (response.data.user && response.data.token) {
+            if (response.data.user && response.data.access_token && response.data.refresh_token) {
                 setUser(response.data.user);
-                setToken(response.data.token);
+                setToken(response.data.access_token);
+                setRefreshToken(response.data.refresh_token)
                 navigate('/home');
-                setIsOpen(false);
             } else {
                 console.error("Unexpected response format", response);
             }

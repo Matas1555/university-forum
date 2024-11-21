@@ -15,17 +15,24 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'username' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users,username',
             'email' => 'required|string|email|unique:users,email',
             'password' => [
                 'required',
-                RulesPassword::min(8) ->letters()
+                RulesPassword::min(8) ->letters()->numbers()
             ],
             'university' => 'nullable|integer|exists:universities,id',
-            'status' => 'nullable|integer|exists:status,id',
             'yearOfGraduation' => 'nullable|integer',
             'avatar' => 'nullable|string',
             'bio' => 'nullable|string',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'username.unique' => 'The username has already been taken.',
+            'email.unique' => 'The email has already been registered.',
         ];
     }
 }

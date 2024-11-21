@@ -9,7 +9,7 @@ function LogIn({ isOpen, setIsOpen }) {
     const passwordRef = useRef();
     const navigate = useNavigate();
     
-    const {setUser, setToken} = useStateContext();
+    const {setUser, setToken, setRefreshToken} = useStateContext();
 
     const submit = async () => {
         try {
@@ -20,9 +20,11 @@ function LogIn({ isOpen, setIsOpen }) {
             const response = await API.post("/login", payload);
             console.log("Response from server:", response);
     
-            if (response.data.user && response.data.token) {
+            if (response.data.user && response.data.access_token && response.data.refresh_token) {
+                console.log("access token: ", response.data.access_token);
                 setUser(response.data.user);
-                setToken(response.data.token);
+                setToken(response.data.access_token);
+                setRefreshToken(response.data.refresh_token);
                 navigate('/home');
                 setIsOpen(false);
             } else {

@@ -3,10 +3,12 @@ import { useState } from "react";
 import { useContext } from "react";
 
 const stateContext = createContext({
-    user: null,
+    user: {}, 
     token: null,
+    refreshToken: null,
     setUser: () => {},
     setToken: () => {},
+    setRefreshToken: () => {},
 });
 
 export const ContextProvider = ({children}) => {
@@ -15,6 +17,7 @@ export const ContextProvider = ({children}) => {
         return storedUser ? JSON.parse(storedUser) : null;
     });
     const [token, _setToken] = useState(() => localStorage.getItem('ACCESS_TOKEN'));
+    const [refreshToken, _setRefreshToken] = useState(() => localStorage.getItem('REFRESH_TOKEN'));
 
     const setToken = (token) => {
         _setToken(token)
@@ -23,6 +26,16 @@ export const ContextProvider = ({children}) => {
         }
         else{
             localStorage.removeItem('ACCESS_TOKEN');
+        }
+    }
+
+    const setRefreshToken = (token) => {
+        _setRefreshToken(token)
+        if(token){
+            localStorage.setItem('REFRESH_TOKEN',token);
+        }
+        else{
+            localStorage.removeItem('REFRESH_TOKEN');
         }
     }
 
@@ -39,8 +52,10 @@ export const ContextProvider = ({children}) => {
         <stateContext.Provider value={{
             user,
             token,
+            refreshToken,
             setUser,
-            setToken
+            setToken,
+            setRefreshToken
         }}>
             {children}
         </stateContext.Provider>

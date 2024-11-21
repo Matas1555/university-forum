@@ -4,8 +4,10 @@ const API = axios.create({
 });
 
 API.interceptors.request.use((config) => {
-    const token = localStorage.getItem('ACCESS_TOKEN')
-    config.headers.Authorization = `Bearer ${token}`;
+    const token = localStorage.getItem('ACCESS_TOKEN');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
 });
 
@@ -13,16 +15,43 @@ API.interceptors.response.use(
     (response) => {
         return response;
     },
-    (error) => {
-        try{
-            const {response} = error;
-            if(response.status === 401) {
+    async (error) => {
+        const { response } = error;
+        const originalRequest = error.config;
+
+        if (response && response.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+
+            try {
+                const refreshToken = localStorage.getItem('REFRESH_TOKEN');
+                if (!refreshToken) {
+                    throw new Error("Refresh token not available");
+                }
+
+                const refreshResponse = await API.post('/refresh-token', {}, {
+                    headers: {
+                        'Authorization': `Bearer ${refreshToken}`
+                    }
+                });
+
+                const newToken = refreshResponse.data.access_token;
+
+                // Update tokens in localStorage and retry the request
+                localStorage.setItem('ACCESS_TOKEN', newToken);
+                API.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
+                return API(originalRequest);
+            } catch (refreshError) {
+                // Remove tokens and redirect to login if refresh fails
                 localStorage.removeItem('ACCESS_TOKEN');
+                localStorage.removeItem('REFRESH_TOKEN');
+                window.location.href = "/login"; // Redirect to login
+                return Promise.reject(refreshError);
             }
-        } catch {
-            console.error(err);
         }
-        throw error;
-});
+
+        return Promise.reject(error);
+    }
+);
+
 
 export default API;

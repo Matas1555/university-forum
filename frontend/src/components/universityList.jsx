@@ -35,7 +35,7 @@ export default function UniversityList(){
                 </div>
             </div>
             {isLoading ? (
-                <div class="w-8 h-8 border-4 rounded-full border-dotted border-t-lime-400 animate-spin m-auto mt-0">
+                <div className="w-8 h-8 border-4 rounded-full border-dotted border-t-lime-400 animate-spin m-auto mt-0">
                 </div>
             ):(
                 <div className="flex flex-col gap-20 w-3/5 pb-20">
