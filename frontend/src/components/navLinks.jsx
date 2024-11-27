@@ -22,18 +22,32 @@ const NavButtons = ({ openLoginDialog}) => {
             console.error("Logout failed", error.response?.data || error.message);
         }
     }
-
+    
     return (
         <>
+            {(user.status_id === 1) ? (
+                <>
+                <NavLink to ="/dashboard">
+                    <div 
+                        className="pl-4 pr-4 pt-1 pb-2 text-center bg-lightest-blue border-blue rounded-md border-2 border-slate-300 text-blue text-xl hover:bg-blue hover:text-lightest-blue duration-300 transition-colors" 
+                        >
+                        Dashboard
+                    </div>
+                </NavLink>
+                </>
+            ):(<></>)}
             {(user && token) ? (
                 <>
-                    <NavLink to='/profile'>
-                        <div className="pl-4 pr-4 pt-1 pb-1 flex flex-row gap-3 border-2 border-blue  border-slate-300 rounded-md  hover:bg-blue hover:text-lightest-blue duration-300 transition-colors">
+                    <NavLink to="/profile">
+                        <div className="px-6 py-1 flex items-center group justify-center gap-3 border-2 border-slate-300 rounded-md border-blue hover:bg-blue hover:text-lightest-blue transition-colors duration-300">
                             <img 
                             src={profilePicture} 
-                            className="w-8 h-8"
+                            alt="Profile" 
+                            className="w-8 h-8 rounded-full"
                             />
-                            <h1 className="text-center align-middle text-blue"  style={{fontFamily: "Inter", fontWeight:600, fontSize:"1em", alignContent:"center"}}>{user.username}</h1>
+                            <h1 className="text-blue text-sm font-semibold group-hover:text-lightest-blue transition-colors duration-300" style={{ fontFamily: "Inter" }}>
+                            {user.username}
+                            </h1>
                         </div>
                     </NavLink>
                     <button 

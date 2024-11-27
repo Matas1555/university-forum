@@ -5,6 +5,7 @@ import Home from "./pages/home";
 import DefaultLayout from "./components/defaultLayout";
 import GuestLayout from "./components/guestLayout";
 import Profile from "./pages/profile";
+import Dashboard from "./pages/dashboard";
 
 const router = createBrowserRouter ([
     {
@@ -21,6 +22,11 @@ const router = createBrowserRouter ([
                 path: '/profile',
                 element: <Profile/>,
                 errorElement: <div>Error loading profile page!</div>,
+            },
+            {
+                path: '/dashboard',
+                element: <Dashboard/>,
+                errorElement: <div>Error loading dashboard page!</div>,
             },
             {
                 

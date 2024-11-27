@@ -30,23 +30,27 @@ class Post extends Model
     protected $fillable = [
         'title',
         'description',
-        'university',
-        'user',
-        'forum',
+        'user_id',
+        'forum_id',
     ];
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function forum()
     {
-        return $this->belongsTo(Forum::class, 'forum');
+        return $this->belongsTo(Forum::class, 'forum_id');
     }
 
-    public function university()
+    public function categories()
     {
-        return $this->belongsTo(University::class, 'university');
+        return $this->belongsToMany(Category::class, 'post_categories', 'post_id', 'category_id');
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'post_id');
     }
 }

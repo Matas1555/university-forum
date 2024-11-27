@@ -22,10 +22,17 @@ class Forum extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'university'];
+    protected $fillable = ['title', 'university_id'];
+    public $timestamps = true;
+
+    public function university()
+    {
+        return $this->belongsTo(University::class, 'university_id');
+    }
 
     public function posts()
     {
-        return $this->hasMany(Post::class);
+        return $this->hasMany(Post::class, 'forum_id');
     }
+
 }

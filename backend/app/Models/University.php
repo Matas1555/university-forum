@@ -8,10 +8,20 @@ use Illuminate\Database\Eloquent\Model;
 class University extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'location'];
+    protected $fillable = ['name', 'location', 'picture'];
 
     public function programs()
     {
-        return $this->hasMany(Program::class);
+        return $this->hasMany(Program::class, 'university_id');
+    }
+
+    public function forum()
+    {
+        return $this->hasOne(Forum::class, 'university_id');
+    }
+
+    public function profiles()
+    {
+        return $this->hasMany(Profile::class, "university_id");
     }
 }

@@ -10,31 +10,35 @@ class Profile extends Model
     use HasFactory;
 
     protected $table = 'profiles';
+    public $timestamps = true;
     protected $fillable = [
         'user_id',
         'bio',
         'avatar',
-        'university',
+        'university_id',
         'yearOfGraduation',
-        'status',
+        'status_id',
         'username'
     ];
 
-    public function program()
-    {
-        return $this->belongsToMany(Program::class, 'profile_programs');
-    }
-
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function university()
     {
-        return $this->belongsTo(University::class);
+        return $this->belongsTo(University::class, 'university_id');
     }
 
+    public function status()
+    {
+        return $this->belongsTo(Status::class, 'status_id');
+    }
 
+    public function programs()
+    {
+        return $this->belongsToMany(Program::class, 'profile_programs', 'profile_id', 'program_id');
+    }
 
 }

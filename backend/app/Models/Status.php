@@ -8,5 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class Status extends Model
 {
     protected $table = 'status';
+    protected $fillable = ['name'];
     use HasFactory;
+
+    public function profiles()
+    {
+        return $this->hasMany(Profile::class, 'status_id');
+    }
+
 }

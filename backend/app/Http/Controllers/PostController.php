@@ -8,14 +8,16 @@ use App\Models\Comment;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 /**
  * @OA\Info(title="Post API", version="0.1")
  */
 class PostController extends Controller
 {
-    //Sarasas
+    use AuthorizesRequests;
 
+    //Sarasas
     /**
      * @OA\Get(
      *     path="/forums/{forum_id}/posts",
@@ -92,7 +94,7 @@ class PostController extends Controller
                 'id' => $post->id,
                 'title' => $post->title,
                 'description' => $post->description,
-                'user' => $post->user,
+                'user' => $post->user_id,
                 'comments' => $comments,
                 'categories' => $categories,
             ];
@@ -124,7 +126,7 @@ class PostController extends Controller
      *     )
      * )
      */
-    public function index(Request $request)
+    public function getPosts(Request $request)
     {
         $query = Post::query();
 
@@ -166,7 +168,10 @@ class PostController extends Controller
      */
     public function insertPost(Request $request)
     {
+        $this->authorize('create', Post::class);
+
         try {
+            $user = auth('api')->user();
             $validatedData = $request->validate([
                 'title' => 'required|string|max:255',
                 'description' => 'required|string',
@@ -176,8 +181,8 @@ class PostController extends Controller
             $post = Post::create([
                 'title' => $validatedData['title'],
                 'description' => $validatedData['description'],
-                'forum' => $validatedData['forum_id'],
-                'user' => 19,
+                'forum_id' => $validatedData['forum_id'],
+                'user_id' => $user->id,
             ]);
 
             return response()->json(['message' => 'Post created successfully', 'post' => $post], 201);
@@ -264,6 +269,8 @@ class PostController extends Controller
             return response()->json(['message' => 'Post not found'], 404);
         }
 
+        $this->authorize('update', $post);
+
         try{
             // Validate the request data
             $validatedData = $request->validate([
@@ -311,7 +318,9 @@ class PostController extends Controller
             return response()->json(['message' => 'Post not found'], 404);
         }
 
-        Comment::where('post', $post->id)->delete();
+        $this->authorize('delete', $post);
+
+        Comment::where('post_id', $post->id)->delete();
 
         $post->delete();
 
@@ -376,9 +385,11 @@ class PostController extends Controller
             return response()->json(['message' => 'Forum not found'], 404);
         }
 
-        $posts = Post::where('forum', $forum->id)->get();
+        $this->authorize('delete', $forum);
+
+        $posts = Post::where('forum_id', $forum->id)->get();
         foreach ($posts as $post) {
-            Comment::where('post', $post->id)->delete();
+            Comment::where('post_id', $post->id)->delete();
             $post->delete();
         }
 
@@ -427,10 +438,12 @@ class PostController extends Controller
             return response()->json(['message' => 'Forum not found'], 404);
         }
 
+        $this->authorize('update', $forum);
+
         try{
             $validatedData = $request->validate([
-                'title' => 'required|string|max:255',
-                'university' => 'required|integer|exists:universities,id',
+                'username' => 'required|string|max:255',
+                'university_id' => 'required|integer|exists:universities,id',
             ]);
 
             $forum->update($validatedData);
@@ -468,15 +481,17 @@ class PostController extends Controller
      */
     public function insertForum(Request $request)
     {
+        $this->authorize('create', Forum::class);
+
         try{
             $validatedData = $request->validate([
                 'title' => 'required|string|max:255',
-                'university' => 'required|integer',
+                'university_id' => 'required|integer',
             ]);
 
             $forum = Forum::create([
                 'title' => $validatedData['title'],
-                'university' => $validatedData['university'],
+                'university_id' => $validatedData['university'],
             ]);
         } catch(\Illuminate\Validation\ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
@@ -543,6 +558,8 @@ class PostController extends Controller
             return response()->json(['message' => 'Comment not found'], 404);
         }
 
+        $this->authorize('delete', $comment);
+
         $comment->delete();
 
         return response()->json(['message' => 'Comment deleted successfully'], 200);
@@ -588,12 +605,14 @@ class PostController extends Controller
             return response()->json(['message' => 'Comment not found'], 404);
         }
 
+        $this->authorize('update', $comment);
+
         try{
             // Validate the request data
             $validatedData = $request->validate([
                 'text' => 'required|string',
                 'post_id' => 'required|integer',
-                'user' => 'required|integer',
+                'user_id' => 'required|integer',
             ]);
         } catch(\Illuminate\Validation\ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
@@ -631,6 +650,8 @@ class PostController extends Controller
      */
     public function insertComment(Request $request)
     {
+        $this->authorize('create', Comment::class);
+
         try{
             $validatedData = $request->validate([
                 'text' => 'required|string',
@@ -639,8 +660,8 @@ class PostController extends Controller
 
             $comment = Comment::create([
                 'text' => $validatedData['text'],
-                'post' => $validatedData['post_id'],
-                'user' => 19,
+                'post_id' => $validatedData['post_id'],
+                'user_id' => auth('api')->user(),
             ]);
         } catch(\Illuminate\Validation\ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);

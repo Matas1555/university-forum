@@ -24,6 +24,17 @@ class Comment extends Model
     use HasFactory;
 
     protected $table = 'comments';
+    public $timestamps = true;
 
-    protected $fillable = ['text', 'post', 'user'];
+    protected $fillable = ['text', 'post_id', 'user_id'];
+
+    public function post()
+    {
+        return $this->belongsTo(Post::class, 'post_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

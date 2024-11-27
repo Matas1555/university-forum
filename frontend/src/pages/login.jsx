@@ -21,7 +21,6 @@ function LogIn({ isOpen, setIsOpen }) {
             console.log("Response from server:", response);
     
             if (response.data.user && response.data.access_token && response.data.refresh_token) {
-                console.log("access token: ", response.data.access_token);
                 setUser(response.data.user);
                 setToken(response.data.access_token);
                 setRefreshToken(response.data.refresh_token);

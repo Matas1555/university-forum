@@ -14,6 +14,7 @@ class User extends Authenticatable implements JWTSubject
     use HasFactory, Notifiable, HasApiTokens;
 
     protected $table = 'users';
+    public $timestamps = true;
 
     /**
      * The attributes that are mass assignable.
@@ -65,18 +66,28 @@ class User extends Authenticatable implements JWTSubject
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
 
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'user_id');
+    }
+
     public function profile()
     {
-        return $this->hasOne(Profile::class);
+        return $this->hasOne(Profile::class, 'user_id');
     }
 
     public function role()
     {
-        return $this->belongsTo(Role::class);
+        return $this->belongsTo(Role::class, 'role_id');
     }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'user_id');
+    }
+
 }
