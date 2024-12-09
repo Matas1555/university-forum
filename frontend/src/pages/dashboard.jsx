@@ -2,6 +2,7 @@ import { useStateContext } from "../context/contextProvider";
 import API from "../API";
 import SideBar from "../components/sidebar";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
     const {user} = useStateContext();
@@ -10,25 +11,31 @@ const Dashboard = () => {
     const [rows, setRows] = useState([]);
     const [formData, setFormData] = useState({});
     const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if(selectedTable){
             setFormData({});
 
             const fetchTableData = async () => {
-                setIsLoading(true);
-                try{
-                    const [columnsResponse, rowsResponse] = await Promise.all([
-                        API.get(`tables/${selectedTable.toLowerCase()}/columns`),
-                        API.get(`/${selectedTable.toLowerCase()}`)
-                    ]);
-                    setColumns(columnsResponse.data.columns);
-                    setRows(rowsResponse.data);
-                } catch(error) {
-                    console.error("Error fetching data", error);
-                } finally {
-                    setIsLoading(false);
+              setIsLoading(true);
+              try{
+                const rowsResponse = await API.get(`/${selectedTable.toLowerCase()}`)
+                setRows(rowsResponse.data);
+                console.log("API Response:", rowsResponse);
+
+                if (rowsResponse.data.length > 0) {
+                  setColumns(Object.keys(rowsResponse.data[0]));
+                  
+                } else {
+                    setColumns([]);
+                    alert("No data found for the selected table.");
                 }
+              } catch(error) {
+                  console.error("Error fetching data", error);
+              } finally {
+                  setIsLoading(false);
+              }  
             }
 
             fetchTableData();
@@ -49,8 +56,9 @@ const Dashboard = () => {
       };
     
     const handleCreate = async () => {
+      const endpoint = getOperationEndpoint();
         try {
-            const response = await API.post(`/${selectedTable.toLowerCase()}`, formData);
+            const response = await API.post(`/${endpoint}`, formData);
             alert("Row created!");
 
             setRows((prevRows) => [...prevRows, response.data]);
@@ -62,8 +70,9 @@ const Dashboard = () => {
     };
 
     const handleUpdate = async (id) => {
+      const endpoint = getOperationEndpoint();
         try {
-            await API.put(`/${selectedTable.toLowerCase()}/${id}`, formData);
+            await API.put(`/${endpoint}/${id}`, formData);
             alert("Row updated!");
         
             setRows((prevRows) =>
@@ -76,10 +85,11 @@ const Dashboard = () => {
     };
 
     const handleDelete = async (id) => {
+        const endpoint = getOperationEndpoint();
         const isConfirmed = window.confirm("Ar jūs isitikinę kad norite pašalinti šį įrašą?");
         if (isConfirmed) {
           try {
-            await API.delete(`/${selectedTable.toLowerCase()}/${id}`);
+            await API.delete(`/${endpoint}/${id}`);
             alert("Row deleted!");
       
             // Update the rows state to reflect the deletion
@@ -89,6 +99,13 @@ const Dashboard = () => {
           }
         }
       };
+
+    const getOperationEndpoint = () => {
+      if (selectedTable && selectedTable.includes("posts")) {
+          return "posts";
+      }
+      return `${selectedTable?.toLowerCase()}`;
+    };
 
     return (
     <>

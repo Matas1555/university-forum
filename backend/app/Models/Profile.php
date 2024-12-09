@@ -20,6 +20,7 @@ class Profile extends Model
         'status_id',
         'username'
     ];
+    protected $hidden = ['created_at', 'updated_at'];
 
     public function user()
     {

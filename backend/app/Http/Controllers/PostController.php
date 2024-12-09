@@ -79,22 +79,23 @@ class PostController extends Controller
             return response()->json(['message' => 'Forum not found'], 404);
         }
 
-        $posts = Post::where('forum', $forum_id)->get();
+        $posts = Post::where('forum_id', $forum_id)->get();
 
         $postData = [];
 
         foreach ($posts as $post) {
-            $comments = Comment::where('post', $post->id)->get();
+            $comments = Comment::where('post_id', $post->id)->get();
 
-            $categories = Category::join('post_categories', 'categories.id', '=', 'post_categories.categoryID')
-                ->where('post_categories.postID', $post->id)
+            $categories = Category::join('post_categories', 'categories.id', '=', 'post_categories.category_id')
+                ->where('post_categories.post_id', $post->id)
                 ->get(['categories.id', 'categories.name']);
 
             $postData[] = [
                 'id' => $post->id,
                 'title' => $post->title,
                 'description' => $post->description,
-                'user' => $post->user_id,
+                'user_id' => $post->user_id,
+                'forum_id' => $post->forum_id,
                 'comments' => $comments,
                 'categories' => $categories,
             ];
@@ -136,7 +137,17 @@ class PostController extends Controller
 
         $posts = $query->get();
 
-        return response()->json($posts, 200);
+        $postData = $posts->map(function ($post) {
+            return [
+                'id' => $post->id,
+                'title' => $post->title,
+                'description' => $post->description,
+                'user' => $post->user->username, // Fetch username
+                'forum' => $post->forum->title,
+            ];
+        });
+
+        return response()->json($postData, 200);
     }
 
     /**
@@ -349,8 +360,14 @@ class PostController extends Controller
      */
     public function getForums()
     {
-        $forum = Forum::all();
-        return response()->json($forum, 200);
+        $forums = Forum::all();
+
+        $forums->each(function ($forum) {
+           $forum->university_name = $forum->university->name;
+           unset($forum->university, $forum->university_id);
+        });
+
+        return response()->json($forums, 200);
     }
 
     /**
@@ -442,7 +459,7 @@ class PostController extends Controller
 
         try{
             $validatedData = $request->validate([
-                'username' => 'required|string|max:255',
+                'title' => 'required|string|max:255',
                 'university_id' => 'required|integer|exists:universities,id',
             ]);
 
@@ -491,7 +508,7 @@ class PostController extends Controller
 
             $forum = Forum::create([
                 'title' => $validatedData['title'],
-                'university_id' => $validatedData['university'],
+                'university_id' => $validatedData['university_id'],
             ]);
         } catch(\Illuminate\Validation\ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
@@ -522,8 +539,15 @@ class PostController extends Controller
      */
     public function getComments()
     {
-        $comment = Comment::all();
-        return response()->json($comment, 200);
+        $comments = Comment::all();
+
+        $comments->each(function ($comment) {
+            $comment->post_title = $comment->post->title;
+            $comment->username = $comment->user->username;
+            unset($comment->post_id, $comment->user_id, $comment->post, $comment->user);
+        });
+
+        return response()->json($comments, 200);
     }
 
     /**

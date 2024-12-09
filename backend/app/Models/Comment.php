@@ -24,6 +24,7 @@ class Comment extends Model
     use HasFactory;
 
     protected $table = 'comments';
+    protected $hidden = ['created_at', 'updated_at'];
     public $timestamps = true;
 
     protected $fillable = ['text', 'post_id', 'user_id'];

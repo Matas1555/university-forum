@@ -3,9 +3,22 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Profile;
 
 class ProfileController extends Controller
 {
+    public function getProfiles()
+    {
+        $profiles = Profile::all();
+
+        $profiles->each(function ($profile) {
+           $profile->university_name = $profile->university->name;
+           $profile->status_name = $profile->status->name;
+           unset($profile->university_id, $profile->status_id, $profile->status, $profile->university);
+        });
+
+        return response()->json($profiles,200);
+    }
     public function show()
     {
         $user = auth('api')->user();
@@ -19,11 +32,10 @@ class ProfileController extends Controller
         return response()->json($profile, 200);
     }
 
-    public function update(Request $request)
+    public function updateProfile(Request $request)
     {
         $user = auth('api')->user();
 
-        // Validate the request data
         $validatedData = $request->validate([
             'bio' => 'nullable|string',
             'avatar' => 'nullable|string', // Assuming avatar is a URL or file path
@@ -31,13 +43,23 @@ class ProfileController extends Controller
             'course' => 'nullable|string',
         ]);
 
-        // Find or create the profile for the authenticated user
         $profile = $user->profile ?? new Profile(['user_id' => $user->id]);
 
-        // Update the profile with validated data
         $profile->fill($validatedData);
         $profile->save();
 
         return response()->json(['message' => 'Profile updated successfully', 'profile' => $profile], 200);
+    }
+    public function destroyProfile(Request $request, $id)
+    {
+        $profile = Profile::find($id);
+
+        $this->authorize('delete', $profile);
+
+
+
+        $profile->delete();
+
+        return response()->json(['message' => 'Profile deleted successfully'], 200);
     }
 }

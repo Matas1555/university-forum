@@ -9,6 +9,7 @@ class University extends Model
 {
     use HasFactory;
     protected $fillable = ['name', 'location', 'picture'];
+    protected $hidden = ['created_at', 'updated_at'];
 
     public function programs()
     {

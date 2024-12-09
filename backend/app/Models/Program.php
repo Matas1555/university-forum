@@ -9,6 +9,7 @@ class Program extends Model
 {
     use HasFactory;
     protected $fillable = ['title', 'description', 'university_id'];
+    protected $hidden = ['created_at', 'updated_at'];
 
     public function profiles()
     {

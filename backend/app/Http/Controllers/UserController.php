@@ -14,6 +14,12 @@ class UserController extends Controller
 
     public function getUsers(Request $request){
         $users = User::all();
+
+        $users->each(function($user){
+           $user->role_name = $user->role->name;
+           unset($user->role, $user->role_id);
+        });
+
         return response()->json($users, 200);
     }
 
@@ -25,6 +31,9 @@ class UserController extends Controller
         }
 
         $this->authorize('delete', $user);
+
+        $profile = Profile::where('user_id', $id)->first();
+        $profile->delete();
 
         $user->delete();
 
@@ -42,7 +51,6 @@ class UserController extends Controller
         $this->authorize('update', $user);
 
         try {
-
             // Validate the incoming request data
             $validatedData = $request->validate([
                 'username' => [

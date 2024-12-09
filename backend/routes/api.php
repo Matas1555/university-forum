@@ -33,6 +33,7 @@ Route::get('/categories', [CategoryController::class, 'getCategories']); // View
 Route::get('/programs', [\App\Http\Controllers\ProgramsController::class, 'getPrograms']); // View programs
 Route::get('/roles', [\App\Http\Controllers\RolesController::class, 'getRoles']); // View roles
 Route::get('/status', [\App\Http\Controllers\StatusController::class, 'getStatus']); // View status
+Route::get('/profiles', [ProfileController::class, 'getProfiles']); // View profiles
 Route::get('/tables/{table}/columns', function ($table) { //return the columns of a table
     try {
         $columns = DB::getSchemaBuilder()->getColumnListing($table);
@@ -78,12 +79,12 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/universities/{university}', [UniversityController::class, 'destroyUniversity']); // Delete a university
 
     // Profile routes
-    Route::put('/profiles/{user}', [ProfileController::class, 'update']); // Update a user's profile
-    Route::delete('/profiles/{user}', [ProfileController::class, 'destroy']); // Delete a user's profile
+    Route::put('/profiles/{user}', [ProfileController::class, 'updateProfile']); // Update a user's profile
+    Route::delete('/profiles/{user}', [ProfileController::class, 'destroyProfile']); // Delete a user's profile
 
     // User routes
-    Route::put('/users/{user}', [UserController::class, 'updateUser']);
-    Route::delete('/users/{user}', [UserController::class, 'deleteUser']);
+    Route::put('/users/{user}', [UserController::class, 'updateUser']); // Update user
+    Route::delete('/users/{user}', [UserController::class, 'deleteUser']); // Delete user
 
     //Category routes
     Route::put('/categories/{category}', [CategoryController::class, 'updateCategory']);

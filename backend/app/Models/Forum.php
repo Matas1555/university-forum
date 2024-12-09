@@ -23,6 +23,7 @@ class Forum extends Model
     use HasFactory;
 
     protected $fillable = ['title', 'university_id'];
+    protected $hidden = ['created_at', 'updated_at'];
     public $timestamps = true;
 
     public function university()
