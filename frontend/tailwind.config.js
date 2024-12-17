@@ -9,8 +9,9 @@ export default {
     extend: {},
     colors:{
       'blue':'#176B87',
-      'light-blue':'#86B6F6',
-      'lighter-blue':'#B4D4FF',
+      'light-blue':'#3a7ca5',
+      'lighter-blue':'#d7e7fc',
+      'almost-blue' : '#e8f2fa',
       'lightest-blue':'#EEF5FF',
     }
   },

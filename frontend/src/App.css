@@ -1,3 +1,11 @@
 iframe[src*="object.center/premium"] {
     display: none !important;
 }
+
+body{
+    background-color: #e8f2fa;
+    /* 'blue':'#176B87',
+    'light-blue':'#86B6F6',
+    'lighter-blue':'#B4D4FF',
+    'lightest-blue':'#EEF5FF', */
+}

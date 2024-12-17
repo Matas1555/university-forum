@@ -132,10 +132,11 @@ class PostController extends Controller
         $query = Post::query();
 
         if ($request->has('forum_id')) {
-            $query->where('forum', $request->input('forum_id'));
+            $query->where('forum_id', $request->input('forum_id')); // Corrected column name
         }
 
-        $posts = $query->get();
+        // Eager load relationships and count comments
+        $posts = $query->with(['user', 'forum', 'categories'])->withCount('comments')->get();
 
         $postData = $posts->map(function ($post) {
             return [
@@ -144,11 +145,20 @@ class PostController extends Controller
                 'description' => $post->description,
                 'user' => $post->user->username, // Fetch username
                 'forum' => $post->forum->title,
+                'categories' => $post->categories->map(function ($category) {
+                    return [
+                        'id' => $category->id,
+                        'name' => $category->name,
+                    ];
+                }),
+                'comments_count' => $post->comments_count, // Number of comments
+                'created_at' => $post->created_at->format('Y-m-d'), // Format the date
             ];
         });
 
         return response()->json($postData, 200);
     }
+
 
     /**
      * @OA\Post(

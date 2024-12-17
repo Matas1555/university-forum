@@ -15,15 +15,15 @@ const Home = () => {
             width: 0;
             height: 2px;
             background-color: #176B87; 
-            transition: width 0.2s ease-in;
+            transition: width 0.1s ease-in;
           }
 
           .tab-underline:hover::after {
-            width: 120%;
+            width: 100%;
           }
 
           .tab-underline-selected::after {
-            width: 120%;
+            width: 100%;
           }
         `}
       </style>

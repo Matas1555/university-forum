@@ -29,7 +29,7 @@ const NavButtons = ({ openLoginDialog}) => {
                 <>
                 <NavLink to ="/dashboard">
                     <div 
-                        className="pl-4 pr-4 pt-1 pb-2 text-center bg-lightest-blue border-blue rounded-md border-2 border-slate-300 text-blue text-xl hover:bg-blue hover:text-lightest-blue duration-300 transition-colors" 
+                        className="pl-4 pr-4 pt-1 pb-2 text-center shadow-inner bg-lightest-blue border-blue rounded-md border-2 border-slate-300 text-blue text-xl hover:bg-blue hover:text-lightest-blue duration-300 transition-colors" 
                         >
                         Dashboard
                     </div>
@@ -39,14 +39,19 @@ const NavButtons = ({ openLoginDialog}) => {
             {(user && token) ? (
                 <>
                     <NavLink to="/profile">
-                        <div className="px-6 py-1 flex items-center group justify-center gap-3 border-2 border-slate-300 rounded-md border-blue hover:bg-blue hover:text-lightest-blue transition-colors duration-300">
+                        <div
+                        className="px-6 py-1 flex items-center group justify-center gap-3 border-2 border-slate-300 rounded-md bg-lightest-blue border-blue hover:bg-blue hover:text-lightest-blue transition-colors duration-300"
+                        >
                             <img 
-                            src={profilePicture} 
-                            alt="Profile" 
-                            className="w-8 h-8 rounded-full"
+                                src={profilePicture} 
+                                alt="Profile" 
+                                className="w-8 h-8 rounded-full"
                             />
-                            <h1 className="text-blue text-sm font-semibold group-hover:text-lightest-blue transition-colors duration-300" style={{ fontFamily: "Inter" }}>
-                            {user.username}
+                            <h1
+                                className="text-blue text-sm font-semibold group-hover:text-lightest-blue transition-colors duration-300"
+                                style={{ fontFamily: "Inter" }}
+                            >
+                                {user.username}
                             </h1>
                         </div>
                     </NavLink>
