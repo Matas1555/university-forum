@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import API from "../API";
 import { Label, Input, Field, Textarea, Select, Listbox, ListboxButton, ListboxOptions, ListboxOption} from '@headlessui/react';
+import { NavLink } from "react-router-dom";
 
 export default function UniversityList(){
     const [universities, setUniversities] = useState([]);
@@ -18,8 +19,8 @@ export default function UniversityList(){
     return(
         <>
 
-        <div className="flex flex-row gap-20 ml-10">
-            <div className="sticky top-32 h-screen">
+        <div className="flex flex-col gap-20 lg:flex-row">
+            <div className="top-32 h-auto w-3/5 m-auto lg:w-1/5 lg:m-0 lg:sticky lg:self-start">
                 <Field className="mb-4">
                     <Label className="text-blue mb-3" style={{fontFamily: "Inter", fontSize:"1.2em"}}>Raktažodis</Label>
                     <Input type="text" name="email" className="w-full bg-lightest-blue bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg"/>
@@ -38,8 +39,9 @@ export default function UniversityList(){
                 <div className="w-8 h-8 border-4 rounded-full border-dotted border-t-lime-400 animate-spin m-auto mt-0">
                 </div>
             ):(
-                <div className="flex flex-col gap-20 w-3/5 pb-20">
+                <div className="flex flex-col gap-20 w-4/5 pb-20 m-auto">
                     {universities.map((value) => (
+                        <NavLink to={`/university`}>
                         <div key={value.id} className="group border-2 w-full h-60 flex flex-row overflow-hidden relative shadow-none transition-shadow duration-300 cursor-pointer hover:shadow-2xl hover:shadow-gray-500 ">
                             <div className="relative w-2/5">
                                 <img
@@ -64,6 +66,7 @@ export default function UniversityList(){
                                 </div>
                             </div>
                         </div>
+                        </NavLink>
                     ))}
                 </div>
             )}

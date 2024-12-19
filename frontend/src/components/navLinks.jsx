@@ -25,7 +25,7 @@ const NavButtons = ({ openLoginDialog}) => {
     
     return (
         <>
-            {(user.status_id === 1) ? (
+            {(user != null && user.status_id === 1) ? (
                 <>
                 <NavLink to ="/dashboard">
                     <div 
@@ -43,8 +43,7 @@ const NavButtons = ({ openLoginDialog}) => {
                         className="px-6 py-1 flex items-center group justify-center gap-3 border-2 border-slate-300 rounded-md bg-lightest-blue border-blue hover:bg-blue hover:text-lightest-blue transition-colors duration-300"
                         >
                             <img 
-                                src={profilePicture} 
-                                alt="Profile" 
+                                src={user.avatar_url ? user.avatar_url : profilePicture}
                                 className="w-8 h-8 rounded-full"
                             />
                             <h1
@@ -119,7 +118,7 @@ const NavLinks = () => {
                 </div>
             </nav>
             {isOpen && (
-                <div className="flex basis-full gap-2 flex-col items-center">
+                <div className="flex basis-full gap-2 flex-col items-center transition-all duration-100">
                     <NavButtons openLoginDialog={openLoginDialog}></NavButtons>
                 </div>
             )

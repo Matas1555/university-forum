@@ -62,4 +62,40 @@ class ProfileController extends Controller
 
         return response()->json(['message' => 'Profile deleted successfully'], 200);
     }
+
+    public function uploadAvatar(\GuzzleHttp\Psr7\Request $request)
+    {
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Only allow image files
+        ]);
+
+        $user = Auth::user();
+
+        // Delete the existing avatar if any
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        // Store the new avatar
+        $path = $request->file('avatar')->store('avatars', 'public');
+
+        // Update the user's avatar URL in the database
+        $user->avatar = $path;
+        $user->save();
+
+        return response()->json(['message' => 'Avatar uploaded successfully!', 'avatar_url' => Storage::url($path)]);
+    }
+
+    public function getAvatar()
+    {
+        $user = Auth::user();
+
+        if (!$user->avatar) {
+            return response()->json(['message' => 'No avatar found'], 404);
+        }
+
+        $avatarUrl = Storage::url($user->avatar);
+
+        return response()->json(['avatar_url' => $avatarUrl]);
+    }
 }

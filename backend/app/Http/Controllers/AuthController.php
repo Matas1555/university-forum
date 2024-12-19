@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Storage;
 
 
 class AuthController extends Controller
@@ -54,7 +55,7 @@ class AuthController extends Controller
        $user = auth('api')->user();
        $profile = Profile::where('user_id', $user->id)->first();
 
-
+       $profile->avatar_url = $profile->avatar_url;
 
        $refreshToken = auth('api')->claims(['refresh' => true])->tokenById($user->id);
 
@@ -76,15 +77,22 @@ class AuthController extends Controller
                 'role_id' => 2
             ]);
 
+            $avatarPath = null;
+            if ($request->hasFile('avatar')) {
+                $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            }
+
             $profile = Profile::create([
                 'user_id' => $user->id,
                 'username' => $data['username'],
                 'email' => $data['email'],
                 'university' => $data['university'] ?? null,
                 'yearOfGraduation' => $data['yearOfGraduation'] ?? null,
-                'avatar' => $data['avatar'] ?? null,
+                'avatar' => $avatarPath,
                 'bio' => $data['bio'] ?? null,
             ]);
+
+            $profile->avatar_url = $profile->avatar_url;
 
             $token = JWTAuth::claims(['role' => "User"])->fromUser($user);
 
@@ -107,7 +115,16 @@ class AuthController extends Controller
         $profile = Profile::where('user_id', $user->id)->first();
 
         return response()->json([
-            'user' => $profile
+            'user' => [
+                'id' => $profile->id,
+                'username' => $profile->username,
+                'email' => $profile->email,
+                'bio' => $profile->bio,
+                'university' => $profile->university->name,
+                'yearOfGraduation' => $profile->yearOfGraduation,
+                'status_id' => $profile->status_id,
+                'avatar_url' => $profile->avatar_url, // Include the full avatar URL
+            ],
         ]);
     }
 
@@ -147,7 +164,16 @@ class AuthController extends Controller
             'access_token' => $token,
             'refresh_token' => $refreshToken,
             'token_type' => 'bearer',
-            'user' => $profile,
+            'user' => [
+                'id' => $profile->id,
+                'username' => $profile->username,
+                'email' => $profile->email,
+                'bio' => $profile->bio,
+                'university' => $profile->university ? $profile->university->name : null,
+                'yearOfGraduation' => $profile->yearOfGraduation,
+                'status_id' => $profile->status_id,
+                'avatar_url' => $profile->avatar_url, // Include the full avatar URL
+            ],
             'expires_in' => auth('api')->factory()->getTTL(),
         ]);
     }

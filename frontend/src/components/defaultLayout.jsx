@@ -9,15 +9,13 @@ export default function DefaultLayout(){
     //     return <Navigate to='/login'/>
     // }
 
-    return(
-        <>
-        <div className="flex flex-col min-h-screen">
-            <NavBar/>
-            <main className="flex-grow">
-                <Outlet />
-            </main>
-            {/* <Footer/> */}
-        </div>
-        </>
-    )
+    return (
+      <div className="flex flex-col min-h-screen">
+        <NavBar />
+        <main className="flex-grow">
+          <Outlet />
+        </main>
+        <Footer />
+      </div>
+      );
 }

@@ -36,9 +36,20 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json([
                 'error' => 'Token is invalid',
             ], 401);
-        });$exceptions->render(function (\Tymon\JWTAuth\Exceptions\JWTException $e, Request $request) {
+        });
+        $exceptions->render(function (\Tymon\JWTAuth\Exceptions\JWTException $e, Request $request) {
             return response()->json([
                 'error' => 'Token is missing or malformed',
             ], 401);
+        });
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Unauthenticated',
+                ], 401);
+            }
+
+            // For non-API routes (if applicable), you can return a custom view or error response
+            return response()->view('errors.unauthenticated', [], 401);
         });
     })->create();

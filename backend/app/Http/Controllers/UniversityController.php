@@ -26,7 +26,7 @@ class UniversityController extends Controller
     // Fetch programs related to a specific university
     public function getPrograms($university_id)
     {
-        $programs = Program::where('university', $university_id)->get();
+        $programs = Program::where('university_id', $university_id)->get();
         return response()->json($programs, 200);
     }
 }

@@ -23,7 +23,7 @@ class RegisterRequest extends FormRequest
             ],
             'university' => 'nullable|integer|exists:universities,id',
             'yearOfGraduation' => 'nullable|integer',
-            'avatar' => 'nullable|string',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'bio' => 'nullable|string',
         ];
     }

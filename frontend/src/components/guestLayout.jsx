@@ -1,6 +1,7 @@
 import { Outlet, Navigate } from "react-router-dom";
 import { useStateContext } from "../context/contextProvider";
 import NavBar from "./navbar";
+import Footer from "./footer";
 
 export default function GuestLayout(){
     const {token} = useStateContext;
@@ -17,6 +18,7 @@ export default function GuestLayout(){
             </div>
             <Outlet/>
         </div>
+        <Footer></Footer>
         </>
         
     )

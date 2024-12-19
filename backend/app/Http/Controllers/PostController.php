@@ -145,6 +145,30 @@ class PostController extends Controller
                 'description' => $post->description,
                 'user' => $post->user->username, // Fetch username
                 'forum' => $post->forum->title,
+            ];
+        });
+
+        return response()->json($postData, 200);
+    }
+
+    public function getPostsExtended(Request $request)
+    {
+        $query = Post::query();
+
+        if ($request->has('forum_id')) {
+            $query->where('forum_id', $request->input('forum_id')); // Corrected column name
+        }
+
+        // Eager load relationships and count comments
+        $posts = $query->with(['user', 'forum', 'categories'])->withCount('comments')->get();
+
+        $postData = $posts->map(function ($post) {
+            return [
+                'id' => $post->id,
+                'title' => $post->title,
+                'description' => $post->description,
+                'user' => $post->user->username, // Fetch username
+                'forum' => $post->forum->title,
                 'categories' => $post->categories->map(function ($category) {
                     return [
                         'id' => $category->id,

@@ -6,6 +6,8 @@ import DefaultLayout from "./components/defaultLayout";
 import GuestLayout from "./components/guestLayout";
 import Profile from "./pages/profile";
 import Dashboard from "./pages/dashboard";
+import Post from "./pages/post";
+import University from "./pages/university";
 
 const router = createBrowserRouter ([
     {
@@ -27,6 +29,16 @@ const router = createBrowserRouter ([
                 path: '/dashboard',
                 element: <Dashboard/>,
                 errorElement: <div>Error loading dashboard page!</div>,
+            },
+            {
+                path: '/post',
+                element: <Post/>,
+                errorElement: <div>Error loading the post!</div>,
+            },
+            {
+                path: '/university',
+                element: <University/>,
+                errorElement: <div>Error loading the post!</div>,
             },
             {
                 

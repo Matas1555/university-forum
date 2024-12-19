@@ -28,10 +28,9 @@ const Home = () => {
         `}
       </style>
 
-      <div className="flex h-screen w-full h-full justify-center pt-8 px-4">
-        <TabGroup className="w-full h-full">
+      <div className="flex  w-ful justify-center pt-8 px-4">
+        <TabGroup className="w-full ">
           <TabList className="flex flex-row gap-40 justify-center">
-            {/* Use the selected state from Headless UI to add the selected class */}
             <Tab style={{fontFamily: "Inter", fontWeight:400, fontSize:"1.5em"}}
               className={({ selected }) =>
                 selected
@@ -50,7 +49,7 @@ const Home = () => {
             >
               Universitetai
             </Tab>
-            <Tab style={{fontFamily: "Inter", fontWeight:400, fontSize:"1.5em"}}
+            {/* <Tab style={{fontFamily: "Inter", fontWeight:400, fontSize:"1.5em"}}
               className={({ selected }) =>
                 selected
                   ? "tab-underline tab-underline-selected text-blue pb-2 outline-none"
@@ -58,7 +57,7 @@ const Home = () => {
               }
             >
               Kategorijos
-            </Tab>
+            </Tab> */}
           </TabList>
           <TabPanels className="mt-10">
             <TabPanel>

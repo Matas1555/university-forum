@@ -20,13 +20,14 @@ Route::controller(AuthController::class)->group(function () {
 
 
 Route::get('/posts', [PostController::class, 'getPosts']); // View all posts (guest, user, etc.)
+Route::get('/postsExtended', [PostController::class, 'getPostsExtended']); // View all posts with additional information (guest, user, etc.)
 Route::get('/posts/{id}', [PostController::class, 'showPost']); // View a specific post
 Route::get('/forums/{forum_id}/posts', [PostController::class, 'getPostsByForum']); // View posts by forum
 Route::get('/forums', [PostController::class, 'getForums']); // View forums
 Route::get('/comments', [PostController::class, 'getComments']); // View all comments
 Route::get('/universities', [UniversityController::class, 'getUniversities']); // View universities
 Route::get('/statuses', [UniversityController::class, 'getStatuses']); // View statuses
-Route::get('/universities/{id}/programs', [UniversityController::class, 'getPdrograms']); // View programs
+Route::get('/universities/{id}/programs', [UniversityController::class, 'getPrograms']); // View programs
 Route::post('/refresh-token', [AuthController::class, 'refreshToken']); // Refresh token
 Route::get('/users', [\App\Http\Controllers\UserController::class, 'getUsers']); // View users
 Route::get('/categories', [CategoryController::class, 'getCategories']); // View categories
@@ -34,6 +35,8 @@ Route::get('/programs', [\App\Http\Controllers\ProgramsController::class, 'getPr
 Route::get('/roles', [\App\Http\Controllers\RolesController::class, 'getRoles']); // View roles
 Route::get('/status', [\App\Http\Controllers\StatusController::class, 'getStatus']); // View status
 Route::get('/profiles', [ProfileController::class, 'getProfiles']); // View profiles
+Route::post('/user/avatar', [ProfileController::class, 'uploadAvatar']);
+Route::get('/user/avatar', [ProfileController::class, 'getAvatar']);
 Route::get('/tables/{table}/columns', function ($table) { //return the columns of a table
     try {
         $columns = DB::getSchemaBuilder()->getColumnListing($table);

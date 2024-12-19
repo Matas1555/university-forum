@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Label, Input, Field, Textarea, Select, Listbox, ListboxButton, ListboxOptions, ListboxOption} from '@headlessui/react';
+import { Label, Input, Field, Textarea, Select, Listbox, ListboxButton, ListboxOptions, ListboxOption, Button} from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { CheckIcon } from '@heroicons/react/20/solid';
 import { BackwardIcon} from '@heroicons/react/20/solid';
@@ -14,6 +14,7 @@ function Register() {
     const passwordRef = useRef();
     const bioRef = useRef();
     const graduationRef = useRef();
+    const fileInputRef = useRef();
 
     const [universities, setUniversities] = useState([]);
     const [statuses, setStatus] = useState([]);
@@ -21,6 +22,7 @@ function Register() {
     const [selectedUniversity, setSelectedUniversity] = useState(null);
     const [selectedStatus, setSelectedStatus] = useState(null);
     const [selectedProgram, setSelectedProgram] = useState(null);
+    const [avatar, setAvatar] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
 
@@ -63,25 +65,44 @@ function Register() {
         })
     }
 
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        setAvatar(file);
+    };
+
+    const handleUploadClick = () => {
+        fileInputRef.current.click();
+    };
+
     const submit = async () => {
         try {
-            const payload = {
-                username: nameRef.current.value,
-                email: emailRef.current.value,
-                password: passwordRef.current.value,
-                university: selectedUniversity ? selectedUniversity.id : null,
-                status: selectedStatus ? selectedStatus.id : null,
-                yearOfGraduation: graduationRef.current.value,
-                bio: bioRef.current.value
+            // Use FormData to handle file uploads
+            const formData = new FormData();
+            formData.append("username", nameRef.current.value);
+            formData.append("email", emailRef.current.value);
+            formData.append("password", passwordRef.current.value);
+            formData.append("university", selectedUniversity ? selectedUniversity.id : "");
+            formData.append("status", selectedStatus ? selectedStatus.id : "");
+            formData.append("yearOfGraduation", graduationRef.current.value);
+            formData.append("bio", bioRef.current.value);
+    
+            if (avatar) {
+                formData.append("avatar", avatar);
             }
-            const response = await API.post("/register", payload);
+    
+            const response = await API.post("/register", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+    
             console.log("Response from server:", response);
     
             if (response.data.user && response.data.access_token && response.data.refresh_token) {
                 setUser(response.data.user);
                 setToken(response.data.access_token);
-                setRefreshToken(response.data.refresh_token)
-                navigate('/home');
+                setRefreshToken(response.data.refresh_token);
+                navigate("/home");
             } else {
                 console.error("Unexpected response format", response);
             }
@@ -93,7 +114,7 @@ function Register() {
     return (
         <>
         {isLoading ? (
-            <div class="mt-20 w-8 h-8 border-4 rounded-full border-dotted border-t-lime-400 animate-spin m-auto"></div>
+            <div className="mt-20 w-8 h-8 border-4 rounded-full border-dotted border-t-lime-400 animate-spin m-auto"></div>
         ) : (
             <div className="pl-20 pr-20 pt-20 max-w-5xl m-auto">
                 <Field className="mb-4">
@@ -213,6 +234,21 @@ function Register() {
                 <Field className="mb-4">
                     <Label className="text-blue mb-3" style={{fontFamily: "Inter", fontSize:"1.2em"}}>Slaptažodis</Label>
                     <Input type="text" ref={passwordRef} name="password" className="w-full bg-lightest-blue bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg" placeholder="Įveskite slaptąžodį" />
+                </Field>
+
+                <Field className="mb-4">
+                    <Label className="text-blue mb-3" style={{fontFamily: "Inter", fontSize:"1.2em"}}>Pasirinkite profilio nuotrauką</Label>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        style={{ display: "none" }}
+                        accept="image/*"
+                        onChange={handleFileChange}
+                    />
+                    <button className="ml-10 pl-4 pr-4 pt-1 pb-2 text-center bg-lightest-blue border-blue rounded-md border-2 border-slate-300 text-blue text-xl hover:bg-blue hover:text-lightest-blue duration-300 transition-colors"  
+                        onClick={() => handleUploadClick()}>Pasirinkti
+                    </button>
+                    {avatar && <p className="mt-2 text-sm text-gray-600">Pasirinktas failas: {avatar.name}</p>}
                 </Field>
 
                 <div className="flex gap-4 mt-8">
