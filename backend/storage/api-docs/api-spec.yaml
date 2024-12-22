@@ -1,0 +1,466 @@
+openapi: 3.0.0
+info:
+  title: Post API
+  version: '0.1'
+paths:
+  /forums/{forum_id}/posts:
+    get:
+      tags:
+        - Forums
+        - Posts
+      summary: Retrieve all posts from a forum
+      description: Fetches all posts in the specified forum, along with their comments and categories.
+      operationId: getPostsByForum
+      parameters:
+        - name: forum_id
+          in: path
+          description: ID of the forum
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                properties:
+                  forum_name:
+                    description: Name of the forum
+                    type: string
+                  posts:
+                    type: array
+                    items:
+                      properties:
+                        id:
+                          description: ID of the post
+                          type: integer
+                        title:
+                          description: Title of the post
+                          type: string
+                        description:
+                          description: Description of the post
+                          type: string
+                        user:
+                          description: ID of the user who created the post
+                          type: integer
+                        comments:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/Comment'
+                        categories:
+                          type: array
+                          items:
+                            properties:
+                              id:
+                                description: ID of the category
+                                type: integer
+                              name:
+                                description: Name of the category
+                                type: string
+                            type: object
+                      type: object
+                type: object
+        '404':
+          description: Forum not found
+  /posts:
+    get:
+      tags:
+        - Posts
+      summary: Retrieve list of posts
+      description: Fetch all posts from the database
+      operationId: getPosts
+      responses:
+        '200':
+          description: List of posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+    post:
+      tags:
+        - Posts
+      summary: Create a new post
+      description: Create a new post with title, description, forum, and university information.
+      operationId: insertPost
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - title
+                - description
+                - forum_id
+                - university_id
+              properties:
+                title:
+                  type: string
+                  example: Post title
+                description:
+                  type: string
+                  example: Post description
+                forum_id:
+                  type: integer
+                  example: 1
+                university_id:
+                  type: integer
+                  example: 1
+              type: object
+      responses:
+        '201':
+          description: Post created successfully
+        '400':
+          description: Invalid input
+  /posts/{id}:
+    get:
+      tags:
+        - Posts
+      summary: Retrieve a specific post
+      description: Fetch a post by its ID.
+      operationId: showPost
+      parameters:
+        - name: id
+          in: path
+          description: ID of the post to retrieve
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Post details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '404':
+          description: Post not found
+    put:
+      tags:
+        - Posts
+      summary: Update a post
+      description: Update an existing post by its ID.
+      operationId: updatePost
+      parameters:
+        - name: id
+          in: path
+          description: ID of the post to update
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - title
+                - description
+              properties:
+                title:
+                  type: string
+                  example: Updated title
+                description:
+                  type: string
+                  example: Updated description
+              type: object
+      responses:
+        '200':
+          description: Post updated successfully
+        '404':
+          description: Post not found
+    delete:
+      tags:
+        - Posts
+      summary: Delete a post
+      description: Delete a post by its ID.
+      operationId: destroyPost
+      parameters:
+        - name: id
+          in: path
+          description: ID of the post to delete
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Post deleted successfully
+        '404':
+          description: Post not found
+  /forums:
+    get:
+      tags:
+        - Forums
+      summary: Retrieve list of forums
+      description: Fetch all forums from the database.
+      operationId: getForums
+      responses:
+        '200':
+          description: List of forums
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Forum'
+    post:
+      tags:
+        - Forums
+      summary: Create a new forum
+      description: Create a new forum with title and university information.
+      operationId: insertForum
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - title
+                - university_id
+              properties:
+                title:
+                  type: string
+                  example: Forum title
+                university_id:
+                  type: integer
+                  example: 1
+              type: object
+      responses:
+        '201':
+          description: Forum created successfully
+        '400':
+          description: Invalid input
+  /forums/{id}:
+    put:
+      tags:
+        - Forums
+      summary: Update a forum
+      description: Update an existing forum by its ID.
+      operationId: updateForum
+      parameters:
+        - name: id
+          in: path
+          description: ID of the forum to update
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - title
+                - university_id
+              properties:
+                title:
+                  type: string
+                  example: Updated title
+                university_id:
+                  type: integer
+                  example: 1
+              type: object
+      responses:
+        '200':
+          description: Forum updated successfully
+        '404':
+          description: Forum not found
+    delete:
+      tags:
+        - Forums
+      summary: Delete a forum
+      description: Delete a forum by its ID.
+      operationId: destroyForum
+      parameters:
+        - name: id
+          in: path
+          description: ID of the forum to delete
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Forum deleted successfully
+        '404':
+          description: Forum not found
+  /comments:
+    get:
+      tags:
+        - Comments
+      summary: Retrieve list of comments
+      description: Fetch all comments from the database.
+      operationId: getComments
+      responses:
+        '200':
+          description: List of comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+    post:
+      tags:
+        - Comments
+      summary: Create a new comment
+      description: Create a new comment with text and post information.
+      operationId: insertComment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - text
+                - post_id
+              properties:
+                text:
+                  type: string
+                  example: Comment text
+                post_id:
+                  type: integer
+                  example: 1
+              type: object
+      responses:
+        '201':
+          description: Comment created successfully
+        '400':
+          description: Invalid input
+  /comments/{id}:
+    put:
+      tags:
+        - Comments
+      summary: Update a comment
+      description: Update an existing comment by its ID.
+      operationId: updateComment
+      parameters:
+        - name: id
+          in: path
+          description: ID of the comment to update
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                  example: Updated comment text
+              type: object
+      responses:
+        '200':
+          description: Comment updated successfully
+        '404':
+          description: Comment not found
+    delete:
+      tags:
+        - Comments
+      summary: Delete a comment
+      description: Delete a comment by its ID.
+      operationId: destroyComment
+      parameters:
+        - name: id
+          in: path
+          description: ID of the comment to delete
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Comment deleted successfully
+        '404':
+          description: Comment not found
+components:
+  schemas:
+    Comment:
+      title: Comment
+      description: Comment model
+      properties:
+        id:
+          description: ID of the comment
+          type: integer
+        text:
+          description: The comment text
+          type: string
+        post_id:
+          description: ID of the post the comment is associated with
+          type: integer
+        user_id:
+          description: ID of the user who made the comment
+          type: integer
+        created_at:
+          description: Comment creation timestamp
+          type: string
+          format: date-time
+        updated_at:
+          description: Comment last update timestamp
+          type: string
+          format: date-time
+      type: object
+    Forum:
+      title: Forum
+      description: Forum model
+      properties:
+        id:
+          description: ID of the forum
+          type: integer
+        title:
+          description: Title of the forum
+          type: string
+        university_id:
+          description: ID of the university associated with the forum
+          type: integer
+        created_at:
+          description: Forum creation timestamp
+          type: string
+          format: date-time
+        updated_at:
+          description: Forum last update timestamp
+          type: string
+          format: date-time
+      type: object
+    Post:
+      title: Post
+      description: Post model
+      properties:
+        id:
+          description: ID of the post
+          type: integer
+        title:
+          description: Title of the post
+          type: string
+        description:
+          description: Description of the post
+          type: string
+        forum_id:
+          description: ID of the forum associated with the post
+          type: integer
+        university_id:
+          description: ID of the university associated with the post
+          type: integer
+        user_id:
+          description: ID of the user who created the post
+          type: integer
+        created_at:
+          description: Post creation timestamp
+          type: string
+          format: date-time
+        updated_at:
+          description: Post last update timestamp
+          type: string
+          format: date-time
+      type: object
+tags:
+  - name: Forums
+    description: Forums
+  - name: Posts
+    description: Posts
+  - name: Comments
+    description: Comments
