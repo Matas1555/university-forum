@@ -84,6 +84,8 @@ Sukurti universitetų forumų sistemą, kurioje naudotojai galės pasirinkti Lie
 
 
 ### API specifikacija
+backend/storage/api-docs/api-spec.yaml
+
 ## Forumų API metodai
 
 Gauti forumų sąrašą
