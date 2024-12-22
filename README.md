@@ -45,11 +45,42 @@ Sukurti universitetų forumų sistemą, kurioje naudotojai galės pasirinkti Lie
 
 <br>
 
+| ![Registracijos puslapis](https://github.com/user-attachments/assets/904820f3-3805-4700-a97e-50def47f1b95)|
+| :--------------------------------------------------------: |
+|                  _Registracijos puslapis_                   |
+
+<br>
+
+| ![Universiteto puslapis](https://github.com/user-attachments/assets/bf8b1d1b-f49a-4e9a-b45a-3e5be5c1f9c8)|
+| :--------------------------------------------------------: |
+|                  _Prisijungimo modulas_                   |
+
+<br>
+
 | ![Įrašo puslapis](https://github.com/user-attachments/assets/98858afc-f6b5-47f6-a3ed-0188ffcca709)|
 | :--------------------------------------------------------: |
 |                  _Įrašo puslapis_                          |
 
 <br>
+
+| ![Universitetų sąrašo puslapis](https://github.com/user-attachments/assets/837c689b-990d-43c5-a518-32e53163063f)|
+| :--------------------------------------------------------: |
+|                  _Universitetų sąrašo puslapis_            |
+
+<br>
+
+| ![Universiteto puslapis](https://github.com/user-attachments/assets/c0f0bbbd-697f-4cf0-aeac-afc400eb13dd)|
+| :--------------------------------------------------------: |
+|                  _Universiteto puslapis_                   |
+
+<br>
+
+| ![Administratoriaus panele](https://github.com/user-attachments/assets/a4a58931-f6d8-45c1-ad21-afb7ea2083c2)|
+| :--------------------------------------------------------: |
+|                  _Administratoriaus panele_                |
+
+<br>
+
 
 
 ### API specifikacija
@@ -99,3 +130,5 @@ Ištrinti komentarą
 <table> <tr><td width="500px">API Metodas:</td><td width="500px">DELETE</td></tr> <tr><td>Paskirtis:</td><td>Ištrinti komentarą pagal jo ID.</td></tr> <tr><td>Pasiekiama adresu:</td><td>/api/comments/{id}</td></tr> <tr><td>Užklausos "header" dalis:</td><td>-</td></tr> <tr><td>Užklausos struktūra:</td><td>-</td></tr> <tr><td>Atsakymo struktūra:</td><td>-</td></tr> <tr><td>Galimi atsakymo kodai:</td><td> - 200 (OK): Komentaras sėkmingai ištrintas.<br> - 404 (Nerasta): Komentaras su nurodytu ID neegzistuoja. </td></tr> </table> <br>
 
 
+### Išvados
+Šis projektas, sukurtas naudojant ReactJS ir Laravel, yra gera pradžia, nors dar ir nebaigtas. Dabartinėje versijoje pavyko sukurti pagrindines funkcijas – vartotojų autentifikaciją ir duomenų skaitymą, o administratoriaus panelėje galima atlikti CRUD operacijas. Tai jau suteikia tam tikrą funkcionalumą ir padėjo suprasti, kaip šios technologijos dera tarpusavyje.
