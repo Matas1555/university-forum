@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import API from "../API";
+import API from "../../utils/API";
 import { useNavigate } from "react-router-dom";
 import { NavLink } from "react-router-dom";
 
@@ -23,25 +23,6 @@ export default function PostList(){
 
     return(
         <>
-        <div className="flex flex-col gap-10 justify-center m-auto lg:flex-row lg:items-start">
-
-{/* Left Section */}
-<div className="flex flex-col gap-1 p-0 overflow-hidden h-auto bg-lighter-blue rounded-md border-2 border-blue shadow-md lg:flex-none lg:w-1/5">
-    <div 
-        className="m-0 w-full bg-light-blue border-b-blue border-b-2 text-almost-blue pl-2 pt-3/5"
-        style={{ fontFamily: "Inter", fontWeight: 800 }}
-    >
-        Sveiki atvykę į UniForum!
-    </div>
-    <div 
-        className="p-2"
-        style={{ fontFamily: "Inter", fontWeight: 200 }}
-    >
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non augue eu lorem fringilla auctor. Vestibulum cursus tempor felis consectetur accumsan.
-    </div>
-</div>
-
-{/* Right Section */}
 <div className="flex flex-col gap-1 p-3 overflow-hidden bg-lighter-blue rounded-md border-2 border-blue shadow-md lg:flex-grow">
     {posts.map((value) => (
         <div 
@@ -51,18 +32,18 @@ export default function PostList(){
         >
             <NavLink to={`/post`}>
                 <div>
-                    <h3 style={{ fontFamily: "Inter", fontWeight: 800, fontSize: "1.4em" }}>{value.title}</h3>
-                    <p style={{ fontFamily: "Inter", fontWeight: 200, fontSize: "1em" }} className="mb-4 italic">
+                    <h3 className="font-sans" style={{fontWeight: 600, fontSize: "1.4em" }}>{value.title}</h3>
+                    <p style={{ fontWeight: 200, fontSize: "1em" }} className="mb-4 italic">
                         Paskelbta {value.created_at}
                     </p>
-                    <p style={{ fontFamily: "Inter", fontWeight: 400, fontSize: "1em" }}>
+                    <p style={{ fontWeight: 400, fontSize: "1em" }}>
                         {truncateText(value.description, 80)}
                     </p>
                 </div>
                 <div className="flex flex-row justify-between mt-2 justify-center">
                     <div 
                         className="flex flex-row gap-1 align-middle" 
-                        style={{ fontFamily: "Inter", fontWeight: 500, fontSize: "1em" }}
+                        style={{ fontWeight: 500, fontSize: "1em" }}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                             <path 
@@ -75,7 +56,7 @@ export default function PostList(){
                     </div>
                     <div 
                         className="flex flex-row gap-4" 
-                        style={{ fontFamily: "Inter", fontWeight: 500, fontSize: "1em" }}
+                        style={{ fontWeight: 500, fontSize: "1em" }}
                     >
                         {value.categories.map((category) => (
                             <div 
@@ -91,8 +72,6 @@ export default function PostList(){
             </NavLink>
         </div>
     ))}
-</div>
-
 </div>
 
         </>

@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { Description, Dialog, Label, Input, Field, DialogPanel, DialogTitle, Transition } from '@headlessui/react';
 import { useStateContext } from "../context/contextProvider";
-import API from "../API";
+import API from "../utils/API";
 import { useNavigate } from "react-router-dom";
 
 function LogIn({ isOpen, setIsOpen }) {
@@ -42,14 +42,14 @@ function LogIn({ isOpen, setIsOpen }) {
                 transition
                 className="w-full max-w-md rounded-xl shadow-2xl bg-lightest-blue border-2 border-blue bg-white/5 p-6 backdrop-blur-2xl duration-200 ease-out data-[closed]:transform-[scale(95%)] data-[closed]:opacity-0">
                 {/* <DialogPanel className="max-w-lg space-y-4 rounded-md border-2 backdrop-blur-2xl border-blue bg-lightest-blue p-12"> */}
-                    <DialogTitle className="font-bold text-blue mb-3" style={{fontFamily: "Inter", fontSize:"1.5em"}}>Sveiki sugrįže</DialogTitle>
+                    <DialogTitle className="font-bold text-blue mb-3" style={{ fontSize:"1.5em"}}>Sveiki sugrįže</DialogTitle>
                     <Field className="mb-4">
-                        <Label className="text-blue mb-3" style={{fontFamily: "Inter", fontSize:"1.2em"}}>El. Paštas</Label>
+                        <Label className="text-blue mb-3" style={{ fontSize:"1.2em"}}>El. Paštas</Label>
                         <Input type="text" ref={emailRef} name="email" className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg" placeholder="Įveskite el.paštą" />
                     </Field>
 
                     <Field>
-                        <Label className="text-blue mb-3" style={{fontFamily: "Inter", fontSize:"1.2em"}}>Slaptažodis</Label>
+                        <Label className="text-blue mb-3" style={{ fontSize:"1.2em"}}>Slaptažodis</Label>
                         <Input type="text" ref={passwordRef} name="password" className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg" placeholder="Įveskite slaptąžodį" />
                     </Field>
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import API from "../API";
+import API from "../../utils/API";
 import { Label, Input, Field, Textarea, Select, Listbox, ListboxButton, ListboxOptions, ListboxOption} from '@headlessui/react';
 import { NavLink } from "react-router-dom";
 
@@ -22,11 +22,11 @@ export default function UniversityList(){
         <div className="flex flex-col gap-20 lg:flex-row">
             <div className="top-32 h-auto w-3/5 m-auto lg:w-1/5 lg:m-0 lg:sticky lg:self-start">
                 <Field className="mb-4">
-                    <Label className="text-blue mb-3" style={{fontFamily: "Inter", fontSize:"1.2em"}}>Raktažodis</Label>
+                    <Label className="text-blue mb-3" style={{ fontSize:"1.2em"}}>Raktažodis</Label>
                     <Input type="text" name="email" className="w-full bg-lightest-blue bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg"/>
                 </Field>
                 <Field className="mb-4">
-                    <Label className="text-blue mb-3" style={{fontFamily: "Inter", fontSize:"1.2em"}}>Miestas</Label>
+                    <Label className="text-blue mb-3" style={{ fontSize:"1.2em"}}>Miestas</Label>
                     <Input type="text" name="email" className="w-full bg-lightest-blue bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg"/>
                 </Field>
                 <div className="flex gap-4 mt-8">
@@ -53,14 +53,13 @@ export default function UniversityList(){
                             </div>
                             <div className="relative flex-grow flex flex-col justify-center items-center w-3/5 p-4">
                                 <div 
-                                    style={{ fontFamily: "Inter", fontWeight: 800, fontSize: "1.5em" }} 
+                                    style={{  fontWeight: 800, fontSize: "1.5em" }} 
                                     className="text-blue text-center"
                                 >
                                     {value.name}
                                 </div>
                                 <div 
                                     className="absolute bottom-4 right-4 text-blue text-sm"
-                                    style={{ fontFamily: "Inter" }}
                                 >
                                     {value.location}
                                 </div>

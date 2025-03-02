@@ -1,5 +1,5 @@
 import { useStateContext } from "../context/contextProvider";
-import API from "../API";
+import API from "../utils/API";
 
 const Profile = () => {
     const {user} = useStateContext();

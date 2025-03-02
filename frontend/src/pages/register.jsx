@@ -3,7 +3,7 @@ import { Label, Input, Field, Textarea, Select, Listbox, ListboxButton, ListboxO
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { CheckIcon } from '@heroicons/react/20/solid';
 import { BackwardIcon} from '@heroicons/react/20/solid';
-import API from "../API";
+import API from "../utils/API";
 import { useStateContext } from "../context/contextProvider";
 import { useNavigate } from "react-router-dom";
 import Datepicker from "tailwind-datepicker-react"
@@ -118,23 +118,23 @@ function Register() {
         ) : (
             <div className="pl-20 pr-20 pt-20 max-w-5xl m-auto">
                 <Field className="mb-4">
-                    <Label className="text-blue mb-3" style={{fontFamily: "Inter", fontSize:"1.2em"}}>Slapyvardis</Label>
+                    <Label className="text-blue mb-3" style={{ fontSize:"1.2em"}}>Slapyvardis</Label>
                     <Input type="text" ref={nameRef} name="username" className="w-full bg-lightest-blue bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg" placeholder="Įveskite vardą, kurį matys kiti naudotojai" />
                 </Field>
 
                 <Field className="mb-4">
-                    <Label className="text-blue mb-3" style={{fontFamily: "Inter", fontSize:"1.2em"}}>El. Paštas</Label>
+                    <Label className="text-blue mb-3" style={{ fontSize:"1.2em"}}>El. Paštas</Label>
                     <Input type="text" ref={emailRef} name="email" className="w-full bg-lightest-blue bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg" placeholder="Įveskite el.paštą" />
                 </Field>
 
                 <Field className="mb-4">
-                    <Label className="text-blue mb-3" style={{fontFamily: "Inter", fontSize:"1.2em"}}>Jūsų aprašymas</Label>
+                    <Label className="text-blue mb-3" style={{ fontSize:"1.2em"}}>Jūsų aprašymas</Label>
                     <Textarea type="text" ref={bioRef} name="bio" className="w-full bg-lightest-blue bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg" placeholder="Įveskite kažką apie save :)" />
                 </Field>
 
                 
                 <Field className="mb-4">
-                    <Label className="text-blue mb-3" style={{fontFamily: "Inter", fontSize:"1.2em"}}>Statusas</Label>
+                    <Label className="text-blue mb-3" style={{ fontSize:"1.2em"}}>Statusas</Label>
                         <Listbox value={selectedStatus} onChange={setSelectedStatus}>
                         <ListboxButton
                             className="relative block w-full rounded-lg bg-lightest-blue border-s-2 border-e-2 py-1.5 pr-8 pl-3 text-left text-sm/6 text-white"
@@ -166,7 +166,7 @@ function Register() {
                 </Field >
 
                 <Field className="mb-4">
-                    <Label className="text-blue mb-3" style={{fontFamily: "Inter", fontSize:"1.2em"}}>Universitetas</Label>
+                    <Label className="text-blue mb-3" style={{ fontSize:"1.2em"}}>Universitetas</Label>
                     <Listbox value={selectedUniversity} onChange={handleUniversityChange}>
                         <ListboxButton
                             className="relative block w-full rounded-lg bg-lightest-blue border-s-2 border-e-2 py-1.5 pr-8 pl-3 text-left text-sm/6 text-white"
@@ -198,7 +198,7 @@ function Register() {
                 </Field >
 
                 <Field className="mb-4">
-                    <Label className="text-blue mb-3" style={{fontFamily: "Inter", fontSize:"1.2em"}}>Studijų programa </Label>
+                    <Label className="text-blue mb-3" style={{ fontSize:"1.2em"}}>Studijų programa </Label>
                     <Listbox value={selectedProgram} onChange={setSelectedProgram}>
                         <ListboxButton 
                             className="relative block w-full rounded-lg bg-lightest-blue border-s-2 border-e-2 py-1.5 pr-8 pl-3 text-left text-sm/6 text-white"
@@ -227,17 +227,17 @@ function Register() {
                 </Field >
 
                 <Field className="mb-4 relative">
-                    <Label className="text-blue mb-3" style={{fontFamily: "Inter", fontSize:"1.2em"}}>Metai kada baigsite mokslus</Label>
+                    <Label className="text-blue mb-3" style={{ fontSize:"1.2em"}}>Metai kada baigsite mokslus</Label>
                     <Input type="number" ref={graduationRef} name="graduation" className="w-full bg-lightest-blue bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg" placeholder="Įveskite metus"/>
                 </Field>
 
                 <Field className="mb-4">
-                    <Label className="text-blue mb-3" style={{fontFamily: "Inter", fontSize:"1.2em"}}>Slaptažodis</Label>
+                    <Label className="text-blue mb-3" style={{ fontSize:"1.2em"}}>Slaptažodis</Label>
                     <Input type="text" ref={passwordRef} name="password" className="w-full bg-lightest-blue bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg" placeholder="Įveskite slaptąžodį" />
                 </Field>
 
                 <Field className="mb-4">
-                    <Label className="text-blue mb-3" style={{fontFamily: "Inter", fontSize:"1.2em"}}>Pasirinkite profilio nuotrauką</Label>
+                    <Label className="text-blue mb-3" style={{ fontSize:"1.2em"}}>Pasirinkite profilio nuotrauką</Label>
                     <input
                         type="file"
                         ref={fileInputRef}

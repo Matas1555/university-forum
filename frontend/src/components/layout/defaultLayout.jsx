@@ -1,7 +1,7 @@
 import { Outlet, Navigate } from "react-router-dom";
-import { useStateContext } from "../context/contextProvider";
-import NavBar from "./navbar";
-import Footer from "./footer";
+import { useStateContext } from "../../context/contextProvider";
+import NavBar from "../navbar/navbar";
+import Footer from "../footer/footer";
 
 export default function DefaultLayout(){
     const {user, token} = useStateContext;

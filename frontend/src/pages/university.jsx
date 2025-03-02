@@ -1,7 +1,8 @@
 import { useStateContext } from "../context/contextProvider";
-import API from "../API";
+import API from "../utils/API";
 import KTU from "../../public/assets/KTU.jpg";
 import KTU_logo from "../../public/assets/KTU-logo.png";
+import VU from "../../public/assets/VU.jpg";
 
 const University = () => {
     const {user} = useStateContext();
@@ -11,13 +12,13 @@ const University = () => {
             <div>
                 <div className="w-full h-96 relative overflow-hidden border-b-2 border-blue ">
                     <img
-                        src={KTU}
+                        src={VU}
                         alt="Background"
                         className="w-full h-full object-cover blur-sm transform scale-105 "
                     />
-                    <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center" style={{fontFamily: "Inter", fontWeight:800, fontSize:"2em", textShadow: "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000"}}
+                    <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center" style={{ fontWeight:800, fontSize:"2em", textShadow: "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000"}}
                     >
-                        <h1 className="text-lightest-blue text-3xl font-bold">UNIVERSITETO PAVADINIMAS</h1>
+                        <h1 className="text-lightest-blue text-3xl font-bold">VILNIAUS UNIVERSITETAS</h1>
                     </div>
                 </div>
                 <div className="w-4/5 justify-center m-auto lg:flex lg:flex-col">
@@ -37,7 +38,7 @@ const University = () => {
                             <p className="m-auto">Programos dėstytojai</p>
                         </div>
                     </div>
-                    <div className="mt-20 text-left" style={{fontFamily: "Inter", fontWeight:500, fontSize:"1.5em"}}>
+                    <div className="mt-20 text-left" style={{ fontWeight:500, fontSize:"1.5em"}}>
                         Kontaktai
                     </div>
                     <div className="gap-10 mt-10 flex flex-row">

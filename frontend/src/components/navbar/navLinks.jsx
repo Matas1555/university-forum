@@ -1,10 +1,10 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import LogIn from "../pages/login"; // Assuming the LogIn component is in the same folder
-import Register from "../pages/register";
-import { useStateContext } from "../context/contextProvider";
-import API from "../API";
-import profilePicture from "../../public/assets/profile-default-icon.png";
+import LogIn from "../../pages/login";
+import Register from "../../pages/register";
+import { useStateContext } from "../../context/contextProvider";
+import API from "../../utils/API";
+import profilePicture from "../../../public/assets/profile-default-icon.png";
 
 
 const NavButtons = ({ openLoginDialog}) => {
@@ -27,13 +27,7 @@ const NavButtons = ({ openLoginDialog}) => {
         <>
             {(user != null && user.status_id === 1) ? (
                 <>
-                <NavLink to ="/dashboard">
-                    <div 
-                        className="pl-4 pr-4 pt-1 pb-2 text-center shadow-inner bg-lightest-blue border-blue rounded-md border-2 border-slate-300 text-blue text-xl hover:bg-blue hover:text-lightest-blue duration-300 transition-colors" 
-                        >
-                        Dashboard
-                    </div>
-                </NavLink>
+
                 </>
             ):(<></>)}
             {(user && token) ? (
@@ -48,7 +42,6 @@ const NavButtons = ({ openLoginDialog}) => {
                             />
                             <h1
                                 className="text-blue text-sm font-semibold group-hover:text-lightest-blue transition-colors duration-300"
-                                style={{ fontFamily: "Inter" }}
                             >
                                 {user.username}
                             </h1>
@@ -64,13 +57,13 @@ const NavButtons = ({ openLoginDialog}) => {
             ) : (
                 <>
                     <button 
-                        className="pl-4 pr-4 pt-1 pb-2 text-center bg-lightest-blue border-blue rounded-md border-2 border-slate-300 text-blue text-xl hover:bg-blue hover:text-lightest-blue duration-300 transition-colors" 
+                        className="pl-2 pr-2 pt-1 pb-1 text-center bg-dark border-white rounded-md border-2 border-slate-300 text-white text-lg hover:bg-grey hover:text-lightest-blue duration-300 transition-colors" 
                         onClick={openLoginDialog}
                         >
                         Prisijungti
                     </button>
                     <NavLink to='/register'
-                        className="pl-4 pr-4 pt-1 pb-2 text-center bg-lightest-blue border-blue rounded-md border-2 border-slate-300 text-blue text-xl hover:bg-blue hover:text-lightest-blue duration-300 transition-colors" 
+                        className="pl-2 pr-2 pt-1 pb-1 text-center bg-dark border-white rounded-md border-2 border-slate-300 text-white text-lg hover:bg-grey hover:text-lightest-blue duration-300 transition-colors" 
                         >
                         Registruotis
                     </NavLink>
@@ -107,10 +100,10 @@ const NavLinks = () => {
 
                 <div className="md:hidden">
                     <button onClick={toggleNavBar}>{isOpen ? 
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 text-white">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                         </svg>
-                    :   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                    :   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 text-white">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
                         </svg>
                         } 

@@ -2,12 +2,10 @@ import { createBrowserRouter } from "react-router-dom";
 import LogIn from "./pages/login";
 import Register from "./pages/register";
 import Home from "./pages/home";
-import DefaultLayout from "./components/defaultLayout";
-import GuestLayout from "./components/guestLayout";
 import Profile from "./pages/profile";
-import Dashboard from "./pages/dashboard";
 import Post from "./pages/post";
 import University from "./pages/university";
+import DefaultLayout from "./components/layout/defaultLayout";
 
 const router = createBrowserRouter ([
     {
@@ -26,11 +24,6 @@ const router = createBrowserRouter ([
                 errorElement: <div>Error loading profile page!</div>,
             },
             {
-                path: '/dashboard',
-                element: <Dashboard/>,
-                errorElement: <div>Error loading dashboard page!</div>,
-            },
-            {
                 path: '/post',
                 element: <Post/>,
                 errorElement: <div>Error loading the post!</div>,
@@ -41,6 +34,11 @@ const router = createBrowserRouter ([
                 errorElement: <div>Error loading the post!</div>,
             },
             {
+                path: '/register',
+                element: <Register/>,
+                errorElement: <div>Error loading register page!</div>,
+            },
+            {
                 
                 path: '/',
                 element: <Home/>,
@@ -48,23 +46,6 @@ const router = createBrowserRouter ([
             },
         ],
     },
-    {
-        path: '/',
-        element: <GuestLayout/>,
-        children: [
-            {
-                path: '/login',
-                element: <LogIn/>,
-                errorElement: <div>Error loading login page!</div>,
-            },
-            {
-                path: '/register',
-                element: <Register/>,
-                errorElement: <div>Error loading register page!</div>,
-            },
-        ],
-    },
-
 ]);
 
 export default router;
