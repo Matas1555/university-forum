@@ -15,9 +15,14 @@ export default {
       'lightest-blue':'#EEF5FF',
       'dark':'#151f27',
       'grey':'#202e39',
+      'light-grey':'#768491',
       'white':'#f0f0fa',
       'lght-blue':'#0084ff',
-      'red':'#8E1616',
+      'red':'#cc0a0a',
+      'green':'#27cf15',
+      'purple':'#9416d9',
+      'orange':'#f08e1f'
+
     },
     fontFamily: {
       sans: ["'HK Grotesk'", "sans"],

@@ -15,7 +15,7 @@ export default function DefaultLayout(){
         <main className="flex-grow">
           <Outlet />
         </main>
-        <Footer />
+        {/* <Footer /> */}
       </div>
       );
 }
