@@ -1,16 +1,56 @@
 import React from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
+
+const categoryColors = {
+  'Bendros diskusijos': { text: 'text-lght-blue', ring: 'ring-lght-blue' },
+  'Kursų apžvalgos': { text: 'text-red', ring: 'ring-red' },
+  'Socialinis gyvenimas ir renginiai': { text: 'text-orange', ring: 'ring-orange' },
+};
 
 const PostList = ({ posts }) => {
+  const navigate = useNavigate();
+
+  const handleOpenPost = (post) =>{
+    navigate('/post', {state: { post } });
+  }
+
   return (
-    <div className="w-full cursor-pointer">
+    <div className="w-full" >
       {posts.map((post, index) => (
-        <div key={index}>
+        <div key={index} className='cursor-pointer' onClick={() => handleOpenPost(post)}>
           <div className="group flex flex-col justify-between items-start gap-5 bg-grey rounded-md p-5 m-2 border-2 border-dark hover:bg-dark hover:border-light-grey transition-colors duration-150 ease-linear">
-            <div className="flex flex-row gap-10 items-center">
-              <div className="flex flex-col gap-2">
-                <h1 className="text-white font-medium">{post.title}</h1>
-                <p className="text-light-grey font-medium">{post.content}</p>
-                <p className="text-light-grey font-light italic text-sm">{post.date}</p>
+            <div className="flex flex-row gap-10 items-center w-full">
+              <div className="flex flex-col gap-2 w-full">
+                <div className="flex flex-row justify-between">
+                  <button className='p-0 text-light-grey hover:text-lght-blue'>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                    </svg>
+                  </button>
+                  <div className="hidden flex-row gap-2 justify-end lg:flex text-xxs">
+                    {post.categories.map((category, catIndex) => {
+                        const { text, ring } = categoryColors[category] || {
+                          text: 'text-light-grey',
+                          ring: 'ring-light-grey',
+                        };
+                        return (
+                          <div
+                            key={catIndex}
+                            className={`ring-1 ${ring} rounded-md p-1 px-2 ${text}`}
+                          >
+                            • {category}
+                          </div>
+                        );
+                    })}
+                  </div>
+                </div>
+                <h1 className="text-white font-medium">{post.title}</h1> 
+                <p className="text-light-grey font-medium">
+                  {post.content.length > 250
+                    ? post.content.slice(0,250) + "..."
+                    : post.content}
+                </p>
+                <p className="text-light-grey font-light italic text-xs">{post.date}</p>
               </div>
             </div>
             <div className="flex flex-row w-full gap-3 border-t-2 pt-4 group-hover:border-t-light-grey border-t-dark justify-between transition-colors duration-150 ease-linear">

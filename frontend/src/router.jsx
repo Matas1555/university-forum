@@ -32,12 +32,12 @@ const router = createBrowserRouter ([
             {
                 path: '/posts',
                 element: <Posts/>,
-                errorElement: <div>Error loading the post!</div>,
+                errorElement: <div>Error loading posts!</div>,
             },
             {
                 path: '/university',
                 element: <University/>,
-                errorElement: <div>Error loading the post!</div>,
+                errorElement: <div>Error loading universities!</div>,
             },
             {
                 path: '/register',

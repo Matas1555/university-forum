@@ -1,121 +1,133 @@
+import {React, useState} from "react";
 import { useStateContext } from "../context/contextProvider";
+import { useLocation } from "react-router-dom";
 import API from "../utils/API";
-import profilePicture from "../../public/assets/profile-default-icon.png";
+import profilePicture from "../assets/profile-default-icon.png";
+import Comment from "../components/lists/commentList";
+
+const categoryColors = {
+    'Bendros diskusijos': { text: 'text-lght-blue', ring: 'ring-lght-blue' },
+    'Kursų apžvalgos': { text: 'text-red', ring: 'ring-red' },
+    'Socialinis gyvenimas ir renginiai': { text: 'text-orange', ring: 'ring-orange' },
+  };
 
 const Post = () => {
     const {user} = useStateContext();
+    const location = useLocation();
+    const post = location.state?.post; // Get post data from state
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [comment, setComment] = useState("");
 
+    if (!post) {
+        return <p className="text-white text-center mt-10">No post found.</p>;
+    }
+    
     return (
         <>
-            <div>
-                <div className="w-4/5 border-2 border-blue rounded-md p-10 h-1/2 m-auto mt-20 shadow-md" style={{ fontWeight:400, fontSize:"1em"}}>
-                    <div className="flex flex-col" >
-                        <div className="flex flex-row justify-between">
-                            <div className="flex flex-row gap-10 mb-10">
-                                <img src={profilePicture} className="w-8 h-8 rounded-full">
-                                </img>
-                                <div>
-                                    pirmasis_105
-                                </div>
-                            </div>
-                            <div>
-                                2024-11-05
-                            </div>
+        
+            <div className="mb-10 w-4/5 m-auto">
+                <div className="flex flex-row gap-2 mb-2 justify-center cursor-pointer text-xxxs sm:text-sm sm:justify-end"> {/**Categories */}
+                    {post.categories.map((category, catIndex) => {
+                        const { text, ring } = categoryColors[category] || {
+                        text: 'text-light-grey',
+                        ring: 'ring-light-grey',
+                        };
+                        return (
+                        <div
+                            key={catIndex}
+                            className={`ring-1 ${ring} rounded-md p-1 px-2 ${text} mt-2`}
+                        >
+                            {category}
                         </div>
-                        <div className="font-semibold mb-2 text-lg">
-                        Kur rasti nemokamų studijų šaltinių?
-                        </div>
-                        <div className="mb-5">
-                        Sveiki visi! Šiuo metu ieškau nemokamų studijų šaltinių, kurie galėtų padėti gilintis į įvairias akademines temas, ypač susijusias su universitetinėmis studijomis, tokiomis kaip programavimas, matematika, fizika ar net humanitariniai mokslai. Suprantu, kad internete yra daugybė informacijos, tačiau kartais sunku rasti patikimus ir kokybiškus išteklius.
-                        </div>
-                        <div className="mb-10">
-                        Galbūt kas nors iš jūsų turi patirties su tokiomis svetainėmis ar platformomis, kurios siūlo nemokamus kursus, el. knygas ar kitas mokymosi priemones? Pavyzdžiui, man labai įdomu, ar yra galimybių mokytis praktinių įgūdžių, kaip programavimas, arba rasti teorinių šaltinių, kurie padėtų pasiruošti egzaminams.
-
-                        Taip pat būtų labai įdomu sužinoti apie nemokamus akademinius šaltinius, kuriuos naudojate jūs. Galbūt žinote kokias nors geras Youtube mokymo programas, universitetų paskaitų įrašus ar platformas, kurios suteikia galimybę mokytis savarankiškai? Bet kokios rekomendacijos būtų labai naudingos. Ačiū iš anksto už jūsų pagalbą ir pasidalintą patirtį!“
-                        </div>
-                        <div className="flex flex-row gap-10 mb-4">
-                            <div className="flex flex-row gap-1 align-middle bg-lighter-blue p-2 rounded-md border-2 border-blue" style={{ fontWeight:500, fontSize:"1em"}}>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
-                                </svg>
-                                 25
-                            </div>
-                            <div className="flex flex-row gap-1 align-middle bg-lighter-blue p-2 rounded-md border-2 border-blue" style={{ fontWeight:500, fontSize:"1em"}}>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
-                                    <path fillRule="evenodd" d="M15.75 4.5a3 3 0 1 1 .825 2.066l-8.421 4.679a3.002 3.002 0 0 1 0 1.51l8.421 4.679a3 3 0 1 1-.729 1.31l-8.421-4.678a3 3 0 1 1 0-4.132l8.421-4.679a3 3 0 0 1-.096-.755Z" clipRule="evenodd" />
-                                </svg>
-                                Dalintis
-                            </div>
-                        </div>
-                        <div className="flex flex-row">
-                            <input className="bg-lighter-blue border-2 border-blue rounded-md p-2 w-4/5" placeholder="Palikite komentarą"></input>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-8 m-2 cursor-pointer">
-                                <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
-                            </svg>
-                        </div>
-                    </div>
+                        );
+                    })}
                 </div>
-                <div className="w-4/5 border-2 border-blue rounded-md p-10 h-1/2 m-auto mt-20 shadow-md" style={{ fontWeight:400, fontSize:"1em"}}>
-                <div className="flex flex-col" >
-                        <div className="flex flex-row gap-5">
-                            <img src={profilePicture} className="w-8 h-8 rounded-full">
-                            </img>
-                            <div className="flex flex-col">
-                                <div className="flex flex-row justify-between align-middle">
-                                    <h2 className="font-semibold">
-                                        pirmasis_1
-                                    </h2>
-                                    <p>2024-12-11</p>
+                <div className="w-full bg-grey text-white rounded-md p-4 h-1/2 m-auto"> {/**Post */}
+                    <div className="flex flex-col gap-10" >
+                        <div className="flex flex-col gap-4">
+                            <div className="flex flex-row items-center justify-between gap-4">
+                                <div className="flex flex-row gap-2 items-center">
+                                    <img src={profilePicture} className="size-8 md:size-10"/>
+                                    <div className="flex flex-col items-start justify-start gap-1">
+                                        <span className="text-white text-xs font-medium md:text-base">{post.user}</span>
+                                        <span className="text-xxs font-medium text-light-grey md:text-xs"> • {post.date}</span>
+                                    </div>
                                 </div>
-
-                                <div className="mb-3 mt-3">
-                                Man labai padėjo MIT OpenCourseWare – tai MIT universitetų paskaitų ir medžiagos kolekcija, kurią galima pasiekti nemokamai. Ten rasite viską nuo matematikos iki inžinerijos.
-                                </div>
+                                <button className='p-0 text-light-grey hover:text-lght-blue'>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div className="font-medium text-lg md:text-3xl">
+                                {post.title}
+                            </div>
+                            <div className="text-sm mt-3 md:text-base font-light text-white">
+                                {post.content}
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div className="w-4/5 border-2 border-blue rounded-md p-10 h-1/2 m-auto mt-20 shadow-md" style={{ fontWeight:400, fontSize:"1em"}}>
-                <div className="flex flex-col" >
-                        <div className="flex flex-row gap-5">
-                            <img src={profilePicture} className="w-8 h-8 rounded-full">
-                            </img>
-                            <div className="flex flex-col">
-                                <div className="flex flex-row justify-between align-middle">
-                                    <h2 className="font-semibold">
-                                        stud_134_gus
-                                    </h2>
-                                    <p>2024-12-10</p>
+                        
+                        <div>
+                            <div className="flex flex-row gap-2 mb-4 text-xs">
+                                <div className="flex flex-row gap-1 items-center bg-grey rounded-md ring-1 ring-light-grey px-2 py-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-4">
+                                        <path fillRule="evenodd" d="M11.47 2.47a.75.75 0 0 1 1.06 0l7.5 7.5a.75.75 0 1 1-1.06 1.06l-6.22-6.22V21a.75.75 0 0 1-1.5 0V4.81l-6.22 6.22a.75.75 0 1 1-1.06-1.06l7.5-7.5Z" clipRule="evenodd" />
+                                    </svg>
+                                    <p className="m-0 p-0 leading-none">{post.like_count}</p>
                                 </div>
-
-                                <div className="mb-3 mt-3">
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque vitae ligula sodales, pharetra tortor id, ultrices lectus. Fusce dignissim consectetur arcu ac posuere. Nulla facilisi. Suspendisse posuere ipsum aliquam felis tincidunt varius. Morbi pellentesque vulputate suscipit. Aliquam quis tristique libero. Phasellus pharetra felis eget magna porta sodales. In commodo accumsan semper. Vivamus justo neque, imperdiet a luctus pulvinar, vestibulum vel urna.
+                                <div className="flex flex-row gap-1 items-center bg-grey rounded-md ring-1 ring-light-grey px-2 py-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 block">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+                                    </svg>
+                                    <p className="m-0 p-0 leading-none">{post.comment_count}</p>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="w-4/5 border-2 border-blue rounded-md p-10 h-1/2 m-auto mt-20 shadow-md" style={{ fontWeight:400, fontSize:"1em"}}>
-                <div className="flex flex-col" >
-                        <div className="flex flex-row gap-5">
-                            <img src={profilePicture} className="w-8 h-8 rounded-full">
-                            </img>
-                            <div className="flex flex-col">
-                                <div className="flex flex-row justify-between align-middle">
-                                    <h2 className="font-semibold">
-                                       slapyvvardenis
-                                    </h2>
-                                    <p>2024-12-01</p>
-                                </div>
+                            <div className="flex flex-row items-center gap-2 w-full">
+                            {isExpanded ? (
+                                <div className="relative w-full">
+                                <textarea
+                                  className="bg-grey ring-1 ring-light-grey rounded-md p-3 w-full text-sm font:ring-lght-blue resize-none h-56 pr-16"
+                                  placeholder="Palikite komentarą"
+                                  value={comment}
+                                  onChange={(e) => setComment(e.target.value)}
+                                  onFocus={() => setIsExpanded(true)}
+                                  onBlur={() => setIsExpanded(false)}
+                                />
+                                
 
-                                <div className="mb-3 mt-3">
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque vitae ligula sodales, pharetra tortor id, ultrices lectus. Fusce dignissim consectetur arcu ac posuere. Nulla facilisi. Suspendisse posuere ipsum aliquam felis tincidunt varius. Morbi pellentesque vulputate suscipit. Aliquam quis tristique libero. Phasellus pharetra felis eget magna porta sodales. In commodo accumsan semper. Vivamus justo neque, imperdiet a luctus pulvinar, vestibulum vel urna.
-                                </div>
+                                <button
+                                  className="absolute bottom-3 right-1 bg-lght-blue text-white px-3 py-1 rounded-md text-sm hover:bg-dark-blue transition"
+                                >
+                                  Komentuoti
+                                </button>
+                                <button
+                                  className="absolute bottom-3 right-28 ring-1 ring-light-grey text-white px-3 py-1 rounded-md text-sm hover:bg-dark-blue transition"
+                                  onClick={() => setIsExpanded(false)}
+                                >
+                                  Atšaukti
+                                </button>
+                              </div>
+                            ) : (
+                                <input
+                                className="bg-grey ring-1 ring-light-grey rounded-md p-3 w-full text-sm font:ring-lght-blue"
+                                placeholder="Palikite komentarą"
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                onFocus={() => setIsExpanded(true)}
+                                />
+                            )}
                             </div>
                         </div>
                     </div>
                 </div>
-                
+                <div className="mt-2">
+                {post.comments && post.comments.length > 0 ? (
+                    post.comments.map((comment, index) => <Comment key={index} comment={comment} level={1} />)
+                    ) : (
+                    <p className="text-light-grey text-sm">Nėra komentarų.</p>
+                )}
+                </div>
+
             </div>
         </>
     );

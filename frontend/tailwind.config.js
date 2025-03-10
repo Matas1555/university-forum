@@ -6,7 +6,12 @@ export default {
     "./node_modules/tailwind-datepicker-react/dist/**/*.js",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontSize: {
+        'xxs': '0.65rem',
+        'xxxs': '0.5rem',
+      },
+    },
     colors:{
       'blue':'#176B87',
       'light-blue':'#3a7ca5',
@@ -15,7 +20,7 @@ export default {
       'lightest-blue':'#EEF5FF',
       'dark':'#151f27',
       'grey':'#202e39',
-      'light-grey':'#768491',
+      'light-grey':'#687682',
       'white':'#f0f0fa',
       'lght-blue':'#0084ff',
       'red':'#d13030',

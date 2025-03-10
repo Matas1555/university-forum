@@ -40,24 +40,24 @@ function LogIn({ isOpen, setIsOpen }) {
             <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
                 <DialogPanel
                 transition
-                className="w-full max-w-md rounded-xl shadow-2xl bg-lightest-blue border-2 border-blue bg-white/5 p-6 backdrop-blur-2xl duration-200 ease-out data-[closed]:transform-[scale(95%)] data-[closed]:opacity-0">
+                className="w-full max-w-md rounded-xl shadow-2xl bg-dark border-2 border-white bg-white/5 p-6 backdrop-blur-2xl duration-200 ease-out data-[closed]:transform-[scale(95%)] data-[closed]:opacity-0">
                 {/* <DialogPanel className="max-w-lg space-y-4 rounded-md border-2 backdrop-blur-2xl border-blue bg-lightest-blue p-12"> */}
-                    <DialogTitle className="font-bold text-blue mb-3" style={{ fontSize:"1.5em"}}>Sveiki sugrįže</DialogTitle>
+                    <DialogTitle className="font-bold text-white mb-3" style={{ fontSize:"1.5em"}}>Sveiki sugrįže</DialogTitle>
                     <Field className="mb-4">
-                        <Label className="text-blue mb-3" style={{ fontSize:"1.2em"}}>El. Paštas</Label>
+                        <Label className="text-white mb-3" style={{ fontSize:"1.2em"}}>El. Paštas</Label>
                         <Input type="text" ref={emailRef} name="email" className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg" placeholder="Įveskite el.paštą" />
                     </Field>
 
                     <Field>
-                        <Label className="text-blue mb-3" style={{ fontSize:"1.2em"}}>Slaptažodis</Label>
-                        <Input type="text" ref={passwordRef} name="password" className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg" placeholder="Įveskite slaptąžodį" />
+                        <Label className="text-white mb-3" style={{ fontSize:"1.2em"}}>Slaptažodis</Label>
+                        <Input type="password" ref={passwordRef} name="password" className="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg" placeholder="Įveskite slaptąžodį" />
                     </Field>
 
 
                     <div className="flex gap-4 mt-8">
-                        <button className="pl-4 pr-4 pt-1 pb-2 text-center bg-lightest-blue border-blue rounded-md border-2 border-slate-300 text-blue text-xl hover:bg-blue hover:text-lightest-blue duration-300 transition-colors"  
+                        <button className="px-2 py-1 text-center font-light items-center bg-lght-blue ring-lght-blue rounded-md ring-1 border-slate-300 text-white text-xl hover:bg-grey duration-300 transition-colors"  
                             onClick={() => submit()}>Prisijungti</button>
-                        <button className="pl-4 pr-4 pt-1 pb-2 text-center bg- border-blue rounded-md border-2 border-slate-300 text-blue text-xl hover:bg-blue hover:text-lightest-blue duration-300 transition-colors" 
+                        <button className="px-2 py-1 text-center font-light rounded-md border-slate-300 text-white text-xl hover:bg-grey ring-1 ring-white hover:border-grey hover:text-lightest-blue duration-300 transition-colors" 
                             onClick={() => setIsOpen(false)}>Atšaukti</button>
                     </div>
                 </DialogPanel>
