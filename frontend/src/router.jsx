@@ -7,6 +7,7 @@ import Post from "./pages/post";
 import Posts from "./pages/posts";
 import University from "./pages/university";
 import DefaultLayout from "./components/layout/defaultLayout";
+import CreatePost from "./pages/createPost";
 
 const router = createBrowserRouter ([
     {
@@ -22,6 +23,11 @@ const router = createBrowserRouter ([
             {
                 path: '/profile',
                 element: <Profile/>,
+                errorElement: <div>Error loading profile page!</div>,
+            },
+            {
+                path: '/createPost',
+                element: <CreatePost/>,
                 errorElement: <div>Error loading profile page!</div>,
             },
             {

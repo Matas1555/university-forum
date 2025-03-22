@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import RichTextEditor from "../richTextEditor/RichTextEditor";
 
 const Comment = ({ comment, level = 1, replyingTo = null }) => {
   const maxLevel = 3;
@@ -24,7 +25,7 @@ const Comment = ({ comment, level = 1, replyingTo = null }) => {
     : Math.min(level * 4, 12); // sm screens: 16px per level (max 48px)
   
     return (
-      <div className={` bg-dark border-l-[1px] border-light-grey pl-5`}
+      <div className={`bg-dark border-light-grey pl-5`}
       style={{ marginLeft: `${marginLeft}px` }}>
         {level > 1 && replyingTo && (
         <div className="inline-flex flex-row items-center text-light-grey -ml-4 mb-1 rounded-md p-1 pr-2 box-border">
@@ -53,16 +54,17 @@ const Comment = ({ comment, level = 1, replyingTo = null }) => {
         <div className="flex flex-row items-center gap-2 w-full">
           {isExpanded ? (
               <div className="relative w-full mt-1">
-              <textarea
-                className="bg-grey ring-1 ring-light-grey text-white rounded-md p-3 w-full text-sm font:ring-lght-blue resize-none h-56 pr-16"
-                value={newComment}
-                onChange={(e) => setComment(e.target.value)}
-                onFocus={() => setIsExpanded(true)}
-                onBlur={() => setIsExpanded(false)}
-              />
+
+              <div className="ring-1 rounded-md ring-light-grey">
+                  <RichTextEditor 
+                  value={newComment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Tekstas"
+                  />
+              </div>
             
               <button
-                className="absolute bottom-3 right-1 bg-lght-blue text-white px-3 py-1 rounded-md text-sm hover:bg-dark-blue transition"
+                className="absolute bottom-3 right-2 bg-lght-blue text-white px-3 py-1 rounded-md text-sm hover:bg-dark-blue transition"
               >
                 Komentuoti
               </button>

@@ -17,11 +17,18 @@ const NavButtons = ({ openLoginDialog}) => {
     };
 
     const handleProfileMenuOptionClick = (text) => {
-        if(text == "Atsijungti")
+        if(text === "Atsijungti")
         {
             onLogout();
+        } else if (text === "Profilis") {
+            navigate('/profile');
+            console.log("taip");
         }
     };
+
+    const handleCreatePost = () =>{
+        navigate('/createPost');
+    }
 
     useEffect(() => {
         const handleClickOutside = (event) =>{
@@ -56,7 +63,7 @@ const NavButtons = ({ openLoginDialog}) => {
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         </svg>
-                        <button className="">
+                        <button className="" onClick={handleCreatePost}>
                             Kurti įraša
                         </button>
                     </div>

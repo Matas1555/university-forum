@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import API from "../utils/API";
 import profilePicture from "../assets/profile-default-icon.png";
 import Comment from "../components/lists/commentList";
+import RichTextEditor from "../components/richTextEditor/RichTextEditor";
 
 const categoryColors = {
     'Bendros diskusijos': { text: 'text-lght-blue', ring: 'ring-lght-blue' },
@@ -84,19 +85,17 @@ const Post = () => {
                             </div>
                             <div className="flex flex-row items-center gap-2 w-full">
                             {isExpanded ? (
-                                <div className="relative w-full">
-                                <textarea
-                                  className="bg-grey ring-1 ring-light-grey rounded-md p-3 w-full text-sm font:ring-lght-blue resize-none h-56 pr-16"
-                                  placeholder="Palikite komentarą"
-                                  value={comment}
-                                  onChange={(e) => setComment(e.target.value)}
-                                  onFocus={() => setIsExpanded(true)}
-                                  onBlur={() => setIsExpanded(false)}
-                                />
-                                
+                              <div className="relative w-full">
+                                <div className="ring-1 rounded-md ring-light-grey">
+                                    <RichTextEditor 
+                                    value={comment}
+                                    onChange={(e) => setComment(e.target.value)}
+                                    placeholder="Tekstas"
+                                    />
+                                </div>
 
                                 <button
-                                  className="absolute bottom-3 right-1 bg-lght-blue text-white px-3 py-1 rounded-md text-sm hover:bg-dark-blue transition"
+                                  className="absolute bottom-3 right-2 bg-lght-blue text-white px-3 py-1 rounded-md text-sm hover:bg-dark-blue transition"
                                 >
                                   Komentuoti
                                 </button>
@@ -120,7 +119,7 @@ const Post = () => {
                         </div>
                     </div>
                 </div>
-                <div className="mt-2">
+                <div className="mt-4">
                 {post.comments && post.comments.length > 0 ? (
                     post.comments.map((comment, index) => <Comment key={index} comment={comment} level={1} />)
                     ) : (
