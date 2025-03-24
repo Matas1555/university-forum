@@ -26,7 +26,8 @@ export default {
       'red':'#d13030',
       'green':'#27cf15',
       'purple':'#9416d9',
-      'orange':'#f08e1f'
+      'orange':'#f08e1f',
+      'yellow':'#e6df19'
 
     },
     fontFamily: {

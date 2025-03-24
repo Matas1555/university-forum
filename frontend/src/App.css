@@ -9,3 +9,18 @@ body{
     scroll-behavior: smooth;
     transition: all 0.1s;
 }
+
+.scrollbar-custom::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: #2d2d2d;
+    border-radius: 10px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background-color: #176B87; 
+    border-radius: 10px;
+    border: 2px solid transparent;
+  }
