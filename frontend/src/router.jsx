@@ -5,56 +5,83 @@ import Home from "./pages/home";
 import Profile from "./pages/profile";
 import Post from "./pages/post";
 import Posts from "./pages/posts";
-import University from "./pages/university";
+import University from "./pages/university/university";
 import DefaultLayout from "./components/layout/defaultLayout";
 import CreatePost from "./pages/createPost";
+import ForumsList from "./pages/forums/forumsList";
 
-const router = createBrowserRouter ([
+const router = createBrowserRouter([
     {
         path: '/',
         element: <DefaultLayout/>,
         children: [
             {
-
-                path: '/home',
+                path: '/pagrindinis',
                 element: <Home/>,
-                errorElement: <div>Error loading home page!</div>,
+            },
+            // Pagrindinė forumų struktūra su dinaminiais įrašais
+            {
+                path: '/forumai',
+                element: <ForumsList/>,
             },
             {
-                path: '/profile',
-                element: <Profile/>,
-                errorElement: <div>Error loading profile page!</div>,
-            },
-            {
-                path: '/createPost',
-                element: <CreatePost/>,
-                errorElement: <div>Error loading profile page!</div>,
-            },
-            {
-                path: '/post',
-                element: <Post/>,
-                errorElement: <div>Error loading the post!</div>,
-            },
-            {
-                path: '/posts',
+                path: '/forumai/:forumType',
                 element: <Posts/>,
-                errorElement: <div>Error loading posts!</div>,
             },
             {
-                path: '/university',
+                path: '/forumai/universitetai/:universityId',
                 element: <University/>,
-                errorElement: <div>Error loading universities!</div>,
             },
             {
-                path: '/register',
+                path: '/forumai/universitetai/:universityId/irasai',
+                element: <Posts/>,
+            },
+            {
+                path: '/forumai/universitetai/:universityId/programos/:programId/irasai',
+                element: <Posts/>,
+            },
+            {
+                path: '/forumai/kategorijos/:categoryId',
+                element: <Posts/>,
+            },
+            // Single post view
+            {
+                path: '/forumai/universitetai/:universityId/irasai/:postId',
+                element: <Post/>,
+            },
+            // Original routes
+            {
+                path: '/forumai/universitetai/:universityId/programos/:programId/irasai/:postId',
+                element: <Post/>,
+            },
+            {
+                path: '/forumai/kategorijos/:categoryId/irasai/:postId',
+                element: <Post/>,
+            },
+            {
+                path: '/forumai/:forumType/irasai/:postId',
+                element: <Post/>,
+            },
+            // Originalūs maršrutai
+            {
+                path: '/profilis',
+                element: <Profile/>,
+            },
+            {
+                path: '/kurti-irasa',
+                element: <CreatePost/>,
+            },
+            {
+                path: '/universitetas',
+                element: <University/>,
+            },
+            {
+                path: '/registracija',
                 element: <Register/>,
-                errorElement: <div>Error loading register page!</div>,
             },
             {
-                
                 path: '/',
                 element: <Home/>,
-                errorElement: <div>Error loading home page!</div>,
             },
         ],
     },

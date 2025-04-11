@@ -13,7 +13,7 @@ const NavBar = () => {
   return (
     <header className="bg-dark top-0 flex-col w-full z-[20] flex p-5">
       <div className="flex flex-row justify-between ">  
-        <NavLink style={{ fontWeight:600, fontSize:"1.5em"}} className="text-white hover:text-lght-blue transition: duration-150 ease-linear" to='/home'>UniForum</NavLink>  
+        <NavLink style={{ fontWeight:600, fontSize:"1.5em"}} className="text-white hover:text-lght-blue transition: duration-150 ease-linear" to='/pagrindinis'>UniForum</NavLink>  
         <NavLinks></NavLinks>
       </div>
       

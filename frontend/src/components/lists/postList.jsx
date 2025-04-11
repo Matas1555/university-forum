@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 
 const categoryColors = {
   'Bendros diskusijos': { text: 'text-lght-blue', ring: 'ring-lght-blue' },
@@ -9,9 +9,32 @@ const categoryColors = {
 
 const PostList = ({ posts }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { forumType, forumId, forumName } = location.state || {};
 
-  const handleOpenPost = (post) =>{
-    navigate('/post', {state: { post } });
+  const handleOpenPost = (post) => {
+    let postUrl = '/forumai';
+    
+    // Construct URL based on forum context
+    if (forumType === 'university' && forumId) {
+      postUrl = `/forumai/universitetai/${forumId}/irasai/${post.id}`;
+    } else if (forumType === 'program' && forumId) {
+      postUrl = `/forumai/universitetai/${forumId}/programos/irasai/${post.id}`;
+    } else if (forumType === 'category' && forumId) {
+      postUrl = `/forumai/kategorijos/${forumId}/irasai/${post.id}`;
+    } else {
+      // Default to general forum post
+      postUrl = `/forumai/irasai/${post.id}`;
+    }
+
+    navigate(postUrl, { 
+      state: { 
+        post,
+        forumType,
+        forumId,
+        forumName // Pass the forum name to be used in breadcrumb
+      } 
+    });
   }
 
   return (

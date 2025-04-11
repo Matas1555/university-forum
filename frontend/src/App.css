@@ -20,7 +20,7 @@ body{
   }
   
   .scrollbar-custom::-webkit-scrollbar-thumb {
-    background-color: #176B87; 
+    background-color: #0084ff; 
     border-radius: 10px;
     border: 2px solid transparent;
   }

@@ -1,0 +1,35 @@
+"filename", "language", "JavaScript", "JavaScript JSX", "CSS", "HTML", "XML", "comment", "blank", "total"
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\App.css", "CSS", 0, 0, 22, 0, 0, 0, 4, 26
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\App.jsx", "JavaScript JSX", 0, 8, 0, 0, 0, 0, 3, 11
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\assets\Vite + React.html", "HTML", 0, 0, 0, 1710, 0, 1, 449, 2160
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\assets\Vite + React_files\main.jsx", "JavaScript JSX", 0, 23, 0, 0, 0, 1, 1, 25
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\assets\campus.svg", "XML", 0, 0, 0, 0, 2929, 1, 16, 2946
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\components\footer\footer.jsx", "JavaScript JSX", 0, 8, 0, 0, 0, 0, 2, 10
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\components\icons.jsx", "JavaScript JSX", 0, 23, 0, 0, 0, 0, 5, 28
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\components\layout\defaultLayout.jsx", "JavaScript JSX", 0, 15, 0, 0, 0, 4, 2, 21
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\components\lists\commentList.jsx", "JavaScript JSX", 0, 80, 0, 0, 0, 4, 11, 95
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\components\lists\discussionList.jsx", "JavaScript JSX", 0, 64, 0, 0, 0, 0, 3, 67
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\components\lists\postList.jsx", "JavaScript JSX", 0, 81, 0, 0, 0, 0, 6, 87
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\components\lists\ratingsList.jsx", "JavaScript JSX", 0, 54, 0, 0, 0, 0, 3, 57
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\components\lists\universityList.jsx", "JavaScript JSX", 0, 71, 0, 0, 0, 0, 5, 76
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\components\navbar\navLinks.jsx", "JavaScript JSX", 0, 142, 0, 0, 0, 6, 20, 168
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\components\navbar\navbar.jsx", "JavaScript JSX", 0, 72, 0, 0, 0, 0, 8, 80
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\components\richTextEditor\RichTextEditor.jsx", "JavaScript JSX", 0, 136, 0, 0, 0, 9, 12, 157
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\components\starRating.jsx", "JavaScript JSX", 0, 32, 0, 0, 0, 1, 4, 37
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\context\contextProvider.jsx", "JavaScript JSX", 0, 58, 0, 0, 0, 0, 7, 65
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\index.css", "CSS", 0, 0, 7, 0, 0, 0, 2, 9
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\main.jsx", "JavaScript JSX", 0, 14, 0, 0, 0, 0, 2, 16
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\pages\createPost.jsx", "JavaScript JSX", 0, 195, 0, 0, 0, 2, 25, 222
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\pages\home.jsx", "JavaScript JSX", 0, 226, 0, 0, 0, 0, 20, 246
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\pages\login.jsx", "JavaScript JSX", 0, 58, 0, 0, 0, 1, 11, 70
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\pages\post.jsx", "JavaScript JSX", 0, 126, 0, 0, 0, 0, 9, 135
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\pages\posts.jsx", "JavaScript JSX", 0, 213, 0, 0, 0, 0, 16, 229
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\pages\profile.jsx", "JavaScript JSX", 0, 22, 0, 0, 0, 0, 3, 25
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\pages\register.jsx", "JavaScript JSX", 0, 233, 0, 0, 0, 1, 34, 268
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\pages\university\desktopUniversity.jsx", "JavaScript JSX", 0, 433, 0, 0, 0, 1, 41, 475
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\pages\university\mobileUniversity.jsx", "JavaScript JSX", 0, 327, 0, 0, 0, 1, 36, 364
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\pages\university\university.jsx", "JavaScript JSX", 0, 15, 0, 0, 0, 0, 6, 21
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\router.jsx", "JavaScript JSX", 0, 59, 0, 0, 0, 0, 4, 63
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\utils\API.js", "JavaScript", 45, 0, 0, 0, 0, 2, 10, 57
+"d:\Documents\KTU\7 semestras\Informaciniu sistemu kurimas karkasais\university-forum\frontend\src\utils\mockData.js", "JavaScript", 265, 0, 0, 0, 0, 1, 0, 266
+"Total", "-", 310, 2788, 29, 1710, 2929, 36, 780, 8582

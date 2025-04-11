@@ -43,7 +43,7 @@ const NavButtons = ({ openLoginDialog}) => {
             setUser({});
             setToken();
             setRefreshToken();
-            navigate('/home');
+            navigate('/pagrindinis');
         } catch (error) {
             console.error("Logout failed", error.response?.data || error.message);
         }

@@ -3,6 +3,12 @@ import React from 'react';
 const StarRating = ({ rating, width }) => {
   // Round the rating to the nearest whole number
   const roundedRating = Math.round(rating);
+  let textSize = "md";
+
+  if(width > 5)
+  {
+    textSize = "4xl"
+  }
   
   return (
     <div className="flex items-center">
@@ -11,10 +17,10 @@ const StarRating = ({ rating, width }) => {
           key={index} 
           xmlns="http://www.w3.org/2000/svg" 
           viewBox="0 0 24 24" 
-          fill={index < roundedRating ? "currentColor" : "none"}
+          fill={index < roundedRating ? "currentColor" : "#687682"}
           stroke="currentColor"
           strokeWidth={1.5}
-          className={`w-${width} h-${width} ${index < roundedRating ? 'text-yellow' : 'text-dark'}`}
+          className={`w-${width} h-${width} ${index < roundedRating ? 'text-yellow' : 'text-light-grey'}`}
         >
           <path 
             fillRule="evenodd" 
@@ -23,8 +29,7 @@ const StarRating = ({ rating, width }) => {
           />
         </svg>
       ))}
-      {/* Optional: Display the numeric rating */}
-      <span className="ml-2 text-white">{rating.toFixed(1)}</span>
+      <span className={`ml-2 text-light-grey text-${textSize}`}>{rating.toFixed(1)}</span>
     </div>
   );
 };
