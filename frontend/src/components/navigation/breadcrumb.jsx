@@ -1,9 +1,34 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Breadcrumb = ({ items }) => {
+  const navigate = useNavigate();
+
+  // Remove duplicate items (items with the same label)
+  const uniqueItems = items ? items.filter((item, index, self) => 
+    index === self.findIndex(t => t.label === item.label)
+  ) : [];
+
+  const handleBreadcrumbClick = (path, index) => {
+    // Get the breadcrumb up to the clicked index
+    const newBreadcrumb = uniqueItems.slice(0, index + 1);
+    
+    // Navigate to the path with the truncated breadcrumb
+    navigate(path, { 
+      state: { 
+        breadcrumb: newBreadcrumb,
+        // Preserve any relevant IDs from the current breadcrumb items
+        ...(uniqueItems[index].universityId && { forumId: uniqueItems[index].universityId }),
+        ...(uniqueItems[index].facultyId && { facultyId: uniqueItems[index].facultyId }),
+        ...(uniqueItems[index].programId && { programId: uniqueItems[index].programId }),
+        // Preserve the forum name
+        forumName: uniqueItems[index].label
+      } 
+    });
+  };
+
   return (
-    <nav className="flex py-4" aria-label="Breadcrumb">
+    <nav className="flex py-4 ml-2" aria-label="Breadcrumb">
       <ol className="flex flex-wrap items-center space-x-1 md:space-x-2">
         <li className="inline-flex items-center">
           <Link 
@@ -18,21 +43,21 @@ const Breadcrumb = ({ items }) => {
           </Link>
         </li>
         
-        {items.map((item, index) => (
+        {uniqueItems.map((item, index) => (
           <li key={index}>
             <div className="flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-light-grey">
                 <path fillRule="evenodd" d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z" clipRule="evenodd" />
               </svg>
-              {index === items.length - 1 ? (
+              {index === uniqueItems.length - 1 ? (
                 <span className="ml-1 text-sm font-medium text-white md:ml-2">{item.label}</span>
               ) : (
-                <Link 
-                  to={item.path} 
-                  className="ml-1 text-sm font-medium text-lght-blue hover:text-white md:ml-2"
+                <button
+                  onClick={() => handleBreadcrumbClick(item.path, index)}
+                  className="ml-1 text-sm font-medium text-lght-blue hover:text-white md:ml-2 border-none bg-transparent cursor-pointer"
                 >
                   {item.label}
-                </Link>
+                </button>
               )}
             </div>
           </li>

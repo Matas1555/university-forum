@@ -35,6 +35,8 @@ export default {
       iter: ["'Inter'", "sans-serif"],
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms'),
+  ],
 }
 

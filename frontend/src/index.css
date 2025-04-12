@@ -7,3 +7,47 @@
 body {
     @apply font-iter;
 }
+
+/* Custom scrollbar styles */
+@layer utilities {
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-grey) var(--color-dark);
+  }
+  
+  /* Chrome, Edge, and Safari */
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  *::-webkit-scrollbar-track {
+    background: var(--color-dark);
+    border-radius: 5px;
+  }
+  
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--color-lght-blue);
+    border-radius: 14px;
+  }
+  
+  /* Specifically style ListboxOptions scrollbars */
+  [role="listbox"]::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  [role="listbox"]::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  [role="listbox"]::-webkit-scrollbar-thumb {
+    background-color: var(--color-lght-blue);
+    border-radius: 10px;
+  }
+  
+  :root {
+    --color-lght-blue: #0084ff;
+    --color-dark: #151f27;
+  }
+}

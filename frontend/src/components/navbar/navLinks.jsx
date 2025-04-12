@@ -5,7 +5,7 @@ import Register from "../../pages/register";
 import { useStateContext } from "../../context/contextProvider";
 import API from "../../utils/API";
 import profilePicture from "../../assets/profile-default-icon.png";
-
+import { MobileMegaMenu } from "./megaMenu";
 
 const NavButtons = ({ openLoginDialog}) => {
     const {user, token, setUser, setToken, setRefreshToken} = useStateContext();
@@ -89,13 +89,6 @@ const NavButtons = ({ openLoginDialog}) => {
                         </div>
                     </div>
                 </div>
-
-                    {/* <button 
-                        className="pl-4 pr-4 pt-1 pb-2 text-center bg-lightest-blue border-blue rounded-md border-2 border-slate-300 text-blue text-xl hover:bg-blue hover:text-lightest-blue duration-300 transition-colors" 
-                        onClick={onLogout}
-                        >
-                        Atsijungti
-                    </button> */}
                 </>
             ) : (
                 <>
@@ -105,7 +98,7 @@ const NavButtons = ({ openLoginDialog}) => {
                         >
                         Prisijungti
                     </button>
-                    <NavLink to='/register'
+                    <NavLink to='/registracija'
                         className="pl-2 pr-2 pt-1 pb-1 text-center bg-lght-blue border-lght-blue rounded-md border-2 border-slate-300 text-white text-lg hover:bg-dark hover:text-lght-blue duration-300 transition-colors" 
                         >
                         Registruotis
@@ -160,6 +153,8 @@ const NavLinks = () => {
                 </div>
             </nav>
 
+            {/* Mobile mega menu */}
+            <MobileMegaMenu isOpen={isOpen} />
         </>
     );
 }

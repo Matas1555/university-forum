@@ -19,7 +19,6 @@ const router = createBrowserRouter([
                 path: '/pagrindinis',
                 element: <Home/>,
             },
-            // Pagrindinė forumų struktūra su dinaminiais įrašais
             {
                 path: '/forumai',
                 element: <ForumsList/>,
@@ -37,6 +36,14 @@ const router = createBrowserRouter([
                 element: <Posts/>,
             },
             {
+                path: '/forumai/universitetai/:universityId/fakultetai/:facultyId/irasai',
+                element: <Posts/>,
+            },
+            {
+                path: '/forumai/universitetai/:universityId/fakultetai/:facultyId/programos/:programId/irasai',
+                element: <Posts/>,
+            },
+            {
                 path: '/forumai/universitetai/:universityId/programos/:programId/irasai',
                 element: <Posts/>,
             },
@@ -44,12 +51,18 @@ const router = createBrowserRouter([
                 path: '/forumai/kategorijos/:categoryId',
                 element: <Posts/>,
             },
-            // Single post view
             {
                 path: '/forumai/universitetai/:universityId/irasai/:postId',
                 element: <Post/>,
             },
-            // Original routes
+            {
+                path: '/forumai/universitetai/:universityId/fakultetai/:facultyId/irasai/:postId',
+                element: <Post/>,
+            },
+            {
+                path: '/forumai/universitetai/:universityId/fakultetai/:facultyId/programos/:programId/irasai/:postId',
+                element: <Post/>,
+            },
             {
                 path: '/forumai/universitetai/:universityId/programos/:programId/irasai/:postId',
                 element: <Post/>,

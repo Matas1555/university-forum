@@ -30,28 +30,44 @@ const discussions = [
 
 const Home = () => {
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState('');
+  const [activeSection, setActiveSection] = useState('universitetai');
   const [loading, setLoading] = useState(false);
   const [contentVisible, setContentVisible] = useState(true);
+  const [sortClicked, setOpenSort] = useState(false);
+  const [filtersClicked, setOpenFilters] = useState(false);
+  const [sortText, setSortText] = useState("Rikiuoti pagal");
   
   const showUniversitetai = () => {
-    setLoading(true);
-    setContentVisible(false);
-    setTimeout(() => {
-      setActiveSection('universitetai');
-      setLoading(false);
-      setContentVisible(true);
-    }, 1000);
+    if (activeSection !== 'universitetai') {
+      setLoading(true);
+      setContentVisible(false);
+      setTimeout(() => {
+        setActiveSection('universitetai');
+        setLoading(false);
+        setContentVisible(true);
+      }, 1000);
+    }
   };
   
   const showKategorijos = () => {
-    setLoading(true);
-    setContentVisible(false);
-    setTimeout(() => {
-      setActiveSection('kategorijos');
-      setLoading(false);
-      setContentVisible(true);
-    }, 1000);
+    if (activeSection !== 'kategorijos') {
+      setLoading(true);
+      setContentVisible(false);
+      setTimeout(() => {
+        setActiveSection('kategorijos');
+        setLoading(false);
+        setContentVisible(true);
+      }, 1000);
+    }
+  };
+
+  const handleSortClick = () => {
+    setOpenSort(!sortClicked);
+  };
+
+  const handleSortOptionClick = (text) => {
+    setSortText(text);
+    setOpenSort(!sortClicked);
   };
   
   const handleOpenForum = (universityId, universityName) => {
@@ -67,6 +83,7 @@ const Home = () => {
         ]
       } 
     });
+    window.scrollTo(0, 0);
   }
 
   const handleOpenUniversity = (universityId, universityName) => {
@@ -104,8 +121,6 @@ const Home = () => {
         />
       </div>
 
-
-
       <div className="w-3/4 md:w-8/12">
 
         <div className="w-full mb-16 bg-grey rounded-md hidden md:block lg:pb-0">
@@ -115,7 +130,7 @@ const Home = () => {
               <p className="text-light-grey mb-10">UniForum tai internetinis forumas skirtas busimiems ir esamiems studentams, dėstytojams ir universiteto darbuotojamas laisva forma diskutuoti apie įvairias temas susijas su universiteto gyvenimu.</p>
               <div className="flex flex-row gap-5 items-end">
                 <p className="text-white font-extrabold text-lg lg:mt-10 lg:mb-1">Suraskite universitetą kuris jus domina</p>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-10 text-lght-blue">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-10 text-lght-blue animate-bounce">
                   <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-.53 14.03a.75.75 0 0 0 1.06 0l3-3a.75.75 0 1 0-1.06-1.06l-1.72 1.72V8.25a.75.75 0 0 0-1.5 0v5.69l-1.72-1.72a.75.75 0 0 0-1.06 1.06l3 3Z" clipRule="evenodd" />
                 </svg>
               </div>
@@ -125,9 +140,9 @@ const Home = () => {
           </div>
         </div>
 
-        <div className="flex flex-row text-white font-thin text-2xl text-center justify-center items-center italic mt-20 m-auto w-1/2">
+        <div className="flex flex-row text-white  justify-center items-center italic mt-20 m-auto w-1/2">
           <img src={drawnArrow} className="size-10 invert rotate-[3.142rad] -translate-x-10 translate-y-14"/>
-          <h1 className="-rotate-12">Paspausk!</h1>
+          <h1 className="-rotate-12 font-thin text-2xl text-center">Paspausk!</h1>
           <img src={drawnArrow} className="size-10 invert rotate-90 translate-x-10 translate-y-14"/>
         </div>
 
@@ -360,6 +375,75 @@ const Home = () => {
           )}
 
           {!loading && activeSection === 'kategorijos' && contentVisible && (
+            <>
+            <div className="relative flex justify-end w-full">
+              <div className="mr-3 md:text-xs">
+                  <button 
+                      type="button" 
+                      className="inline-flex justify-center gap-x-1.5 rounded-md bg-grey px-3 py-2 text-sm font-medium text-white ring-1 ring-light-grey ring-inset hover:bg-gray-50 focus:ring-lght-blue focus:text-lght-blue" 
+                      id="menu-button" 
+                      aria-expanded="true" 
+                      aria-haspopup="true" 
+                      onClick={handleSortClick}
+                  >
+                      {sortText}
+                      <svg className="-mr-1 size-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
+                          <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+                      </svg>
+                  </button>
+              </div>
+              <div 
+                  className={`absolute top-full right-0 z-10 mt-2 mr-3 origin-top-right rounded-md bg-grey ring-1 shadow-lg ring-light-grey focus:outline-hidden ${
+                      sortClicked ? "" : "hidden"
+                  }`} 
+                  role="menu" 
+                  aria-orientation="vertical" 
+                  aria-labelledby="menu-button" 
+                  tabIndex="-1"
+              >
+                  <div className="" role="none">
+                      <a 
+                          href="#" 
+                          className="block px-4 py-2 text-sm text-white m-1 rounded-md ring-1 ring-grey hover:text-lght-blue hover:ring-lght-blue transition: duration-100 ease-linear" 
+                          role="menuitem" 
+                          tabIndex="-1" 
+                          id="menu-item-0" 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleSortOptionClick("Įvertinimus");
+                          }}
+                      >
+                          Įvertinimus
+                      </a>
+                      <a 
+                          href="#" 
+                          className="block px-4 py-2 text-sm text-white m-1 rounded-md ring-1 ring-grey hover:text-lght-blue hover:ring-lght-blue transition: duration-100 ease-linear" 
+                          role="menuitem" 
+                          tabIndex="-1" 
+                          id="menu-item-1" 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleSortOptionClick("Nuo A-Z");
+                          }}
+                      >
+                          Nuo A-Z
+                      </a>
+                      <a 
+                          href="#" 
+                          className="block px-4 py-2 text-sm text-white m-1 rounded-md ring-1 ring-grey hover:text-lght-blue hover:ring-lght-blue transition: duration-100 ease-linear" 
+                          role="menuitem" 
+                          tabIndex="-1" 
+                          id="menu-item-2" 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleSortOptionClick("Nuo Z-A");
+                          }}
+                      >
+                          Nuo Z-A
+                      </a>
+                  </div>
+              </div>
+          </div>
           <div className="grid grid-cols-1 gap-6 mt-5 sm:grid-cols-2 md:grid-cols-3 md:gap-8 animate-fade-in-up">
             <div 
               className="bg-grey rounded-md text-white overflow-hidden hover:bg-dark transition-colors duration-300 cursor-pointer group"
@@ -454,6 +538,7 @@ const Home = () => {
               </div>
             </div>
           </div>
+          </>
         )}
         </div>
       </div>
