@@ -321,8 +321,8 @@ const Posts = () => {
                                         <div className="m-3">
                                             <p className="text-white font-medium text-sm">{faculty.postCount}</p>
                                             <p className="text-light-grey font-medium">Įrašų</p>
-                                        </div>
-                                    </div>
+                        </div>
+                    </div>
                                 ))}
                             </div>
                         </div>
@@ -375,7 +375,7 @@ const Posts = () => {
                                             <p className="text-white font-medium text-sm">{program.postCount}</p>
                                             <p className="text-light-grey font-medium">Įrašų</p>
                                         </div>
-                                    </div>
+                                </div>
                                 ))}
                             </div>
                         </div>
@@ -389,7 +389,7 @@ const Posts = () => {
                                 : forumName}
                         </h1>
                         <div className=" border-light-grey"></div>
-                    </div>
+                            </div>
 
                     {/* Render the breadcrumb if available */}
                     {currentBreadcrumb && (

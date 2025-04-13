@@ -9,6 +9,8 @@ import University from "./pages/university/university";
 import DefaultLayout from "./components/layout/defaultLayout";
 import CreatePost from "./pages/createPost";
 import ForumsList from "./pages/forums/forumsList";
+import LecturersPage from "./pages/lecturers";
+import LecturerPage from "./pages/lecturer";
 
 const router = createBrowserRouter([
     {
@@ -95,6 +97,14 @@ const router = createBrowserRouter([
             {
                 path: '/',
                 element: <Home/>,
+            },
+            {
+                path: '/destytojai',
+                element: <LecturersPage/>,
+            },
+            {
+                path: '/destytojai/:id',
+                element: <LecturerPage/>,
             },
         ],
     },

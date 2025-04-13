@@ -24,47 +24,28 @@ const DesktopUniversity = () => {
 
     const topRatingsPrograms = [
         {
-            program: "Programų sistemos",
-            faculty: "Informatikos fakultetas",
-            rating: 5
+            first: "Programų sistemos",
+            second: "Informatikos fakultetas",
+            rating: 5,
+            reviewCount: 10
         },
         {
-            program: "Dirbtinis intelektas",
-            faculty: "Cheminės technologijos fakultetas",
-            rating: 2.2
+            first: "Dirbtinis intelektas",
+            second: "Cheminės technologijos fakultetas",
+            rating: 2.2,
+            reviewCount: 5
         },
         {
-            program: "Informatika",
-            faculty: "Matematikos ir gamtos fakultetas",
-            rating: 3.6
+            first: "Informatika",
+            second: "Matematikos ir gamtos fakultetas",
+            rating: 3.6,
+            reviewCount: 3
         },
         {
-            program: "Informatikos inžinerija",
-            faculty: "Ekonomikos ir verslo fakultetas",
-            rating: 1
-        }
-    ]
-
-    const topRatingsLecturers = [
-        {
-            program: "Programų sistemos",
-            faculty: "Informatikos fakultetas",
-            rating: 5
-        },
-        {
-            program: "Dirbtinis intelektas",
-            faculty: "Cheminės technologijos fakultetas",
-            rating: 2.2
-        },
-        {
-            program: "Informatika",
-            faculty: "Matematikos ir gamtos fakultetas",
-            rating: 3.6
-        },
-        {
-            program: "Informatikos inžinerija",
-            faculty: "Ekonomikos ir verslo fakultetas",
-            rating: 1
+            first: "Informatikos inžinerija",
+            second: "Ekonomikos ir verslo fakultetas",
+            rating: 1,
+            reviewCount: 1
         }
     ]
     

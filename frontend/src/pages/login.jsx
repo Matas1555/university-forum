@@ -57,12 +57,12 @@ function LogIn({ isOpen, setIsOpen }) {
                             <DialogTitle className="font-bold text-white mb-3" style={{ fontSize:"1.5em"}}>Sveiki sugrįžę</DialogTitle>
                             <Field className="mb-4">
                                 <Label className="text-white mb-3" style={{ fontSize:"1.2em"}}>El. Paštas</Label>
-                                <Input type="text" ref={emailRef} name="email" className="w-full bg-transparent placeholder:text-slate-400 text-black text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg" placeholder="Įveskite el.paštą" />
+                                <Input type="text" ref={emailRef} name="email" className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg" placeholder="Įveskite el.paštą" />
                             </Field>
 
                             <Field>
                                 <Label className="text-white mb-3" style={{ fontSize:"1.2em"}}>Slaptažodis</Label>
-                                <Input type="password" ref={passwordRef} name="password" className="w-full bg-transparent placeholder:text-slate-400 text-black text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg" placeholder="Įveskite slaptąžodį" />
+                                <Input type="password" ref={passwordRef} name="password" className="w-full bg-transparent placeholder:text-slate-400 text-white text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg" placeholder="Įveskite slaptąžodį" />
                             </Field>
                             
                             <div className="flex items-center mt-4">

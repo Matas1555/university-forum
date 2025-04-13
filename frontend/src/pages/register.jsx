@@ -23,7 +23,7 @@ function Register() {
     const [passwordMatch, setPasswordMatch] = useState(true);
     const [passwordStrength, setPasswordStrength] = useState(0);
     const [termsAccepted, setTermsAccepted] = useState(false);
-    
+
     const [universities, setUniversities] = useState([]);
     const [faculties, setFaculties] = useState([]);
     const [programs, setPrograms] = useState([]);
@@ -46,21 +46,21 @@ function Register() {
         setIsLoading(true);
 
         const fetchData = async () => {
-            try {
-                const [universitiesResponse, statusesResponse] = await Promise.all([
-                    API.get('/universities'),
-                    API.get('/statuses'),
-                ]);
-        
-                setUniversities(universitiesResponse.data);
+          try {
+            const [universitiesResponse, statusesResponse] = await Promise.all([
+              API.get('/universities'),
+              API.get('/statuses'),
+            ]);
+      
+            setUniversities(universitiesResponse.data);
                 setAcademicStatuses(statusesResponse.data);
-            } catch (error) {
-                console.error("Error fetching data", error);
-            } finally {
-                setIsLoading(false);
-            }
+          } catch (error) {
+            console.error("Error fetching data", error);
+          } finally {
+            setIsLoading(false);
+          }
         };
-        
+      
         fetchData();
     }, []);
 
@@ -116,18 +116,18 @@ function Register() {
     const handleFacultyChange = (faculty) => {
         setSelectedFaculty(faculty);
         setSelectedProgram(null);
-        
+
         if (faculty) {
             API.get(`/faculties/${faculty.id}/programs`)
                 .then(response => {
-                    setPrograms(response.data);
-                })
+            setPrograms(response.data); 
+        })
                 .catch(error => {
                     console.error("Error fetching programs", error);
                 });
         } else {
             setPrograms([]);
-        }
+    }
     };
 
     const handleFileChange = (event) => {
@@ -196,7 +196,7 @@ function Register() {
             formData.append("isStudent", isStudent);
             
             if (isStudent) {
-                formData.append("university", selectedUniversity ? selectedUniversity.id : "");
+            formData.append("university", selectedUniversity ? selectedUniversity.id : "");
                 formData.append("faculty", selectedFaculty ? selectedFaculty.id : "");
                 formData.append("program", selectedProgram ? selectedProgram.id : "");
                 formData.append("academicStatus", selectedAcademicStatus ? selectedAcademicStatus.id : "");
@@ -204,17 +204,17 @@ function Register() {
             }
             
             formData.append("bio", bioRef.current?.value || "");
-            
+    
             if (avatar) {
                 formData.append("avatar", avatar);
             }
-            
+    
             const response = await API.post("/register", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
-            
+    
             if (response.data.user && response.data.access_token && response.data.refresh_token) {
                 setUser(response.data.user);
                 setToken(response.data.access_token);
@@ -255,8 +255,8 @@ function Register() {
                     placeholder="Įveskite vardą, kurį matys kiti naudotojai" 
                 />
                 <ErrorMessage message={errors.username} />
-            </Field>
-            
+                </Field>
+
             <Field>
                 <Label className="text-white mb-2">Pilnas vardas (neprivaloma)</Label>
                 <Input 
@@ -266,8 +266,8 @@ function Register() {
                     className="w-full bg-dark/20 bg-transparent placeholder:text-light-grey text-white text-sm border border-light-grey rounded-md px-3 py-2 transition duration-300 ease focus:border-lght-blue focus:outline-none hover:border-lght-blue shadow-sm" 
                     placeholder="Įveskite savo pilną vardą" 
                 />
-            </Field>
-            
+                </Field>
+
             <Field>
                 <Label className="text-white mb-2">El. paštas*</Label>
                 <Input 
@@ -278,8 +278,8 @@ function Register() {
                     placeholder="Įveskite el. paštą" 
                 />
                 <ErrorMessage message={errors.email} />
-            </Field>
-            
+                </Field>
+
             <Field>
                 <Label className="text-white mb-2">Slaptažodis*</Label>
                 <div className="relative">
@@ -405,7 +405,7 @@ function Register() {
                             ))}
                         </ListboxOptions>
                     </div>
-                </Listbox>
+                    </Listbox>
                 <ErrorMessage message={errors.university} />
             </Field>
             
@@ -535,7 +535,7 @@ function Register() {
                             ))}
                         </ListboxOptions>
                     </div>
-                </Listbox>
+                    </Listbox>
                 <ErrorMessage message={errors.academicStatus} />
             </Field>
             
@@ -587,8 +587,8 @@ function Register() {
                     className="w-full bg-dark/20 bg-transparent placeholder:text-light-grey text-white text-sm border border-light-grey rounded-md px-3 py-2 min-h-[100px] transition duration-300 ease focus:border-lght-blue focus:outline-none hover:border-lght-blue shadow-sm" 
                     placeholder="Papasakokite apie save..." 
                 />
-            </Field>
-            
+                </Field>
+
             <Field>
                 <Label className="text-white mb-2">Profilio nuotrauka (neprivaloma)</Label>
                 <div className="flex items-center gap-4">
@@ -619,8 +619,8 @@ function Register() {
                         />
                     </div>
                 )}
-            </Field>
-            
+                </Field>
+
             <div className="flex items-center mt-6">
                 <input
                     id="terms"
@@ -658,7 +658,7 @@ function Register() {
                     ) : (
                         "Registruotis"
                     )}
-                </button>
+                    </button>
             </div>
         </div>
     );
