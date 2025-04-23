@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { cleanRichTextContent } from "../../utils/helpers";
 import 'quill/dist/quill.snow.css';
 
 const RichTextEditor = ({ value, onChange, placeholder, backgroundColor = "#202e39" }) => {
@@ -6,6 +7,8 @@ const RichTextEditor = ({ value, onChange, placeholder, backgroundColor = "#202e
   const toolbarRef = useRef(null);
   const quillRef = useRef(null);
   const [editorContent, setEditorContent] = useState(value || '');
+  const [isInitialized, setIsInitialized] = useState(false);
+  const initialLoad = useRef(true);
 
   useEffect(() => {
     if (!editorRef.current || !toolbarRef.current) return;
@@ -27,68 +30,39 @@ const RichTextEditor = ({ value, onChange, placeholder, backgroundColor = "#202e
       // Initialize Quill with a reference to our toolbar container
       quillRef.current = new Quill.default(editorRef.current, {
         modules: {
-          toolbar: {
-            container: toolbarRef.current,
-            handlers: {
-              // Explicitly define toggles for key formatting options
-              bold: function(value) {
-                const format = this.quill.getFormat();
-                this.quill.format('bold', !format.bold);
-              },
-              italic: function(value) {
-                const format = this.quill.getFormat();
-                this.quill.format('italic', !format.italic);
-              },
-              underline: function(value) {
-                const format = this.quill.getFormat();
-                this.quill.format('underline', !format.underline);
-              },
-              strike: function(value) {
-                const format = this.quill.getFormat();
-                this.quill.format('strike', !format.strike);
-              }
-            }
-          }
+          toolbar: toolbarRef.current
         },
         placeholder: placeholder || 'Tekstas...',
         theme: 'snow'
       });
 
-      // Set initial content if any
+      // Set initial content if any or initialize with a clean single paragraph
       if (value) {
-        quillRef.current.root.innerHTML = value;
+        quillRef.current.root.innerHTML = cleanRichTextContent(value);
+      } else {
+        // Start with a single empty paragraph
+        quillRef.current.root.innerHTML = '<p><br></p>';
       }
 
       // Handle text change
       quillRef.current.on('text-change', () => {
-        const content = quillRef.current.root.innerHTML;
+        let content = quillRef.current.root.innerHTML;
+        
+        // Only clean the content once the user starts typing
+        if (!initialLoad.current) {
+          content = cleanRichTextContent(content);
+        }
+        
         setEditorContent(content);
         if (onChange) {
           onChange(content);
         }
+        
+        // After the first change, set initial load to false
+        initialLoad.current = false;
       });
       
-      // Handle toolbar clicks to ensure proper toggling
-      const toolbar = quillRef.current.getModule('toolbar');
-      toolbar.addHandler('bold', function() {
-        const format = quillRef.current.getFormat();
-        quillRef.current.format('bold', !format.bold);
-      });
-      
-      toolbar.addHandler('italic', function() {
-        const format = quillRef.current.getFormat();
-        quillRef.current.format('italic', !format.italic);
-      });
-      
-      toolbar.addHandler('underline', function() {
-        const format = quillRef.current.getFormat();
-        quillRef.current.format('underline', !format.underline);
-      });
-      
-      toolbar.addHandler('strike', function() {
-        const format = quillRef.current.getFormat();
-        quillRef.current.format('strike', !format.strike);
-      });
+      setIsInitialized(true);
     });
 
     // Cleanup on unmount
@@ -101,11 +75,15 @@ const RichTextEditor = ({ value, onChange, placeholder, backgroundColor = "#202e
 
   // Handle content updates from parent component
   useEffect(() => {
-    if (quillRef.current && value !== editorContent) {
-      quillRef.current.root.innerHTML = value;
-      setEditorContent(value);
+    if (quillRef.current && isInitialized && value !== editorContent) {
+      // Clean the content before setting it
+      const cleanedValue = cleanRichTextContent(value || '');
+      
+      // Only update if the editor is initialized and the value has changed from outside
+      quillRef.current.root.innerHTML = cleanedValue;
+      setEditorContent(cleanedValue);
     }
-  }, [value]);
+  }, [value, isInitialized]);
 
   return (
     <div className="rich-text-editor-container">
@@ -197,10 +175,10 @@ const RichTextEditor = ({ value, onChange, placeholder, backgroundColor = "#202e
       {/* Explicitly define the toolbar container */}
       <div ref={toolbarRef} className="quill-toolbar">
         <span className="ql-formats">
-          <button className="ql-bold" data-toggle="true"></button>
-          <button className="ql-italic" data-toggle="true"></button>
-          <button className="ql-underline" data-toggle="true"></button>
-          <button className="ql-strike" data-toggle="true"></button>
+          <button className="ql-bold"></button>
+          <button className="ql-italic"></button>
+          <button className="ql-underline"></button>
+          <button className="ql-strike"></button>
         </span>
         <span className="ql-formats">
           <button className="ql-blockquote"></button>

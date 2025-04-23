@@ -6,9 +6,11 @@ use App\Http\Controllers\UniversityController;
 use \App\Http\Controllers\PostController;
 use \App\Http\Controllers\ProfileController;
 use \App\Http\Controllers\UserController;
+use \App\Http\Controllers\FacultyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\EnsureTokenIsValid;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\LecturerController;
 
 // Public routes (no authentication required)
 Route::controller(AuthController::class)->group(function () {
@@ -22,16 +24,18 @@ Route::controller(AuthController::class)->group(function () {
 Route::get('/posts', [PostController::class, 'getPosts']); // View all posts (guest, user, etc.)
 Route::get('/postsExtended', [PostController::class, 'getPostsExtended']); // View all posts with additional information (guest, user, etc.)
 Route::get('/posts/{id}', [PostController::class, 'showPost']); // View a specific post
+Route::get('/posts/{post_id}/comments', [PostController::class, 'getPostComments']); // View comments for a specific post
 Route::get('/forums/{forum_id}/posts', [PostController::class, 'getPostsByForum']); // View posts by forum
 Route::get('/forums', [PostController::class, 'getForums']); // View forums
 Route::get('/comments', [PostController::class, 'getComments']); // View all comments
 Route::get('/universities', [UniversityController::class, 'getUniversities']); // View universities
+Route::get('/universities/{id}/faculties', [UniversityController::class, 'getFaculties']); // View faculties
+Route::get('/universities/{id}/faculties-with-programs', [UniversityController::class, 'getFacultiesWithPrograms']); // View faculties with nested programs
 Route::get('/statuses', [UniversityController::class, 'getStatuses']); // View statuses
-Route::get('/universities/{id}/programs', [UniversityController::class, 'getPrograms']); // View programs
+Route::get('/faculties/{id}/programs', [FacultyController::class, 'getPrograms']); // View programs
 Route::post('/refresh-token', [AuthController::class, 'refreshToken']); // Refresh token
 Route::get('/users', [\App\Http\Controllers\UserController::class, 'getUsers']); // View users
 Route::get('/categories', [CategoryController::class, 'getCategories']); // View categories
-Route::get('/programs', [\App\Http\Controllers\ProgramsController::class, 'getPrograms']); // View programs
 Route::get('/roles', [\App\Http\Controllers\RolesController::class, 'getRoles']); // View roles
 Route::get('/status', [\App\Http\Controllers\StatusController::class, 'getStatus']); // View status
 Route::get('/profiles', [ProfileController::class, 'getProfiles']); // View profiles
@@ -52,14 +56,20 @@ Route::get('/tables/{table}/columns', function ($table) { //return the columns o
     }
 });
 
-
-
+// Lecturer routes
+Route::get('/lecturers', [LecturerController::class, 'getLecturers']); // Get all lecturers
+Route::get('/lecturers/top-rated', [LecturerController::class, 'getTopRatedLecturers']);
+Route::get('/lecturers/{id}', [LecturerController::class, 'getLecturer']); // Get specific lecturer with reviews
+Route::get('/faculties/{id}/lecturers', [LecturerController::class, 'getLecturersByFaculty']); // Get lecturers by faculty
 
 // Routes that require authentication
 Route::middleware('auth:api')->group(function () {
 
     // User-specific routes
     Route::post('/logout', [AuthController::class, 'logout']); // Logout
+    Route::post('/posts/{post}/like', [PostController::class, 'like']); //Likes a post
+    Route::post('/posts/{post}/dislike', [PostController::class, 'dislike']); //Dislikes a post
+    Route::get('/user/post-interactions', [PostController::class, 'getUserPostInteractions']); // Get user's post interactions
 
     // Post routes
     Route::post('/posts', [PostController::class, 'insertPost']); // Create a new post
@@ -70,6 +80,9 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/comments', [PostController::class, 'insertComment']); // Create a new comment
     Route::put('/comments/{comment}', [PostController::class, 'updateComment']); // Update a comment
     Route::delete('/comments/{comment}', [PostController::class, 'destroyComment']); // Delete a comment
+    Route::post('/comments/{id}/like', [PostController::class, 'likeComment']);
+    Route::post('/comments/{id}/dislike', [PostController::class, 'dislikeComment']);
+    Route::get('/user/comment-interactions', [PostController::class, 'getUserCommentInteractions']);
 
     // Forum routes
     Route::post('/forums', [PostController::class, 'insertForum']); // Create a new forum
@@ -93,5 +106,9 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/categories/{category}', [CategoryController::class, 'updateCategory']);
     Route::post('/categories', [CategoryController::class, 'insertCategory']);
     Route::delete('/categories/{category}', [CategoryController::class, 'deleteCategory']);
+
+    // Lecturer auth routes
+    Route::post('/lecturers/{id}/reviews', [LecturerController::class, 'createReview']); // Create a review for a lecturer
+    Route::put('/lecturers/{id}', [LecturerController::class, 'updateLecturer']); // Update a lecturer
 
 });

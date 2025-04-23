@@ -17,6 +17,7 @@ import StarRating from "../components/starRating/starRating";
 import drawnArrow from "../assets/drawn_Arrow.png";
 import PeopleTalking from "../assets/peopleTalking-removebg-preview.png";
 import PersonRating from "../assets/ratingPerson.png";
+import API from "../utils/API";
 
 
 const discussions = [
@@ -33,9 +34,47 @@ const Home = () => {
   const [activeSection, setActiveSection] = useState('universitetai');
   const [loading, setLoading] = useState(false);
   const [contentVisible, setContentVisible] = useState(true);
-  const [sortClicked, setOpenSort] = useState(false);
-  const [filtersClicked, setOpenFilters] = useState(false);
-  const [sortText, setSortText] = useState("Rikiuoti pagal");
+  const [forums, setForums] = useState([]);
+  const [forumsLoading, setForumsLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchForums = async () => {
+      try {
+        setForumsLoading(true);
+        const response = await API.get('/forums', {
+          params: {
+            entity_type: 'university'
+          }
+        });
+        setForums(response.data);
+      } catch (error) {
+        console.error('Error fetching forums:', error);
+      } finally {
+        setForumsLoading(false);
+      }
+    };
+
+    fetchForums();
+  }, []);
+
+  const getUniversityLogo = (universityName) => {
+    if (!universityName) {
+      return { src: KTUlogo, className: "size-12 m-3 rounded-sm" };
+    }
+    
+    if (universityName.includes('KTU') || universityName.includes('Kaun')) {
+      return { src: KTUlogo, className: "size-12 m-3 rounded-sm" };
+    } else if (universityName.includes('VDU') || universityName.includes('Vytaut')) {
+      return { src: VDUlogo, className: "size-10 m-3 rounded-sm invert" };
+    } else if (universityName.includes('VU') || universityName.includes('Vilnia')) {
+      return { src: VUlogo, className: "size-10 m-3 rounded-sm invert" };
+    } else if (universityName.includes('MRU') || universityName.includes('Mykol')) {
+      return { src: MRUlogo, className: "size-6 w-20 m-3 rounded-sm" };
+    } else {
+      // Default logo
+      return { src: KTUlogo, className: "size-12 m-3 rounded-sm" };
+    }
+  };
   
   const showUniversitetai = () => {
     if (activeSection !== 'universitetai') {
@@ -60,26 +99,19 @@ const Home = () => {
       }, 1000);
     }
   };
-
-  const handleSortClick = () => {
-    setOpenSort(!sortClicked);
-  };
-
-  const handleSortOptionClick = (text) => {
-    setSortText(text);
-    setOpenSort(!sortClicked);
-  };
   
-  const handleOpenForum = (universityId, universityName) => {
-    navigate(`/forumai/universitetai/${universityId}/irasai`, { 
+  const handleOpenForum = (forumId, forumName, universityName, entityId) => {
+    navigate(`/forumai/universitetai/${forumId}/irasai`, { 
       state: { 
         forumType: 'university',
-        forumId: universityId, 
-        forumName: universityName,
+        forumId: forumId, 
+        forumName: forumName,
+        entityType: 'university',
+        entityId: entityId || forumId,
         breadcrumb: [
           { label: 'Forumai', path: '/forumai' },
           { label: 'Universitetai', path: '/pagrindinis' },
-          { label: universityName, path: `/forumai/universitetai/${universityId}/irasai` }
+          { label: universityName || forumName, path: `/forumai/universitetai/${forumId}/irasai` }
         ]
       } 
     });
@@ -101,9 +133,6 @@ const Home = () => {
     window.scrollTo(0, 0);
   }
 
-  const handleClick = () => {
-    setOpenFilters(!filtersClicked);
-  };
 
   return (
     <>
@@ -172,17 +201,17 @@ const Home = () => {
           <div className="my-10">              
             <div 
                 className="bg-grey rounded-md flex flex-row align-middle justify-between border-l-2 border-light-grey items-center hover:bg-dark cursor-pointer transition-colors transition: duration-150 ease-linear" 
-                onClick={() => handleOpenForum(1, 'Kauno technologijos universitetas')}
-            >
-                <div className="flex flex-row items-center">
+                onClick={() => handleOpenForum(1, 'Bendros diskusijos', 'General', null)}
+          >
+            <div className="flex flex-row items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-20 bg-dark m-2 p-4 rounded-md text-light-grey">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
                 </svg>
                 <div>
                   <p className="text-white ml-5 text-2xl font-medium">Bendros diskusijos</p> 
                   <p className="text-light-grey ml-5 text-md font-medium">Tai yra forumus bendroms diskusijoms apie viską, kas susiję su universiteto gyvenimu.</p>
-                </div>
-                </div>
+            </div>
+            </div>
                 <div className="m-3 mr-5">
                   <p className="text-white font-medium text-xl">256</p>
                   <p className="text-light-grey font-medium text-xl">Įrašų</p>
@@ -193,358 +222,55 @@ const Home = () => {
           <div className="text-white font-medium text-md ml-3">
             <h1>Universitetų forumai</h1>
           </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 animate-fade-in-up border-t-2 pt-4 border-light-grey rounded-md px-1 mb-10">
-            <div 
-              className="bg-grey rounded-md flex flex-row align-middle justify-between border-l-2 border-light-grey items-center hover:bg-dark cursor-pointer transition-colors transition: duration-150 ease-linear" 
-            onClick={() => handleOpenForum(1, 'Kauno technologijos universitetas')}
-          >
-            <div className="flex flex-row items-center">
-              <img src={KTUlogo} className="size-12 m-3 rounded-sm"/>
-              <p className="text-white text-sm font-medium">Kauno technologijos universitetas</p>
+          
+          {forumsLoading ? (
+            <div className="flex justify-center mt-10">
+              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-lght-blue"></div>
             </div>
-            <div className="m-3">
-              <p className="text-white font-medium text-sm">256</p>
-              <p className="text-light-grey font-medium">Įrašų</p>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 animate-fade-in-up border-t-2 pt-4 border-light-grey rounded-md px-1 mb-10">
+              {forums.map((forum) => {
+                const logo = getUniversityLogo(forum.university_name);
+                return (
+                  <div 
+                    key={forum.id}
+                    className="bg-grey rounded-md flex flex-row align-middle justify-between border-l-2 border-light-grey items-center hover:bg-dark cursor-pointer transition-colors transition: duration-150 ease-linear" 
+                    onClick={() => handleOpenForum(forum.id, forum.title, forum.university_name, forum.entity_id)}
+                  >
+                    <div className="flex flex-row items-center">
+                      <img src={logo.src} className={logo.className} alt={forum.university_name || "University"} />
+                      <div>
+                        <p className="text-white text-sm font-medium">{forum.title}</p>
+                      </div>
             </div>
-          </div>
-            <div className="bg-grey rounded-md flex flex-row align-middle justify-between border-l-2 border-light-grey items-center hover:bg-dark cursor-pointer transition-colors transition: duration-150 ease-linear">
-            <div className="flex flex-row items-center">
-              <img src={VUlogo} className="size-10 m-3 rounded-sm invert"/>
-              <p className="text-white text-sm font-medium">Vilniaus universitetas</p>
-            </div>
-            <div className="m-3">
-              <p className="text-white font-medium text-sm">256</p>
-              <p className="text-light-grey font-medium">Įrašų</p>
-            </div>
-          </div>
-            <div className="bg-grey rounded-md flex flex-row align-middle justify-between border-l-2 border-light-grey items-center hover:bg-dark cursor-pointer transition-colors transition: duration-150 ease-linear">
-            <div className="flex flex-row items-center">
-              <img src={VDUlogo} className="size-10 m-3 rounded-sm invert"/>
-              <p className="text-white text-sm font-medium">Vytauto didžiojo universitetas</p>
-            </div>
-            <div className="m-3">
-              <p className="text-white font-medium text-sm">256</p>
-              <p className="text-light-grey font-medium">Įrašų</p>
+            <div className="m-3 text-end">
+                      <p className="text-white font-medium text-sm">{forum.post_count || 0}</p>
+              <p className="text-light-grey font-medium">
+                {forum.post_count === 1 
+                ? 'įrašas' 
+                : (forum.post_count >= 2 && forum.post_count <= 9) 
+                    ? 'įrašai' 
+                    : 'įrašų'}
+              </p>
             </div>
           </div>
-            <div className="bg-grey rounded-md flex flex-row align-middle justify-between border-l-2 border-light-grey items-center hover:bg-dark cursor-pointer transition-colors transition: duration-150 ease-linear">
-            <div className="flex flex-row items-center">
-              <img src={MRUlogo} className="size-6 w-20 m-3 rounded-sm"/>
-              <p className="text-white text-sm font-medium">Vytauto didžiojo universitetas</p>
+                );
+              })}
             </div>
-            <div className="m-3">
-              <p className="text-white font-medium text-sm">256</p>
-              <p className="text-light-grey font-medium">Įrašų</p>
-            </div>
-          </div>
-            <div className="bg-grey rounded-md flex flex-row align-middle justify-between border-l-2 border-light-grey items-center hover:bg-dark cursor-pointer transition-colors transition: duration-150 ease-linear">
-            <div className="flex flex-row items-center">
-              <img src={KTUlogo} className="size-12 m-3 rounded-sm"/>
-              <p className="text-white text-sm font-medium">Kauno technologijos universitetas</p>
-            </div>
-            <div className="m-3">
-              <p className="text-white font-medium text-sm">256</p>
-              <p className="text-light-grey font-medium">Įrašų</p>
-            </div>
-          </div>
-            <div className="bg-grey rounded-md flex flex-row align-middle justify-between border-l-2 border-light-grey items-center hover:bg-dark cursor-pointer transition-colors transition: duration-150 ease-linear">
-            <div className="flex flex-row items-center">
-              <img src={VUlogo} className="size-10 m-3 rounded-sm invert"/>
-              <p className="text-white text-sm font-medium">Vilniaus universitetas</p>
-            </div>
-            <div className="m-3">
-              <p className="text-white font-medium text-sm">256</p>
-              <p className="text-light-grey font-medium">Įrašų</p>
-            </div>
-          </div>
-            <div className="bg-grey rounded-md flex flex-row align-middle justify-between border-l-2 border-light-grey items-center hover:bg-dark cursor-pointer transition-colors transition: duration-150 ease-linear">
-            <div className="flex flex-row items-center">
-              <img src={VDUlogo} className="size-10 m-3 rounded-sm invert"/>
-              <p className="text-white text-sm font-medium">Vytauto didžiojo universitetas</p>
-            </div>
-            <div className="m-3">
-              <p className="text-white font-medium text-sm">256</p>
-              <p className="text-light-grey font-medium">Įrašų</p>
-            </div>
-          </div>
-            <div className="bg-grey rounded-md flex flex-row align-middle justify-between border-l-2 border-light-grey items-center hover:bg-dark cursor-pointer transition-colors transition: duration-150 ease-linear">
-            <div className="flex flex-row items-center">
-              <img src={MRUlogo} className="size-6 w-20 m-3 rounded-sm"/>
-              <p className="text-white text-sm font-medium">Vytauto didžiojo universitetas</p>
-            </div>
-            <div className="m-3">
-              <p className="text-white font-medium text-sm">256</p>
-              <p className="text-light-grey font-medium">Įrašų</p>
-            </div>
-          </div>
-          </div>
-
-          <div className="text-white font-medium text-md ml-3">
-            <h1>Kategorijų forumai</h1>
-          </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 animate-fade-in-up border-t-2 pt-4 border-light-grey rounded-md px-1 mb-10">
-            <div 
-              className="bg-grey rounded-md flex flex-row align-middle justify-between border-l-2 border-light-grey items-center hover:bg-dark cursor-pointer transition-colors transition: duration-150 ease-linear" 
-              onClick={() => handleOpenForum(1, 'Kauno technologijos universitetas')}
-            >
-              <div className="flex flex-row items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-14 bg-dark rounded-md p-2 m-2 text-light-grey">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                </svg>
-                <p className="text-white text-sm font-medium">Kursų apžvalgos</p>
-              </div>
-              <div className="m-3">
-                <p className="text-white font-medium text-sm">256</p>
-                <p className="text-light-grey font-medium">Įrašų</p>
-              </div>
-            </div>
-            <div className="bg-grey rounded-md flex flex-row align-middle justify-between border-l-2 border-light-grey items-center hover:bg-dark cursor-pointer transition-colors transition: duration-150 ease-linear">
-              <div className="flex flex-row items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-14 bg-dark rounded-md p-2 m-2 text-light-grey">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                </svg>
-                <p className="text-white text-sm font-medium">Studijų medžiaga</p>
-              </div>
-              <div className="m-3">
-                <p className="text-white font-medium text-sm">256</p>
-                <p className="text-light-grey font-medium">Įrašų</p>
-              </div>
-            </div>
-            <div className="bg-grey rounded-md flex flex-row align-middle justify-between border-l-2 border-light-grey items-center hover:bg-dark cursor-pointer transition-colors transition: duration-150 ease-linear">
-              <div className="flex flex-row items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-14 bg-dark rounded-md p-2 m-2 text-light-grey">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                </svg>
-                <p className="text-white text-sm font-medium">Socialinis gyvenimas ir renginiai</p>
-              </div>
-              <div className="m-3">
-                <p className="text-white font-medium text-sm">256</p>
-                <p className="text-light-grey font-medium">Įrašų</p>
-              </div>
-            </div>
-            <div className="bg-grey rounded-md flex flex-row align-middle justify-between border-l-2 border-light-grey items-center hover:bg-dark cursor-pointer transition-colors transition: duration-150 ease-linear">
-              <div className="flex flex-row items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-14 bg-dark rounded-md p-2 m-2 text-light-grey">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                </svg>
-                <p className="text-white text-sm font-medium">Būstas ir apgyvendinimas</p>
-              </div>
-              <div className="m-3">
-                <p className="text-white font-medium text-sm">256</p>
-                <p className="text-light-grey font-medium">Įrašų</p>
-              </div>
-            </div>
-            <div className="bg-grey rounded-md flex flex-row align-middle justify-between border-l-2 border-light-grey items-center hover:bg-dark cursor-pointer transition-colors transition: duration-150 ease-linear">
-              <div className="flex flex-row items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-14 bg-dark rounded-md p-2 m-2 text-light-grey">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-            </svg>
-                <p className="text-white text-sm font-medium">Praktikos ir karjeros galimybės</p>
-              </div>
-              <div className="m-3">
-                <p className="text-white font-medium text-sm">256</p>
-                <p className="text-light-grey font-medium">Įrašų</p>
-              </div>
-          </div>
-            <div className="bg-grey rounded-md flex flex-row align-middle justify-between border-l-2 border-light-grey items-center hover:bg-dark cursor-pointer transition-colors transition: duration-150 ease-linear">
-              <div className="flex flex-row items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-14 bg-dark rounded-md p-2 m-2 text-light-grey">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-            </svg>
-                <p className="text-white text-sm font-medium">Universiteto politika ir administracija</p>
-              </div>
-              <div className="m-3">
-                <p className="text-white font-medium text-sm">256</p>
-                <p className="text-light-grey font-medium">Įrašų</p>
-              </div>
-          </div>
-            <div className="bg-grey rounded-md flex flex-row align-middle justify-between border-l-2 border-light-grey items-center hover:bg-dark cursor-pointer transition-colors transition: duration-150 ease-linear">
-              <div className="flex flex-row items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-14 bg-dark rounded-md p-2 m-2 text-light-grey">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-            </svg>
-                <p className="text-white text-sm font-medium">Vytauto didžiojo universitetas</p>
-              </div>
-              <div className="m-3">
-                <p className="text-white font-medium text-sm">256</p>
-                <p className="text-light-grey font-medium">Įrašų</p>
-              </div>
-            </div>
-          </div>
-          </>
+          )}
+            </>
           )}
 
           {!loading && activeSection === 'kategorijos' && contentVisible && (
             <>
-            <div className="relative flex justify-end w-full">
-              <div className="mr-3 md:text-xs">
-                  <button 
-                      type="button" 
-                      className="inline-flex justify-center gap-x-1.5 rounded-md bg-grey px-3 py-2 text-sm font-medium text-white ring-1 ring-light-grey ring-inset hover:bg-gray focus:ring-lght-blue focus:text-lght-blue" 
-                      id="menu-button" 
-                      aria-expanded="true" 
-                      aria-haspopup="true" 
-                      onClick={handleSortClick}
-                  >
-                      {sortText}
-                      <svg className="-mr-1 size-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                          <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
-            </svg>
-                  </button>
+              <div className="mt-8">
+                <UniversityList />
               </div>
-              <div 
-                  className={`absolute top-full right-0 z-10 mt-2 mr-3 origin-top-right rounded-md bg-grey ring-1 shadow-lg ring-light-grey focus:outline-hidden ${
-                      sortClicked ? "" : "hidden"
-                  }`} 
-                  role="menu" 
-                  aria-orientation="vertical" 
-                  aria-labelledby="menu-button" 
-                  tabIndex="-1"
-              >
-                  <div className="" role="none">
-                      <a 
-                          href="#" 
-                          className="block px-4 py-2 text-sm text-white m-1 rounded-md ring-1 ring-grey hover:text-lght-blue hover:ring-lght-blue transition: duration-100 ease-linear" 
-                          role="menuitem" 
-                          tabIndex="-1" 
-                          id="menu-item-0" 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleSortOptionClick("Įvertinimus");
-                          }}
-                      >
-                          Įvertinimus
-                      </a>
-                      <a 
-                          href="#" 
-                          className="block px-4 py-2 text-sm text-white m-1 rounded-md ring-1 ring-grey hover:text-lght-blue hover:ring-lght-blue transition: duration-100 ease-linear" 
-                          role="menuitem" 
-                          tabIndex="-1" 
-                          id="menu-item-1" 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleSortOptionClick("Nuo A-Z");
-                          }}
-                      >
-                          Nuo A-Z
-                      </a>
-                      <a 
-                          href="#" 
-                          className="block px-4 py-2 text-sm text-white m-1 rounded-md ring-1 ring-grey hover:text-lght-blue hover:ring-lght-blue transition: duration-100 ease-linear" 
-                          role="menuitem" 
-                          tabIndex="-1" 
-                          id="menu-item-2" 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleSortOptionClick("Nuo Z-A");
-                          }}
-                      >
-                          Nuo Z-A
-                      </a>
-                  </div>
-              </div>
-          </div>
-          <div className="grid grid-cols-1 gap-6 mt-5 sm:grid-cols-2 md:grid-cols-3 md:gap-8 animate-fade-in-up">
-            <div 
-              className="bg-grey rounded-md text-white overflow-hidden hover:bg-dark transition-colors duration-300 cursor-pointer group"
-              onClick={() => handleOpenUniversity(1, 'Kauno Technologijos universitetas')}
-            >
-              <div className="relative">
-                <img src={KTU} className="w-full h-48 object-cover"/>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-dark to-transparent h-1/2"></div>
-              </div>
-              <div className="p-4">
-                <h1 className="text-lg font-bold group-hover:text-lght-blue transition-colors duration-300">Kauno Technologijos universitetas</h1>
-                <div className="flex items-center mt-2 mb-3">
-                  <StarRating rating={4.5} width={4}/>
-                  <span className="ml-2 text-light-grey text-sm">(154 atsiliepimai)</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <div>
-                    <p className="text-light-grey">Fakultetai</p>
-                    <p className="font-medium">12</p>
-                  </div>
-                  <div>
-                    <p className="text-light-grey">Studijų programos</p>
-                    <p className="font-medium">96</p>
-                  </div>
-                  <div>
-                    <p className="text-light-grey">Diskusijos</p>
-                    <p className="font-medium">542</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div 
-              className="bg-grey rounded-md text-white overflow-hidden hover:bg-dark transition-colors duration-300 cursor-pointer group"
-              onClick={() => handleOpenUniversity(2, 'Vilniaus universitetas')}
-            >
-              <div className="relative">
-                <img src={VU} className="w-full h-48 object-cover"/>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-dark to-transparent h-1/2"></div>
-              </div>
-              <div className="p-4">
-                <h1 className="text-lg font-bold group-hover:text-lght-blue transition-colors duration-300">Vilniaus universitetas</h1>
-                <div className="flex items-center mt-2 mb-3">
-                  <StarRating rating={4.7} width={4}/>
-                  <span className="ml-2 text-light-grey text-sm">(210 atsiliepimai)</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <div>
-                    <p className="text-light-grey">Fakultetai</p>
-                    <p className="font-medium">14</p>
-                  </div>
-                  <div>
-                    <p className="text-light-grey">Studijų programos</p>
-                    <p className="font-medium">103</p>
-                  </div>
-                  <div>
-                    <p className="text-light-grey">Diskusijos</p>
-                    <p className="font-medium">685</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div 
-              className="bg-grey rounded-md text-white overflow-hidden hover:bg-dark transition-colors duration-300 cursor-pointer group"
-              onClick={() => handleOpenUniversity(3, 'Vytauto Didžiojo universitetas')}
-            >
-              <div className="relative">
-                <img src={VDU} className="w-full h-48 object-cover"/>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-dark to-transparent h-1/2"></div>
-              </div>
-              <div className="p-4">
-                <h1 className="text-lg font-bold group-hover:text-lght-blue transition-colors duration-300">Vytauto Didžiojo universitetas</h1>
-                <div className="flex items-center mt-2 mb-3">
-                  <StarRating rating={4.2} width={4}/>
-                  <span className="ml-2 text-light-grey text-sm">(89 atsiliepimai)</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <div>
-                    <p className="text-light-grey">Fakultetai</p>
-                    <p className="font-medium">10</p>
-                  </div>
-                  <div>
-                    <p className="text-light-grey">Studijų programos</p>
-                    <p className="font-medium">74</p>
-                  </div>
-                  <div>
-                    <p className="text-light-grey">Diskusijos</p>
-                    <p className="font-medium">423</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          </>
-        )}
+            </>
+          )}
         </div>
       </div>
-
     </div>
-
     </>
   );
 };

@@ -1,13 +1,14 @@
 import React from 'react';
 
-const StarRating = ({ rating, width }) => {
-  // Round the rating to the nearest whole number
-  const roundedRating = Math.round(rating);
+const StarRating = ({ rating = 0, width = 4,  color='light-grey'}) => {
+  // Convert rating to a number and default to 0 if it's null, undefined, or not a valid number
+  const validRating = isNaN(Number(rating)) ? 0 : Number(rating);
+  
+  const roundedRating = Math.round(validRating);
   let textSize = "md";
 
-  if(width > 5)
-  {
-    textSize = "4xl"
+  if (width > 5) {
+    textSize = "4xl";
   }
   
   return (
@@ -20,7 +21,7 @@ const StarRating = ({ rating, width }) => {
           fill={index < roundedRating ? "currentColor" : "#687682"}
           stroke="currentColor"
           strokeWidth={1.5}
-          className={`w-${width} h-${width} ${index < roundedRating ? 'text-yellow' : 'text-light-grey'}`}
+          className={`w-${width} h-${width} ${index < roundedRating ? 'text-yellow' : `text-light-grey`}`}
         >
           <path 
             fillRule="evenodd" 
@@ -29,7 +30,11 @@ const StarRating = ({ rating, width }) => {
           />
         </svg>
       ))}
-      <span className={`ml-2 text-light-grey text-${textSize}`}>{rating.toFixed(1)}</span>
+      {validRating > 0 && (
+        <span className={`ml-2 text-${color} text-${textSize}`}>
+          {validRating.toFixed(1)}
+        </span>
+      )}
     </div>
   );
 };

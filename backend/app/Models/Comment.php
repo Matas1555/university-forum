@@ -27,7 +27,7 @@ class Comment extends Model
     protected $hidden = ['created_at', 'updated_at'];
     public $timestamps = true;
 
-    protected $fillable = ['text', 'post_id', 'user_id'];
+    protected $fillable = ['text', 'post_id', 'user_id', 'parent_id', 'level'];
 
     public function post()
     {
@@ -37,5 +37,20 @@ class Comment extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+    
+    public function parent()
+    {
+        return $this->belongsTo(Comment::class, 'parent_id');
+    }
+    
+    public function replies()
+    {
+        return $this->hasMany(Comment::class, 'parent_id');
+    }
+    
+    public function interactions()
+    {
+        return $this->hasMany(CommentInteraction::class, 'comment_id');
     }
 }

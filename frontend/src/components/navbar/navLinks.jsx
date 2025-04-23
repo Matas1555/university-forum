@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import LogIn from "../../pages/login";
 import Register from "../../pages/register";
 import { useStateContext } from "../../context/contextProvider";
@@ -11,43 +11,63 @@ const NavButtons = ({ openLoginDialog}) => {
     const {user, token, setUser, setToken, setRefreshToken} = useStateContext();
     const navigate = useNavigate();
     const [profileMenuClicked, setOpenProfileMenu] = useState(false);
+    const menuRef = useRef(null);
 
     const handleSortClick = () => {
         setOpenProfileMenu(!profileMenuClicked);
     };
 
-    const handleProfileMenuOptionClick = (text) => {
-        if(text === "Atsijungti")
-        {
-            onLogout();
-        } else if (text === "Profilis") {
-            navigate('/profile');
-            console.log("taip");
-        }
+    const handleProfileClick = () => {
+        navigate('/profile');
+        setOpenProfileMenu(false);
     };
 
-    const handleCreatePost = () =>{
-        navigate('/createPost');
+    const handleSettingsClick = () => {
+        // Handle settings navigation
+        setOpenProfileMenu(false);
+    };
+
+    const handleLogout = async () => {
+        console.log("Logging out...");
+        try {
+            // Clear token from backend
+            await API.post('/logout');
+        } catch (error) {
+            console.error("Logout API call failed", error);
+            // Continue with logout even if API call fails
+        }
+        
+        // Clear all local storage and state
+        localStorage.removeItem('ACCESS_TOKEN');
+        localStorage.removeItem('REFRESH_TOKEN');
+        localStorage.removeItem('USER');
+        
+        // Update context state
+        setUser(null);
+        setToken(null);
+        setRefreshToken(null);
+        
+        // Navigate to home and close menu
+        navigate('/pagrindinis');
+        setOpenProfileMenu(false);
+    };
+
+    const handleCreatePost = () => {
+        navigate('/kurti-irasa');
     }
 
     useEffect(() => {
-        const handleClickOutside = (event) =>{
-            setOpenProfileMenu(false);
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setOpenProfileMenu(false);
+            }
         }
-        document.addEventListener('mousedown', handleClickOutside)
-    },[])
-
-    const onLogout = async () => {
-        try {
-            await API.post('/logout');
-            setUser({});
-            setToken();
-            setRefreshToken();
-            navigate('/pagrindinis');
-        } catch (error) {
-            console.error("Logout failed", error.response?.data || error.message);
-        }
-    }
+        
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
     
     return (
         <>
@@ -68,7 +88,7 @@ const NavButtons = ({ openLoginDialog}) => {
                         </button>
                     </div>
                     
-                    <div className="relative inline-block text-left m-auto">
+                    <div className="relative inline-block text-left m-auto" ref={menuRef}>
                         <div className="w-10 h-10 flex items-center justify-center ring-2 ring-dark rounded-full overflow-hidden mr-3 cursor-pointer hover:ring-lght-blue transition-colors duration-200 ease-linear"
                         onClick={handleSortClick}>
                             <img 
@@ -77,29 +97,53 @@ const NavButtons = ({ openLoginDialog}) => {
                                 alt="User Avatar"
                             />
                         </div>
-                        <div className={`absolute right-0 z-10 mt-5 mr-3  origin-top-right rounded-md bg-grey ring-1 shadow-lg ring-light-grey focus:outline-hidden ${
-                                profileMenuClicked ? " " : "hidden"
-                                }`} 
+                        {profileMenuClicked && (
+                            <div className="absolute right-0 pr-2 z-10 mt-5 mr-3 origin-top-right rounded-md bg-grey ring-1 shadow-lg ring-light-grey focus:outline-hidden" 
                                 role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabIndex="-1">
-                            <div className="" role="none">
-                            <a href="#" className="block px-4 py-2 text-sm text-white m-1 rounded-md ring-1 ring-grey hover:text-lght-blue  hover:ring-lght-blue transition: duration-100 ease-linear" role="menuitem" tabIndex="-1" id="menu-item-0" onClick={() => handleProfileMenuOptionClick("Profilis")}>Profilis</a>
-                            <a href="#" className="block px-4 py-2 text-sm text-white m-1 rounded-md ring-1 ring-grey hover:text-lght-blue  hover:ring-lght-blue transition: duration-100 ease-linear" role="menuitem" tabIndex="-1" id="menu-item-1" onClick={() => handleProfileMenuOptionClick("Nustatymai")}>Nustatymai</a>
-                            <a href="#" className="block px-4 py-2 text-sm text-white m-1 rounded-md ring-1 ring-grey hover:text-lght-blue  hover:ring-lght-blue transition: duration-100 ease-linear" role="menuitem" tabIndex="-1" id="menu-item-2" onClick={() => handleProfileMenuOptionClick("Atsijungti")}>Atsijungti</a>
+                                <div className="" role="none">
+                                    <button 
+                                        className="block w-full text-left px-4 py-2 text-sm text-white m-1 rounded-md ring-1 ring-grey hover:text-lght-blue hover:ring-lght-blue transition-duration-100 ease-linear" 
+                                        role="menuitem" 
+                                        tabIndex="-1" 
+                                        id="menu-item-0" 
+                                        onClick={handleProfileClick}
+                                    >
+                                        Profilis
+                                    </button>
+                                    <button 
+                                        className="block w-full text-left px-4 py-2 text-sm text-white m-1 rounded-md ring-1 ring-grey hover:text-lght-blue hover:ring-lght-blue transition-duration-100 ease-linear" 
+                                        role="menuitem" 
+                                        tabIndex="-1" 
+                                        id="menu-item-1" 
+                                        onClick={handleSettingsClick}
+                                    >
+                                        Nustatymai
+                                    </button>
+                                    <button 
+                                        className="block w-full text-left px-4 py-2 text-sm text-white m-1 rounded-md ring-1 ring-grey hover:text-lght-blue hover:ring-lght-blue transition-duration-100 ease-linear" 
+                                        role="menuitem" 
+                                        tabIndex="-1" 
+                                        id="menu-item-2" 
+                                        onClick={handleLogout}
+                                    >
+                                        Atsijungti
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
                 </>
             ) : (
                 <>
                     <button 
-                        className="pl-2 pr-2 pt-1 pb-1 text-center bg-dark border-dark rounded-md border-2 border-slate-300 text-white text-lg hover:border-white duration-300 transition-colors" 
+                        className="pl-2 pr-2 pt-1 pb-1 text-center bg-dark border-white rounded-md border-2 text-white text-lg hover:bg-lght-blue duration-300 transition-colors" 
                         onClick={openLoginDialog}
                         >
                         Prisijungti
                     </button>
                     <NavLink to='/registracija'
-                        className="pl-2 pr-2 pt-1 pb-1 text-center bg-lght-blue border-lght-blue rounded-md border-2 border-slate-300 text-white text-lg hover:bg-dark hover:text-lght-blue duration-300 transition-colors" 
+                        className="pl-2 pr-2 pt-1 pb-1 text-center bg-lght-blue rounded-md border-2 border-slate-300 text-white text-lg hover:bg-dark duration-300 transition-colors" 
                         >
                         Registruotis
                     </NavLink>

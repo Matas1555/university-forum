@@ -22,10 +22,10 @@ export default function DiscussionList ({ listName, IconComponent, discussions }
           >
             <div>
             <p className="text-white font-light text-base">{discussion.title}</p>
-            <p className="text-light-grey font-medium text-sm">Įkelta {discussion.date}</p>
+            <p className="text-light-grey font-medium text-sm">Įkelta {discussion.created_at}</p>
             </div>
             <div className="flex flex-row gap-1">
-              <p className="flex gap-1 text-white">{discussion.comment_count}</p>
+              <p className="flex gap-1 text-white">{discussion.comments_count}</p>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"

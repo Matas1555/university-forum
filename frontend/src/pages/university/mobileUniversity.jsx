@@ -1,6 +1,7 @@
 import {React, useState, useEffect} from 'react';
 import { useStateContext } from "../../context/contextProvider";
-import API from "../../utils/API";
+import API, { ForumAPI } from "../../utils/API";
+import { useLocation, useParams } from 'react-router-dom';
 import KTU_logo from "../../../public/assets/KTU-logo.png";
 import StarRating from "../../components/starRating/starRating";
 import InteractiveStarRating from "../../components/starRating/interactiveStarRating";
@@ -10,6 +11,13 @@ import RichTextEditor from '../../components/richTextEditor/RichTextEditor';
 
 const MobileUniversity = () => {
     const {user} = useStateContext();
+    const location = useLocation();
+    const params = useParams();
+    
+
+    const universityId = params.universityId || (location.state && location.state.universityId) || 1;
+
+    
     const [destytojaiActive, setStojimaiActive] = useState(true);
     const [moduliaiActive, setModuliaiActive] = useState(false);
     const [atsiliepimaiActive, setAtsiliepimaiActive] = useState(false);
@@ -18,6 +26,114 @@ const MobileUniversity = () => {
     const [newReview, setReview] = useState("");
     const [reviewScreenIsOpen, setreviewScreenIsOpen] = useState(false);
     const [userRating, setUserRating] = useState(0);
+    
+    // State for dynamic data
+    const [universityData, setUniversityData] = useState(null);
+    const [faculties, setFaculties] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    
+    // Fetch university data, faculties, and programs
+    useEffect(() => {
+        const fetchUniversityData = async () => {
+            setIsLoading(true);
+            try {
+                // Fetch university details
+                const universityResponse = await ForumAPI.getUniversityById(universityId);
+                setUniversityData(universityResponse.data);
+                
+                // Fetch faculties for this university
+                const facultiesResponse = await ForumAPI.getFacultiesByUniversity(universityId);
+                const facultiesData = facultiesResponse.data;
+                setFaculties(facultiesData);
+                
+                // Select first faculty by default if available
+                if (facultiesData.length > 0) {
+                    const firstFaculty = facultiesData[0];
+                    setSelectedFaculty(firstFaculty);
+                    
+                    // Fetch programs for the first faculty
+                    const programsResponse = await ForumAPI.getProgramsByFaculty(firstFaculty.id);
+                    const programsData = programsResponse.data;
+                    
+                    // Set the faculty with programs loaded
+                    setSelectedFaculty({
+                        ...firstFaculty,
+                        programs: programsData
+                    });
+                    
+                    // Select first program by default if available
+                    if (programsData.length > 0) {
+                        setSelectedProgram(programsData[0]);
+                    }
+                }
+                setIsLoading(false);
+            } catch (err) {
+                console.error("Error fetching university data:", err);
+                setError("Failed to load university data");
+                setIsLoading(false);
+                
+                // Fallback to mock data if API fails
+                if (mockData.length > 0) {
+                    setFaculties(mockData);
+                    setSelectedFaculty(mockData[0]);
+                    if (mockData[0].programs.length > 0) {
+                        setSelectedProgram(mockData[0].programs[0]);
+                    }
+                }
+            }
+        };
+        
+        fetchUniversityData();
+    }, [universityId]);
+    
+    // Handler for faculty selection
+    const handleFacultySelect = async (faculty) => {
+        try {
+            setIsLoading(true);
+            // If the programs are already loaded, use them
+            if (faculty.programs) {
+                setSelectedFaculty(faculty);
+                if (faculty.programs.length > 0) {
+                    setSelectedProgram(faculty.programs[0]);
+                } else {
+                    setSelectedProgram(null);
+                }
+                setIsLoading(false);
+                return;
+            }
+            
+            // Otherwise, fetch the programs for the faculty
+            const programsResponse = await ForumAPI.getProgramsByFaculty(faculty.id);
+            const programsData = programsResponse.data;
+            
+            // Update the selected faculty with programs
+            const updatedFaculty = {
+                ...faculty,
+                programs: programsData
+            };
+            
+            // Update the faculties array to include the loaded programs
+            setFaculties(prevFaculties => prevFaculties.map(f => 
+                f.id === faculty.id ? updatedFaculty : f
+            ));
+            
+            setSelectedFaculty(updatedFaculty);
+            
+            // Select first program by default
+            if (programsData.length > 0) {
+                setSelectedProgram(programsData[0]);
+            } else {
+                setSelectedProgram(null);
+            }
+            
+            setIsLoading(false);
+        } catch (err) {
+            console.error("Error fetching programs:", err);
+            setError("Failed to load programs");
+            setIsLoading(false);
+        }
+    };
 
     const colorClasses = [
         'bg-blue', 
@@ -29,19 +145,19 @@ const MobileUniversity = () => {
     ];
 
     const handleShowDestytojai = () => {
-        setStojimaiActive(!destytojaiActive);
+        setStojimaiActive(true);
         setModuliaiActive(false);
         setAtsiliepimaiActive(false);
     }
 
     const handleShowModuliai = () => {
-        setModuliaiActive(!moduliaiActive);
+        setModuliaiActive(true);
         setAtsiliepimaiActive(false);
         setStojimaiActive(false);
     }
 
     const handleShowAtsilipimai = () => {
-        setAtsiliepimaiActive(!atsiliepimaiActive);
+        setAtsiliepimaiActive(true);
         setModuliaiActive(false);
         setStojimaiActive(false);
     }
@@ -60,8 +176,10 @@ const MobileUniversity = () => {
                 <div className="flex flex-row gap-10 w-full xl:w-4/5 content-center items justify-center border-t-2 border-b-2 p-10 border-light-grey">
                     <img className="size-24 xl:size-40" src={KTU_logo}/>
                     <div className="flex flex-col justify-between">
-                        <h1 className="text-white font-bold text-2xl md:text-6xl">Kauno Technologijos Universitetas</h1>
-                        <StarRating rating={4.2} width={4} />
+                        <h1 className="text-white font-bold text-2xl md:text-6xl">
+                            {universityData ? universityData.name : "Kauno Technologijos Universitetas"}
+                        </h1>
+                        <StarRating rating={universityData ? universityData.rating : 4.2} width={4} />
                     </div>
                 </div>
 
@@ -81,27 +199,38 @@ const MobileUniversity = () => {
                             </svg>
                         </div>
                         
-                        <div className="flex flex-col gap-2 max-h-80 overflow-auto scrollbar-custom ">
-                            {mockData.map((faculty, index) => {
-                                const colorClass = colorClasses[index % colorClasses.length];
-                                return (
-                                    <div 
-                                        key={faculty.abbreviation}
-                                        className={`flex fles-row gap-2 mr-2 p-2 py-4 transition-color duration-150 ease-in ${
-                                            selectedFaculty?.name === faculty.name ? 'bg-lght-blue rounded-md' : ''
-                                        }`}
-                                        onClick={() => setSelectedFaculty(faculty)}
-                                    >
-                                        <div>
-                                            <div className={`flex justify-center ${colorClass} px-4 text-white rounded-md max-w-14 min-w-14`}>
-                                                {faculty.abbreviation}
+                        {isLoading ? (
+                            <div className="text-center p-6 text-light-grey">
+                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-lght-blue mx-auto mb-4"></div>
+                                Kraunami fakultetai...
+                            </div>
+                        ) : error ? (
+                            <div className="text-center p-6 text-red-500">
+                                {error}
+                            </div>
+                        ) : (
+                            <div className="flex flex-col gap-2 max-h-80 overflow-auto scrollbar-custom ">
+                                {faculties.map((faculty, index) => {
+                                    const colorClass = colorClasses[index % colorClasses.length];
+                                    return (
+                                        <div 
+                                            key={faculty.id || faculty.abbreviation}
+                                            className={`flex fles-row gap-2 mr-2 p-2 py-4 transition-color duration-150 ease-in ${
+                                                selectedFaculty?.id === faculty.id || selectedFaculty?.name === faculty.name ? 'bg-lght-blue rounded-md' : ''
+                                            }`}
+                                            onClick={() => handleFacultySelect(faculty)}
+                                        >
+                                            <div>
+                                                <div className={`flex justify-center ${colorClass} px-4 text-white rounded-md max-w-14 min-w-14`}>
+                                                    {faculty.abbreviation || faculty.name.substring(0, 3)}
+                                                </div>
                                             </div>
+                                            <h1 className="text-white font-medium">{faculty.name}</h1>
                                         </div>
-                                        <h1 className="text-white font-medium">{faculty.name}</h1>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                 
 
@@ -112,31 +241,42 @@ const MobileUniversity = () => {
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                             </svg>
                         </div>
-                        <div className="flex flex-col gap-2 max-h-80 overflow-auto scrollbar-custom">
-                            {!selectedFaculty ? (
-                                <div className="text-center p-4 text-light-grey">
-                                    Pasirinkite fakultetą, kad matytumėte programas
-                                </div>
-                            ) : (
-                                selectedFaculty.programs.map((program) => (
-                                    <div 
-                                        key={program.name}
-                                        className={`flex flex-row justify-between items-center rounded-md p-2 border-dark py-4 mr-2 cursor-pointer transition-color duration-150 ease-in ${
-                                            selectedProgram?.name === program.name ? 'bg-lght-blue rounded-md' : ''
-                                        }`}
-                                        onClick={() => {
-                                            setSelectedProgram(program);
-                                            setStojimaiActive(true); // Reset to default tab
-                                            setModuliaiActive(false);
-                                            setAtsiliepimaiActive(false);
-                                        }}
-                                    >
-                                        <p className="text-sm text-white font-medium">{program.name}</p>
-                                        <StarRating rating={program.rating} width={4} />
+                        {isLoading ? (
+                            <div className="text-center p-6 text-light-grey">
+                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-lght-blue mx-auto mb-4"></div>
+                                Kraunamos programos...
+                            </div>
+                        ) : (
+                            <div className="flex flex-col gap-2 max-h-80 overflow-auto scrollbar-custom">
+                                {!selectedFaculty ? (
+                                    <div className="text-center p-4 text-light-grey">
+                                        Pasirinkite fakultetą, kad matytumėte programas
                                     </div>
-                                ))
-                            )}
-                        </div>
+                                ) : !selectedFaculty.programs || selectedFaculty.programs.length === 0 ? (
+                                    <div className="text-center p-4 text-light-grey">
+                                        Nėra programų šiam fakultetui
+                                    </div>
+                                ) : (
+                                    selectedFaculty.programs.map((program) => (
+                                        <div 
+                                            key={program.id || program.name}
+                                            className={`flex flex-row justify-between items-center rounded-md p-2 border-dark py-4 mr-2 cursor-pointer transition-color duration-150 ease-in ${
+                                                selectedProgram?.id === program.id || selectedProgram?.name === program.name ? 'bg-lght-blue rounded-md' : ''
+                                            }`}
+                                            onClick={() => {
+                                                setSelectedProgram(program);
+                                                setStojimaiActive(true); // Reset to default tab
+                                                setModuliaiActive(false);
+                                                setAtsiliepimaiActive(false);
+                                            }}
+                                        >
+                                            <p className="text-sm text-white font-medium">{program.name}</p>
+                                            <StarRating rating={program.rating || 0} width={4} />
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -152,15 +292,15 @@ const MobileUniversity = () => {
                                 <tbody>
                                     <tr className="border-b-[1px] border-t-[1px]">
                                         <td className="p-4">Kaina</td>
-                                        <td className="p-4 text-end">~{selectedProgram.generalInfo.price}€</td>
+                                        <td className="p-4 text-end">~{selectedProgram.price || selectedProgram.generalInfo?.price || 'N/A'}€</td>
                                     </tr>
                                     <tr className="border-b-[1px] border-t-[1px]">
                                         <td className="p-4">Trukmė</td>
-                                        <td className="p-4 text-end">{selectedProgram.generalInfo.length} metai</td>
+                                        <td className="p-4 text-end">{selectedProgram.length || selectedProgram.generalInfo?.length || 'N/A'} metai</td>
                                     </tr>
                                     <tr className="border-b-[1px] border-t-[1px]">
                                         <td className="p-4">Pakopa</td>
-                                        <td className="p-4 text-end">{selectedProgram.generalInfo.type}</td>
+                                        <td className="p-4 text-end">{selectedProgram.degree_type === 'bachelor' ? 'Bakalauras' : selectedProgram.degree_type === 'master' ? 'Magistras' : selectedProgram.generalInfo?.type || 'N/A'}</td>
                                     </tr>
                                 </tbody>
                             </table>

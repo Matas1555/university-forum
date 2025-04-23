@@ -5,11 +5,14 @@ import './index.css'
 import { RouterProvider } from 'react-router-dom'
 import router from './router.jsx'
 import { ContextProvider } from './context/contextProvider.jsx'
+import { ForumDataProvider } from './context/ForumDataContext.jsx'
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  //<StrictMode>
     <ContextProvider>
-      <RouterProvider router={router} />
+      <ForumDataProvider>
+        <RouterProvider router={router} />
+      </ForumDataProvider>
     </ContextProvider>
-  </StrictMode>,
+  //</StrictMode>,
 )

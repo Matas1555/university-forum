@@ -11,7 +11,8 @@ import CreatePost from "./pages/createPost";
 import ForumsList from "./pages/forums/forumsList";
 import LecturersPage from "./pages/lecturers";
 import LecturerPage from "./pages/lecturer";
-
+import UniversitiesPage from "./pages/universities";
+import TooltipExample from "./components/TooltipExample";
 const router = createBrowserRouter([
     {
         path: '/',
@@ -22,16 +23,24 @@ const router = createBrowserRouter([
                 element: <Home/>,
             },
             {
+                path: '/tooltip',
+                element: <TooltipExample/>,
+            },
+            {
+                path: '/prisijungti',
+                element: <LogIn/>,
+            },
+            {
                 path: '/forumai',
                 element: <ForumsList/>,
             },
             {
-                path: '/forumai/:forumType',
+                path: '/:forumType',
                 element: <Posts/>,
             },
             {
-                path: '/forumai/universitetai/:universityId',
-                element: <University/>,
+                path: 'forumai/universitetai/',
+                element: <Home/>,
             },
             {
                 path: '/forumai/universitetai/:universityId/irasai',
@@ -87,7 +96,7 @@ const router = createBrowserRouter([
                 element: <CreatePost/>,
             },
             {
-                path: '/universitetas',
+                path: '/universitetas/:universityId',
                 element: <University/>,
             },
             {
@@ -105,6 +114,10 @@ const router = createBrowserRouter([
             {
                 path: '/destytojai/:id',
                 element: <LecturerPage/>,
+            },
+            {
+                path: '/universitetai',
+                element: <UniversitiesPage/>,
             },
         ],
     },

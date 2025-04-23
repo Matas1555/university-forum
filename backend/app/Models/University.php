@@ -16,13 +16,24 @@ class University extends Model
         return $this->hasMany(Program::class, 'university_id');
     }
 
+    public function faculties()
+    {
+        return $this->hasMany(Faculty::class, 'university_id');
+    }
+
     public function forum()
     {
-        return $this->hasOne(Forum::class, 'university_id');
+        return $this->hasOne(Forum::class, 'entity_id')
+            ->where('entity_type', 'university');
     }
 
     public function profiles()
     {
         return $this->hasMany(Profile::class, "university_id");
+    }
+
+    public function lecturers()
+    {
+        return $this->hasMany(Lecturer::class, 'university_id');
     }
 }

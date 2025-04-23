@@ -20,10 +20,8 @@ class RoleMiddleware
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        // Retrieve the user's role (adjust this based on your role structure)
         $userRole = $user->role->name ?? null;
 
-        // If the user's role is not among the required roles, deny access
         if (!in_array($userRole, $roles)) {
             return response()->json(['error' => 'Forbidden: Insufficient permissions.'], 403);
         }

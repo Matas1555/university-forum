@@ -5,110 +5,9 @@ import ProfilePicture from "../assets/profile-default-icon.png";
 import StarRating from "../components/starRating/starRating";
 import RichTextEditor from "../components/richTextEditor/RichTextEditor";
 import InteractiveStarRating from "../components/starRating/interactiveStarRating";
+import Tooltip from "../components/Tooltip";
+import { LecturerAPI } from "../utils/API";
 
-// Mock detailed lecturer data (in a real app this would come from an API)
-const mockLecturerData = {
-    1: {
-        id: 1,
-        name: "Rimantas Butleris",
-        age: "58",
-        profession: "Programų sistemų profesorius",
-        faculty: "Informatikos fakultetas",
-        university: "Kauno technologijos universitetas",
-        overallRating: 4.9,
-        ratings: {
-            friendliness: 4.8,
-            complexity: 3.2,
-            clarity: 4.5,
-            extraCategories: 4.1
-        },
-        reviews: [
-            {
-                id: 1,
-                user: {
-                    username: "studentas123",
-                    status: "PS bakalauras",
-                    profilePic: null
-                },
-                date: "2023-12-15",
-                comment: "Labai aiškiai dėsto medžiagą, visada pasiruošęs atsakyti į klausimus. Egzaminai sunkūs, bet teisingi.",
-                ratings: {
-                    friendliness: 4,
-                    complexity: 2,
-                    clarity: 4,
-                    extraCategories: 3
-                }
-            },
-            {
-                id: 2,
-                user: {
-                    username: "informatika_stud",
-                    status: "Absolventas",
-                    profilePic: null
-                },
-                date: "2023-11-02",
-                comment: "Vienas geriausių dėstytojų fakultete. Paskaitos įdomios ir aktualios, dažnai pateikia realius pavyzdžius iš IT sektoriaus.",
-                ratings: {
-                    friendliness: 5,
-                    complexity: 3,
-                    clarity: 5,
-                    extraCategories: 4
-                }
-            },
-            {
-                id: 3,
-                user: {
-                    username: "coding_wizard",
-                    status: "PS magistras",
-                    profilePic: null
-                },
-                date: "2023-09-18",
-                comment: "Nors užduotys kartais būna per sudėtingos, dėstytojas visada padeda ir konsultuoja. Vertinu jo profesionalumą.",
-                ratings: {
-                    friendliness: 4,
-                    complexity: 4,
-                    clarity: 4,
-                    extraCategories: 1
-                }
-            }
-        ]
-    },
-    2: {
-        id: 2,
-        name: "Vita Masteikaitė",
-        age: "42",
-        profession: "Informatikos dėstytoja",
-        faculty: "Informatikos fakultetas",
-        university: "Kauno technologijos universitetas",
-        overallRating: 4.7,
-        ratings: {
-            friendliness: 4.9,
-            complexity: 3.8,
-            clarity: 4.5,
-            extraCategories: 4.3
-        },
-        reviews: [
-            {
-                id: 1,
-                user: {
-                    username: "jane_doe",
-                    status: "IS bakalauras",
-                    profilePic: null
-                },
-                date: "2023-12-10",
-                comment: "Puikios paskaitos, labai aiškiai išdėstyti sudėtingi dalykai. Visada galima kreiptis pagalbos.",
-                ratings: {
-                    friendliness: 5,
-                    complexity: 4,
-                    clarity: 5,
-                    extraCategories: 4
-                }
-            }
-        ]
-    }
-};
-
-// Helper function to get color class based on rating
 const getRatingColorClass = (rating) => {
     if (rating <= 1) return "bg-red";
     if (rating <= 2) return "bg-red/80";
@@ -117,14 +16,6 @@ const getRatingColorClass = (rating) => {
     return "bg-green";
 };
 
-// Helper function for text colors
-const getRatingTextColorClass = (rating, starRating) => {
-    if (starRating <= 1) return "text-red";
-    if (starRating <= 2) return "text-red/80";
-    if (starRating <= 3) return "text-yellow";
-    if (starRating <= 4) return "text-green/80";
-    return "text-green";
-};
 
 const LecturerPage = () => {
     const { id } = useParams();
@@ -132,39 +23,52 @@ const LecturerPage = () => {
     const { user } = useStateContext();
     const [lecturer, setLecturer] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [newReview, setNewReview] = useState({
         comment: "",
-        ratings: {
-            friendliness: 0,
-            complexity: 0,
-            clarity: 0,
-            extraCategories: 0
-        }
+        lecture_quality_rating: 0,
+        availability_rating: 0,
+        friendliness_rating: 0
     });
 
     useEffect(() => {
-        const fetchLecturer = () => {
+        const fetchLecturer = async () => {
             setLoading(true);
             
-            setTimeout(() => {
-                const lecturerData = mockLecturerData[id];
-                if (lecturerData) {
-                    setLecturer(lecturerData);
-                }
+            try {
+                const response = await LecturerAPI.getLecturer(id);
+                setLecturer(response.data);
+                setError(null);
+            } catch (err) {
+                console.error("Error fetching lecturer data:", err);
+                setError("Failed to load lecturer data. Please try again later.");
+            } finally {
                 setLoading(false);
-            }, 500);
+            }
         };
 
         fetchLecturer();
     }, [id]);
 
     const handleRatingChange = (category, value) => {
+        let ratingKey;
+        switch(category) {
+            case 'friendliness':
+                ratingKey = 'friendliness_rating';
+                break;
+            case 'complexity':
+                ratingKey = 'availability_rating';
+                break;
+            case 'clarity':
+                ratingKey = 'lecture_quality_rating';
+                break;
+            default:
+                ratingKey = category;
+        }
+        
         setNewReview(prev => ({
             ...prev,
-            ratings: {
-                ...prev.ratings,
-                [category]: value
-            }
+            [ratingKey]: value
         }));
     };
     
@@ -175,19 +79,27 @@ const LecturerPage = () => {
         }));
     };
 
-    const handleSubmitReview = (e) => {
+    const handleSubmitReview = async (e) => {
         e.preventDefault();
-        console.log("Submitting review:", newReview);
         
-        setNewReview({
-            comment: "",
-            ratings: {
-                friendliness: 0,
-                complexity: 0,
-                clarity: 0,
-                extraCategories: 0
-            }
-        });
+        try {
+            await LecturerAPI.createReview(id, newReview);
+            
+            // Refresh lecturer data to include the new review
+            const response = await LecturerAPI.getLecturer(id);
+            setLecturer(response.data);
+            
+            // Reset form
+            setNewReview({
+                comment: "",
+                lecture_quality_rating: 0,
+                availability_rating: 0,
+                friendliness_rating: 0
+            });
+        } catch (err) {
+            console.error("Error submitting review:", err);
+            alert("Failed to submit review. Please try again later.");
+        }
     };
 
     if (loading) {
@@ -198,10 +110,10 @@ const LecturerPage = () => {
         );
     }
 
-    if (!lecturer) {
+    if (error || !lecturer) {
         return (
             <div className="flex justify-center items-center h-96">
-                <p className="text-white">Dėstytojas nerastas.</p>
+                <p className="text-white">{error || "Dėstytojas nerastas."}</p>
             </div>
         );
     }
@@ -240,7 +152,7 @@ const LecturerPage = () => {
                         <div className="flex justify-center items-center">
                             <p className="text-white text-2xl mr-2 font-medium">Bendras įvertinimas:</p>
                             <div className="flex items-center">
-                                <StarRating rating={lecturer.overallRating} width={6} />
+                                <StarRating rating={lecturer.overallRating} width={6} color='white' />
                             </div>
                         </div>
                     </div>
@@ -252,30 +164,44 @@ const LecturerPage = () => {
                     
                     <div className="space-y-6">
                         <div className="flex justify-between items-center">
-                            <p className="text-white flex items-center">Dėstymo kokybė</p>
+                            <div className="flex flex-row gap-2 items-center">
+                                <p className="text-white flex items-center">Dėstymo kokybė</p>
+                                <Tooltip 
+                                content="Dėstytojas (-ja) dėsto / aiškina / kalba įtaigiai ir suprantamai" 
+                                maxWidth={400}
+                                position="bottom" 
+                                />
+                            </div>
                             <div className="flex items-center">
-                                <StarRating rating={lecturer.ratings.friendliness} width={6} />
+                                <StarRating rating={lecturer.ratings.clarity} width={6} color='white' />
                             </div>
                         </div>
                         
                         <div className="flex justify-between items-center">
-                            <p className="text-white flex items-center">Vertinimo teisingumas</p>
+                        <div className="flex flex-row gap-2 items-center">
+                                <p className="text-white flex items-center">Pagarbus</p>
+                                <Tooltip 
+                                content="Išlaikomi kolegialūs (pagarbūs) dėstytojo (-jos) ir studentų santykiai" 
+                                maxWidth={400}
+                                position="bottom" 
+                                />
+                            </div>
                             <div className="flex items-center">
-                                <StarRating rating={lecturer.ratings.complexity} width={6} />
+                                <StarRating rating={lecturer.ratings.friendliness} width={6} color='white' />
                             </div>
                         </div>
                         
                         <div className="flex justify-between items-center">
-                            <p className="text-white flex items-center">Pasiekiamumas</p>
-                            <div className="flex items-center">
-                                <StarRating rating={lecturer.ratings.clarity} width={6} />
+                            <div className="flex flex-row gap-2 items-center">
+                                <p className="text-white flex items-center">Pasiekiamumas</p>
+                                <Tooltip 
+                                content="Studentams teikiamas grįžtamasis ryšys apie jų atliktą darbą (aptariami atsiskaitymų rezultatai, savarankiški darbai ir pan.) " 
+                                maxWidth={400}
+                                position="bottom" 
+                                />
                             </div>
-                        </div>
-                        
-                        <div className="flex justify-between items-center">
-                            <p className="text-white flex items-center">Organizuotumas</p>
                             <div className="flex items-center">
-                                <StarRating rating={lecturer.ratings.extraCategories} width={6} />
+                                <StarRating rating={lecturer.ratings.availability} width={6} color='white' />
                             </div>
                         </div>
                     </div>
@@ -289,7 +215,7 @@ const LecturerPage = () => {
                 <h2 className="text-white text-2xl font-bold mb-4 border-b border-grey pb-2">Studentų įvertinimai</h2>
 
                 {/* Add Review Form - only shown for logged-in users */}
-                {/* {user && ( */}
+                {user && (
                 <div className="bg-grey rounded-lg p-6 my-4">
                     <h3 className="text-white text-xl font-bold mb-4">Palikite atsiliepimą</h3>
                     
@@ -300,18 +226,18 @@ const LecturerPage = () => {
                                     <label className="block text-white mb-2 text-sm">Dėstymo kokybė</label>
                                     <div className="flex">
                                         <InteractiveStarRating 
-                                            initialRating={newReview.ratings.friendliness} 
+                                            initialRating={newReview.lecture_quality_rating} 
                                             width={6} 
-                                            onRatingChange={(rating) => handleRatingChange('friendliness', rating)} 
+                                            onRatingChange={(rating) => handleRatingChange('clarity', rating)} 
                                         />
                                     </div>
                                 </div>
                                 
                                 <div>
-                                    <label className="block text-white mb-2 text-sm">Vertinimo teisingumas</label>
+                                    <label className="block text-white mb-2 text-sm">Pagarbus</label>
                                     <div className="flex">
                                         <InteractiveStarRating 
-                                            initialRating={newReview.ratings.complexity} 
+                                            initialRating={newReview.availability_rating} 
                                             width={6} 
                                             onRatingChange={(rating) => handleRatingChange('complexity', rating)} 
                                         />
@@ -322,20 +248,9 @@ const LecturerPage = () => {
                                     <label className="block text-white mb-2 text-sm">Pasiekiamumas</label>
                                     <div className="flex">
                                         <InteractiveStarRating 
-                                            initialRating={newReview.ratings.clarity} 
+                                            initialRating={newReview.friendliness_rating} 
                                             width={6} 
-                                            onRatingChange={(rating) => handleRatingChange('clarity', rating)} 
-                                        />
-                                    </div>
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-white mb-2 text-sm">Organizuotumas</label>
-                                    <div className="flex">
-                                        <InteractiveStarRating 
-                                            initialRating={newReview.ratings.extraCategories} 
-                                            width={6} 
-                                            onRatingChange={(rating) => handleRatingChange('extraCategories', rating)} 
+                                            onRatingChange={(rating) => handleRatingChange('friendliness', rating)} 
                                         />
                                     </div>
                                 </div>
@@ -343,7 +258,7 @@ const LecturerPage = () => {
                             
                             <div className="md:col-span-3">
                                 <label className="block text-white mb-2">Jūsų komentaras</label>
-                                <div className="border-2 rounded-md border-light-grey p-0 w-full">
+                                <div className="border-2 rounded-md border-white p-0 w-full">
                                     <RichTextEditor 
                                         value={newReview.comment} 
                                         onChange={handleCommentChange} 
@@ -362,9 +277,9 @@ const LecturerPage = () => {
                         </div>
                     </form>
                 </div>
-                {/* )} */}
+                )}
 
-                {lecturer.reviews.map(review => (
+                {lecturer.reviews && lecturer.reviews.map(review => (
                     <div key={review.id} className="bg-grey rounded-lg p-6 mb-4">
                         <div className="flex flex-col md:flex-row mb-4">
                             <div className="flex mb-4 md:mb-0">
@@ -381,7 +296,7 @@ const LecturerPage = () => {
                                 </div>
                             </div>
                             <div className="md:ml-auto">
-                                <p className="text-light-grey text-sm">{review.date}</p>
+                                <p className="text-lighter-grey text-sm">{review.date}</p>
                             </div>
                         </div>
                         
@@ -390,19 +305,15 @@ const LecturerPage = () => {
                                 <div className="flex flex-col">
                                     <div className="flex justify-between items-center mb-1">
                                         <span className="text-white text-sm">Dėstymo kokybė:</span>
-                                        <span className={`text-white ${getRatingColorClass(review.ratings.friendliness)} rounded-lg px-2 py-1 text-sm font-bold`}>{review.ratings.friendliness}/5</span>
+                                        <span className={`text-white ${getRatingColorClass(review.ratings.lecture_quality_rating)} rounded-lg px-2 py-1 text-sm font-bold`}>{review.ratings.lecture_quality_rating}/5</span>
                                     </div>
                                     <div className="flex justify-between items-center mb-1">
                                         <span className="text-white text-sm">Vertinimo teisingumas:</span>
-                                        <span className={`text-white ${getRatingColorClass(review.ratings.complexity)} rounded-lg px-2 py-1 text-sm font-bold`}>{review.ratings.complexity}/5</span>
+                                        <span className={`text-white ${getRatingColorClass(review.ratings.availability_rating)} rounded-lg px-2 py-1 text-sm font-bold`}>{review.ratings.availability_rating}/5</span>
                                     </div>
                                     <div className="flex justify-between items-center mb-1">
                                         <span className="text-white text-sm">Pasiekiamumas:</span>
-                                        <span className={`text-white ${getRatingColorClass(review.ratings.clarity)} rounded-lg px-2 py-1 text-sm font-bold`}>{review.ratings.clarity}/5</span>
-                                    </div>
-                                    <div className="flex justify-between items-center mb-1">
-                                        <span className="text-white text-sm">Organizuotumas:</span>
-                                        <span className={`text-white ${getRatingColorClass(review.ratings.extraCategories)} rounded-lg px-2 py-1 text-sm font-bold`}>{review.ratings.extraCategories}/5</span>
+                                        <span className={`text-white ${getRatingColorClass(review.ratings.friendliness_rating)} rounded-lg px-2 py-1 text-sm font-bold`}>{review.ratings.friendliness_rating}/5</span>
                                     </div>
                                 </div>
                             </div>

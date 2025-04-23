@@ -25,7 +25,13 @@ class User extends Authenticatable implements JWTSubject
         'username',
         'email',
         'password',
-        'role_id'
+        'role_id',
+        'bio',
+        'avatar',
+        'university_id',
+        'yearOfGraduation',
+        'status_id',
+        'reputation'
     ];
 
     /**
@@ -90,6 +96,16 @@ class User extends Authenticatable implements JWTSubject
     public function comments()
     {
         return $this->hasMany(Comment::class, 'user_id');
+    }
+
+    public function university()
+    {
+        return $this->belongsTo(University::class, 'university_id');
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(Status::class, 'status_id');
     }
 
 }

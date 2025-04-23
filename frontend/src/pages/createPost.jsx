@@ -170,7 +170,7 @@ const CreatePost = () => {
         />
         
         <select
-          className="bg-grey text-white p-3 rounded-md border-r-8 border-r-grey"
+          className="bg-grey text-white p-3 rounded-md"
           name="university"
           value={formData.university}
           onChange={handleInputChange}
@@ -183,7 +183,7 @@ const CreatePost = () => {
         </select>
 
         <select
-          className="bg-grey text-white p-3 rounded-md border-r-8 border-r-grey hidden"
+          className="bg-grey text-white p-3 rounded-md hidden"
           name="university"
           value={formData.university}
           onChange={handleInputChange}
@@ -196,7 +196,7 @@ const CreatePost = () => {
         </select>
 
         <select
-          className="bg-grey text-white p-3 rounded-md border-r-8 border-r-grey hidden"
+          className="bg-grey text-white p-3 rounded-md hidden"
           name="university"
           value={formData.university}
           onChange={handleInputChange}

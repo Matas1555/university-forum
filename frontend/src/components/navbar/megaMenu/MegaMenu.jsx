@@ -2,9 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import ForumMegaPanel from './ForumMegaPanel';
 
-const MegaMenu = () => {
+const MegaMenu = ({ isOpen, setIsOpen }) => {
   const [activeMenu, setActiveMenu] = useState(null);
-  const [isVisible, setIsVisible] = useState(false);
   const timeoutRef = useRef(null);
 
   useEffect(() => {
@@ -20,23 +19,23 @@ const MegaMenu = () => {
     // Only show mega menu for 'forumai'
     if (menuName === 'forumai') {
       setActiveMenu(menuName);
-      setIsVisible(true);
+      setIsOpen(true);
     }
   };
 
   const handleMouseLeave = () => {
     timeoutRef.current = setTimeout(() => {
-      setIsVisible(false);
+      setIsOpen(false);
 
       setTimeout(() => {
-        if (!isVisible) setActiveMenu(null);
+        if (!isOpen) setActiveMenu(null);
       }, 300); 
     }, 150); 
   };
 
   const handleMenuEnter = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    setIsVisible(true);
+    setIsOpen(true);
   };
 
   return (
@@ -44,7 +43,7 @@ const MegaMenu = () => {
       <div className="flex gap-6 items-center">
         <div className='flex gap-1 items-center'>
             <NavLink 
-                to="/forumai"
+                to="/"
                 className="text-white hover:text-lght-blue transition-colors duration-150"
                 onMouseEnter={() => handleMouseEnter('forumai')}
                 >
@@ -72,7 +71,7 @@ const MegaMenu = () => {
       {/* Mega Menu Panel Container - Only for Forumai */}
       <div 
         className={`fixed left-0 w-screen top-20 bg-dark border-t border-light-grey shadow-lg shadow-white/10 transition-all duration-400 ease-in-out z-50 ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'
+          isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'
         }`}
         onMouseEnter={handleMenuEnter}
         onMouseLeave={handleMouseLeave}

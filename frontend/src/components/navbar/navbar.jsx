@@ -1,21 +1,36 @@
-import {React, useState} from "react";
+import {React, useState, useEffect} from "react";
 import { NavLink } from "react-router-dom"
 import NavLinks from "./navLinks"
 import MegaMenu from "./megaMenu"
 
 const NavBar = () => {
   const [filtersClicked, setOpenFilters] = useState(false);
+  const [megaMenuOpen, setMegaMenuOpen] = useState(false);
 
   const handleClick = () => {
     setOpenFilters(!filtersClicked);
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (megaMenuOpen) {
+        setMegaMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [megaMenuOpen]);
 
   return (
     <header className="bg-dark top-0 flex-col w-full z-[20] flex p-5">
       <div className="flex flex-row justify-between items-center">  
         <div className="flex items-center gap-10">
           <NavLink style={{ fontWeight:600, fontSize:"1.5em"}} className="text-white hover:text-lght-blue transition: duration-150 ease-linear" to='/pagrindinis'>UniForum</NavLink>  
-          <MegaMenu />
+          <MegaMenu isOpen={megaMenuOpen} setIsOpen={setMegaMenuOpen} />
         </div>
         <NavLinks></NavLinks>
       </div>
@@ -41,7 +56,7 @@ const NavBar = () => {
         <div className={`grid grid-cols-2 grid-rows-1 gap-5 w-10/12 mb-10 ${
           filtersClicked ? " " : "hidden"
         }`}> {/* Filter screen*/}
-          <select className="bg-grey text-white p-3 rounded-md border-r-8 border-r-grey">
+          <select className="bg-grey text-white p-3 rounded-md">
             <option value="none">Pasirinkite universiteta...</option>
             <option value="KTU" className="">Kauno Technologijos universitetas</option>
             <option value="KTU">Kauno Technologijos universitetas</option>
@@ -49,7 +64,7 @@ const NavBar = () => {
             <option value="KTU">Kauno Technologijos universitetas</option>
             <option value="KTU">Kauno Technologijos universitetas</option>
           </select>
-          <select className="bg-grey text-white p-3 rounded-md border-r-8 border-r-grey">
+          <select className="bg-grey text-white p-3 rounded-m">
             <option value="none">Pasirinkite universiteta...</option>
             <option value="KTU" className="">Kauno Technologijos universitetas</option>
             <option value="KTU">Kauno Technologijos universitetas</option>
@@ -57,7 +72,7 @@ const NavBar = () => {
             <option value="KTU">Kauno Technologijos universitetas</option>
             <option value="KTU">Kauno Technologijos universitetas</option>
           </select>
-          <select className="bg-grey text-white p-3 rounded-md border-r-8 border-r-grey">
+          <select className="bg-grey text-white p-3 rounded-md">
             <option value="none">Pasirinkite universiteta...</option>
             <option value="KTU" className="">Kauno Technologijos universitetas</option>
             <option value="KTU">Kauno Technologijos universitetas</option>
@@ -65,7 +80,7 @@ const NavBar = () => {
             <option value="KTU">Kauno Technologijos universitetas</option>
             <option value="KTU">Kauno Technologijos universitetas</option>
           </select>
-          <select className="bg-grey text-white p-3 rounded-md border-r-8 border-r-grey">
+          <select className="bg-grey text-white p-3 rounded-md">
             <option value="none">Pasirinkite universiteta...</option>
             <option value="KTU" className="">Kauno Technologijos universitetas</option>
             <option value="KTU">Kauno Technologijos universitetas</option>

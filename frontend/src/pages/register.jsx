@@ -7,6 +7,15 @@ import { useNavigate } from "react-router-dom";
 import Datepicker from "tailwind-datepicker-react";
 
 function Register() {
+    const [username, setUsername] = useState('');
+    const [fullName, setFullName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [passwordConfirm, setPasswordConfirm] = useState('');
+    const [bio, setBio] = useState('');
+    const [graduationYear, setGraduationYear] = useState('');
+    
+
     const usernameRef = useRef();
     const fullNameRef = useRef();
     const emailRef = useRef();
@@ -65,9 +74,6 @@ function Register() {
     }, []);
 
     useEffect(() => {
-        if (!passwordRef.current) return;
-        
-        const password = passwordRef.current.value;
         if (!password) {
             setPasswordStrength(0);
             return;
@@ -76,30 +82,25 @@ function Register() {
         let strength = 0;
         if (password.length >= 8) strength += 1;
         if (/\d/.test(password)) strength += 1;
-        if (/[!@#$%^&*]/.test(password)) strength += 1;
         if (/[A-Z]/.test(password)) strength += 1;
         
         setPasswordStrength(strength);
-    }, [passwordRef.current?.value]);
+    }, [password]);
 
     useEffect(() => {
-        if (!passwordRef.current || !passwordConfirmRef.current) return;
-        
-        if (!passwordConfirmRef.current.value) {
+        if (!passwordConfirm) {
             setPasswordMatch(true);
             return;
         }
         
-        setPasswordMatch(
-            passwordRef.current.value === passwordConfirmRef.current.value
-        );
-    }, [passwordRef.current?.value, passwordConfirmRef.current?.value]);
+        setPasswordMatch(password === passwordConfirm);
+    }, [password, passwordConfirm]);
 
     const handleUniversityChange = (university) => {
         setSelectedUniversity(university);
         setSelectedFaculty(null);
         setSelectedProgram(null);
-        
+
         if (university) {
             API.get(`/universities/${university.id}/faculties`)
                 .then(response => {
@@ -151,14 +152,14 @@ function Register() {
         const newErrors = {};
         
         if (currentStep === 1) {
-            if (!usernameRef.current.value) newErrors.username = "Slapyvardis yra privalomas";
-            if (!emailRef.current.value) newErrors.email = "El. paštas yra privalomas";
-            else if (!/\S+@\S+\.\S+/.test(emailRef.current.value)) newErrors.email = "Neteisingas el. pašto formatas";
+            if (!username) newErrors.username = "Slapyvardis yra privalomas";
+            if (!email) newErrors.email = "El. paštas yra privalomas";
+            else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Neteisingas el. pašto formatas";
             
-            if (!passwordRef.current.value) newErrors.password = "Slaptažodis yra privalomas";
-            else if (passwordStrength < 2) newErrors.password = "Slaptažodis per silpnas";
+            if (!password) newErrors.password = "Slaptažodis yra privalomas";
+            else if (passwordStrength < 1) newErrors.password = "Slaptažodis per silpnas";
             
-            if (passwordRef.current.value !== passwordConfirmRef.current.value) {
+            if (password !== passwordConfirm) {
                 newErrors.passwordConfirm = "Slaptažodžiai nesutampa";
             }
         }
@@ -188,22 +189,29 @@ function Register() {
         setFormSubmitted(true);
         
         try {
+            if (!username || !email || !password) {
+                setFormSubmitted(false);
+                setErrors({general: "Užpildykite visus privalomus laukus."});
+                return;
+            }
+            
             const formData = new FormData();
-            formData.append("username", usernameRef.current.value);
-            formData.append("fullName", fullNameRef.current?.value || "");
-            formData.append("email", emailRef.current.value);
-            formData.append("password", passwordRef.current.value);
+            formData.append("username", username);
+            formData.append("fullName", fullName);
+            formData.append("email", email);
+            formData.append("password", password);
+            formData.append("password_confirmation", passwordConfirm);
             formData.append("isStudent", isStudent);
             
             if (isStudent) {
-            formData.append("university", selectedUniversity ? selectedUniversity.id : "");
+                formData.append("university", selectedUniversity ? selectedUniversity.id : "");
                 formData.append("faculty", selectedFaculty ? selectedFaculty.id : "");
                 formData.append("program", selectedProgram ? selectedProgram.id : "");
-                formData.append("academicStatus", selectedAcademicStatus ? selectedAcademicStatus.id : "");
-                formData.append("graduationYear", graduationYearRef.current?.value || "");
+                formData.append("status_id", selectedAcademicStatus ? selectedAcademicStatus.id : "");
+                formData.append("yearOfGraduation", graduationYear);
             }
             
-            formData.append("bio", bioRef.current?.value || "");
+            formData.append("bio", bio);
     
             if (avatar) {
                 formData.append("avatar", avatar);
@@ -219,7 +227,7 @@ function Register() {
                 setUser(response.data.user);
                 setToken(response.data.access_token);
                 setRefreshToken(response.data.refresh_token);
-                navigate("/home");
+                navigate("/");
             } else {
                 console.error("Unexpected response format", response);
                 setFormSubmitted(false);
@@ -229,12 +237,19 @@ function Register() {
             setFormSubmitted(false);
             
             if (error.response?.data.errors) {
-                setErrors(error.response.data.errors);
+                const backendErrors = {};
+                Object.entries(error.response.data.errors).forEach(([key, messages]) => {
+                    backendErrors[key] = Array.isArray(messages) ? messages[0] : messages;
+                });
+                setErrors(backendErrors);
+            } else if (error.response?.data.error) {
+                setErrors({general: error.response.data.error});
+            } else {
+                setErrors({general: "Registracija nepavyko. Bandykite dar kartą."});
             }
         }
     };
 
-    // Helper components
     const ErrorMessage = ({ message }) => (
         message ? <p className="text-red text-xs mt-1">{message}</p> : null
     );
@@ -251,8 +266,10 @@ function Register() {
                     type="text" 
                     ref={usernameRef} 
                     name="username" 
-                    className="w-full bg-dark/20 bg-transparent placeholder:text-light-grey text-white text-sm border border-light-grey rounded-md px-3 py-2 transition duration-300 ease focus:border-lght-blue focus:outline-none hover:border-lght-blue shadow-sm" 
+                    className="w-full bg-dark/20  placeholder:text-light-grey text-white text-sm border border-light-grey rounded-md px-3 py-2 transition duration-300 ease focus:border-lght-blue focus:outline-none hover:border-lght-blue shadow-sm" 
                     placeholder="Įveskite vardą, kurį matys kiti naudotojai" 
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                 />
                 <ErrorMessage message={errors.username} />
                 </Field>
@@ -263,8 +280,10 @@ function Register() {
                     type="text" 
                     ref={fullNameRef} 
                     name="fullName" 
-                    className="w-full bg-dark/20 bg-transparent placeholder:text-light-grey text-white text-sm border border-light-grey rounded-md px-3 py-2 transition duration-300 ease focus:border-lght-blue focus:outline-none hover:border-lght-blue shadow-sm" 
+                    className="w-full bg-dark/20  placeholder:text-light-grey text-white text-sm border border-light-grey rounded-md px-3 py-2 transition duration-300 ease focus:border-lght-blue focus:outline-none hover:border-lght-blue shadow-sm" 
                     placeholder="Įveskite savo pilną vardą" 
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
                 />
                 </Field>
 
@@ -274,8 +293,10 @@ function Register() {
                     type="email" 
                     ref={emailRef} 
                     name="email" 
-                    className="w-full bg-dark/20 bg-transparent placeholder:text-light-grey text-white text-sm border border-light-grey rounded-md px-3 py-2 transition duration-300 ease focus:border-lght-blue focus:outline-none hover:border-lght-blue shadow-sm" 
+                    className="w-full bg-dark/20  placeholder:text-light-grey text-white text-sm border border-light-grey rounded-md px-3 py-2 transition duration-300 ease focus:border-lght-blue focus:outline-none hover:border-lght-blue shadow-sm" 
                     placeholder="Įveskite el. paštą" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                 />
                 <ErrorMessage message={errors.email} />
                 </Field>
@@ -289,6 +310,8 @@ function Register() {
                         name="password" 
                         className="w-full bg-dark/20 bg-transparent placeholder:text-light-grey text-white text-sm border border-light-grey rounded-md px-3 py-2 pr-10 transition duration-300 ease focus:border-lght-blue focus:outline-none hover:border-lght-blue shadow-sm" 
                         placeholder="Sukurkite slaptažodį" 
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                     />
                     <button 
                         type="button"
@@ -314,8 +337,10 @@ function Register() {
                         type={showConfirmPassword ? "text" : "password"} 
                         ref={passwordConfirmRef} 
                         name="passwordConfirm" 
-                        className={`w-full bg-dark/20 bg-transparent placeholder:text-light-grey text-white text-sm border ${!passwordMatch && passwordConfirmRef.current?.value ? 'border-red-500' : 'border-light-grey'} rounded-md px-3 py-2 pr-10 transition duration-300 ease focus:border-lght-blue focus:outline-none hover:border-lght-blue shadow-sm`}
+                        className={`w-full bg-dark/20 bg-transparent placeholder:text-light-grey text-white text-sm border ${!passwordMatch && passwordConfirm ? 'border-red-500' : 'border-light-grey'} rounded-md px-3 py-2 pr-10 transition duration-300 ease focus:border-lght-blue focus:outline-none hover:border-lght-blue shadow-sm`}
                         placeholder="Pakartokite slaptažodį" 
+                        value={passwordConfirm}
+                        onChange={(e) => setPasswordConfirm(e.target.value)}
                     />
                     <button 
                         type="button"
@@ -329,7 +354,7 @@ function Register() {
                         )}
                     </button>
                 </div>
-                {!passwordMatch && passwordConfirmRef.current?.value && (
+                {!passwordMatch && passwordConfirm && (
                     <p className="text-red text-xs mt-1">Slaptažodžiai nesutampa</p>
                 )}
                 {/* <ErrorMessage message={errors.passwordConfirm} /> */}
@@ -549,6 +574,8 @@ function Register() {
                     placeholder="Įveskite metus"
                     min={new Date().getFullYear()}
                     max={new Date().getFullYear() + 10}
+                    value={graduationYear}
+                    onChange={(e) => setGraduationYear(e.target.value)}
                 />
             </Field>
             
@@ -586,6 +613,8 @@ function Register() {
                     name="bio" 
                     className="w-full bg-dark/20 bg-transparent placeholder:text-light-grey text-white text-sm border border-light-grey rounded-md px-3 py-2 min-h-[100px] transition duration-300 ease focus:border-lght-blue focus:outline-none hover:border-lght-blue shadow-sm" 
                     placeholder="Papasakokite apie save..." 
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
                 />
                 </Field>
 
@@ -663,7 +692,6 @@ function Register() {
         </div>
     );
 
-    // Progress indicator
     const renderProgressIndicator = () => {
         const totalSteps = isStudent ? 3 : 2;
         
@@ -726,6 +754,12 @@ function Register() {
                         <h1 className="text-2xl font-bold text-lght-blue mb-2">Prisijunkite prie akademinės bendruomenės</h1>
                         <p className="text-light-grey">Ačiū, kad padedate kurti geresnę studijų aplinką</p>
                     </div>
+                    
+                    {errors.general && (
+                        <div className="mb-4 p-3 bg-red/10 border border-red rounded-md text-red text-center">
+                            {errors.general}
+                        </div>
+                    )}
                     
                     {renderProgressIndicator()}
                     

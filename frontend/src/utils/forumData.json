@@ -1,0 +1,783 @@
+{
+    "universities": [
+        {
+            "id": 1,
+            "name": "Vilniaus universitetas",
+            "forumId": 1
+        },
+        {
+            "id": 2,
+            "name": "Kauno technologijos universitetas",
+            "forumId": 2
+        },
+        {
+            "id": 3,
+            "name": "Vytauto Did\u017eiojo universitetas",
+            "forumId": 3
+        },
+        {
+            "id": 4,
+            "name": "Vilniaus Gedimino technikos universitetas",
+            "forumId": 4
+        },
+        {
+            "id": 5,
+            "name": "Lietuvos sveikatos moksl\u0173 universitetas",
+            "forumId": 5
+        },
+        {
+            "id": 6,
+            "name": "Klaip\u0117dos universitetas",
+            "forumId": 6
+        },
+        {
+            "id": 7,
+            "name": "Mykolo Romerio universitetas",
+            "forumId": 7
+        },
+        {
+            "id": 8,
+            "name": "Lietuvos sporto universitetas",
+            "forumId": 8
+        },
+        {
+            "id": 9,
+            "name": "Vilniaus dail\u0117s akademija",
+            "forumId": 9
+        },
+        {
+            "id": 10,
+            "name": "Lietuvos muzikos ir teatro akademija",
+            "forumId": 10
+        },
+        {
+            "id": 11,
+            "name": "ISM Vadybos ir ekonomikos universitetas",
+            "forumId": 11
+        },
+        {
+            "id": 12,
+            "name": "Lietuvos agrarini\u0173 ir mi\u0161k\u0173 moksl\u0173 centras",
+            "forumId": 12
+        },
+        {
+            "id": 13,
+            "name": "Generolo Jono \u017demai\u010dio Lietuvos karo akademija",
+            "forumId": 13
+        },
+        {
+            "id": 14,
+            "name": "Europos humanitarinis universitetas",
+            "forumId": 14
+        },
+        {
+            "id": 15,
+            "name": "Kazimiero Simonavi\u010diaus universitetas",
+            "forumId": 15
+        },
+        {
+            "id": 16,
+            "name": "LCC tarptautinis universitetas",
+            "forumId": 16
+        },
+        {
+            "id": 17,
+            "name": "Vilniaus kolegija",
+            "forumId": 17
+        },
+        {
+            "id": 18,
+            "name": "Kauno kolegija",
+            "forumId": 18
+        },
+        {
+            "id": 19,
+            "name": "Klaip\u0117dos valstybin\u0117 kolegija",
+            "forumId": 19
+        },
+        {
+            "id": 20,
+            "name": "\u0160iauli\u0173 valstybin\u0117 kolegija",
+            "forumId": 20
+        },
+        {
+            "id": 21,
+            "name": "Panev\u0117\u017eio kolegija",
+            "forumId": 21
+        },
+        {
+            "id": 22,
+            "name": "Marijampol\u0117s kolegija",
+            "forumId": 22
+        },
+        {
+            "id": 23,
+            "name": "Alytaus kolegija",
+            "forumId": 23
+        },
+        {
+            "id": 24,
+            "name": "Utenos kolegija",
+            "forumId": 24
+        },
+        {
+            "id": 25,
+            "name": "Vilniaus technologij\u0173 ir dizaino kolegija",
+            "forumId": 25
+        },
+        {
+            "id": 26,
+            "name": "Vilniaus verslo kolegija",
+            "forumId": 26
+        },
+        {
+            "id": 27,
+            "name": "Socialini\u0173 moksl\u0173 kolegija",
+            "forumId": 27
+        },
+        {
+            "id": 28,
+            "name": "Kauno mi\u0161k\u0173 ir aplinkos in\u017einerijos kolegija",
+            "forumId": 28
+        },
+        {
+            "id": 29,
+            "name": "Tarptautin\u0117 teis\u0117s ir verslo auk\u0161toji mokykla",
+            "forumId": 29
+        },
+        {
+            "id": 30,
+            "name": "Kolpingo kolegija",
+            "forumId": 30
+        },
+        {
+            "id": 31,
+            "name": "\u0160iaur\u0117s Lietuvos kolegija",
+            "forumId": 31
+        },
+        {
+            "id": 32,
+            "name": "Klaip\u0117dos verslo auk\u0161toji mokykla",
+            "forumId": 32
+        },
+        {
+            "id": 33,
+            "name": "\u017demaitijos kolegija",
+            "forumId": 33
+        },
+        {
+            "id": 34,
+            "name": "Vilniaus dizaino kolegija",
+            "forumId": 34
+        },
+        {
+            "id": 35,
+            "name": "Vilniaus kooperacijos kolegija",
+            "forumId": 35
+        }
+    ],
+    "faculties": [
+        {
+            "id": 1,
+            "name": "Chemijos ir geomoksl\u0173 fakultetas",
+            "universityId": 1,
+            "forumId": 64
+        },
+        {
+            "id": 2,
+            "name": "Ekonomikos ir verslo administravimo fakultetas",
+            "universityId": 1,
+            "forumId": 65
+        },
+        {
+            "id": 3,
+            "name": "Filologijos fakultetas",
+            "universityId": 1,
+            "forumId": 66
+        },
+        {
+            "id": 4,
+            "name": "Filosofijos fakultetas",
+            "universityId": 1,
+            "forumId": 67
+        },
+        {
+            "id": 5,
+            "name": "Fizikos fakultetas",
+            "universityId": 1,
+            "forumId": 68
+        },
+        {
+            "id": 6,
+            "name": "Gyvyb\u0117s moksl\u0173 centras",
+            "universityId": 1,
+            "forumId": 69
+        },
+        {
+            "id": 7,
+            "name": "Istorijos fakultetas",
+            "universityId": 1,
+            "forumId": 70
+        },
+        {
+            "id": 8,
+            "name": "Komunikacijos fakultetas",
+            "universityId": 1,
+            "forumId": 71
+        },
+        {
+            "id": 9,
+            "name": "Matematikos ir informatikos fakultetas",
+            "universityId": 1,
+            "forumId": 72
+        },
+        {
+            "id": 10,
+            "name": "Medicinos fakultetas",
+            "universityId": 1,
+            "forumId": 73
+        },
+        {
+            "id": 11,
+            "name": "Tarptautini\u0173 santyki\u0173 ir politikos moksl\u0173 institutas",
+            "universityId": 1,
+            "forumId": 74
+        },
+        {
+            "id": 12,
+            "name": "Teis\u0117s fakultetas",
+            "universityId": 1,
+            "forumId": 75
+        },
+        {
+            "id": 13,
+            "name": "Chemin\u0117s technologijos fakultetas",
+            "universityId": 2,
+            "forumId": 76
+        },
+        {
+            "id": 14,
+            "name": "Ekonomikos ir verslo fakultetas",
+            "universityId": 2,
+            "forumId": 77
+        },
+        {
+            "id": 15,
+            "name": "Elektros ir elektronikos fakultetas",
+            "universityId": 2,
+            "forumId": 78
+        },
+        {
+            "id": 16,
+            "name": "Informatikos fakultetas",
+            "universityId": 2,
+            "forumId": 79
+        },
+        {
+            "id": 17,
+            "name": "Matematikos ir gamtos moksl\u0173 fakultetas",
+            "universityId": 2,
+            "forumId": 80
+        },
+        {
+            "id": 18,
+            "name": "Mechanikos in\u017einerijos ir dizaino fakultetas",
+            "universityId": 2,
+            "forumId": 81
+        },
+        {
+            "id": 19,
+            "name": "Socialini\u0173, humanitarini\u0173 moksl\u0173 ir men\u0173 fakultetas",
+            "universityId": 2,
+            "forumId": 82
+        },
+        {
+            "id": 20,
+            "name": "Statybos ir architekt\u016bros fakultetas",
+            "universityId": 2,
+            "forumId": 83
+        },
+        {
+            "id": 21,
+            "name": "Ekonomikos ir vadybos fakultetas",
+            "universityId": 3,
+            "forumId": 84
+        },
+        {
+            "id": 22,
+            "name": "Gamtos moksl\u0173 fakultetas",
+            "universityId": 3,
+            "forumId": 85
+        },
+        {
+            "id": 23,
+            "name": "Humanitarini\u0173 moksl\u0173 fakultetas",
+            "universityId": 3,
+            "forumId": 86
+        },
+        {
+            "id": 24,
+            "name": "Informatikos fakultetas",
+            "universityId": 3,
+            "forumId": 87
+        },
+        {
+            "id": 25,
+            "name": "Katalik\u0173 teologijos fakultetas",
+            "universityId": 3,
+            "forumId": 88
+        },
+        {
+            "id": 26,
+            "name": "Men\u0173 fakultetas",
+            "universityId": 3,
+            "forumId": 89
+        },
+        {
+            "id": 27,
+            "name": "Muzikos akademija",
+            "universityId": 3,
+            "forumId": 90
+        },
+        {
+            "id": 28,
+            "name": "Politikos moksl\u0173 ir diplomatijos fakultetas",
+            "universityId": 3,
+            "forumId": 91
+        },
+        {
+            "id": 29,
+            "name": "Socialini\u0173 moksl\u0173 fakultetas",
+            "universityId": 3,
+            "forumId": 92
+        },
+        {
+            "id": 30,
+            "name": "\u0160vietimo akademija",
+            "universityId": 3,
+            "forumId": 93
+        },
+        {
+            "id": 31,
+            "name": "Teis\u0117s fakultetas",
+            "universityId": 3,
+            "forumId": 94
+        },
+        {
+            "id": 32,
+            "name": "\u017dem\u0117s \u016bkio akademija",
+            "universityId": 3,
+            "forumId": 95
+        },
+        {
+            "id": 33,
+            "name": "Aplinkos in\u017einerijos fakultetas",
+            "universityId": 4,
+            "forumId": 96
+        },
+        {
+            "id": 34,
+            "name": "Architekt\u016bros fakultetas",
+            "universityId": 4,
+            "forumId": 97
+        },
+        {
+            "id": 35,
+            "name": "Elektronikos fakultetas",
+            "universityId": 4,
+            "forumId": 98
+        },
+        {
+            "id": 36,
+            "name": "Fundamentini\u0173 moksl\u0173 fakultetas",
+            "universityId": 4,
+            "forumId": 99
+        },
+        {
+            "id": 37,
+            "name": "K\u016brybini\u0173 industrij\u0173 fakultetas",
+            "universityId": 4,
+            "forumId": 100
+        },
+        {
+            "id": 38,
+            "name": "Mechanikos fakultetas",
+            "universityId": 4,
+            "forumId": 101
+        },
+        {
+            "id": 39,
+            "name": "Statybos fakultetas",
+            "universityId": 4,
+            "forumId": 102
+        },
+        {
+            "id": 40,
+            "name": "Transporto in\u017einerijos fakultetas",
+            "universityId": 4,
+            "forumId": 103
+        },
+        {
+            "id": 41,
+            "name": "Verslo vadybos fakultetas",
+            "universityId": 4,
+            "forumId": 104
+        },
+        {
+            "id": 42,
+            "name": "Medicinos fakultetas",
+            "universityId": 5,
+            "forumId": 105
+        },
+        {
+            "id": 43,
+            "name": "Odontologijos fakultetas",
+            "universityId": 5,
+            "forumId": 106
+        },
+        {
+            "id": 44,
+            "name": "Farmacijos fakultetas",
+            "universityId": 5,
+            "forumId": 107
+        },
+        {
+            "id": 45,
+            "name": "Slaugos fakultetas",
+            "universityId": 5,
+            "forumId": 108
+        },
+        {
+            "id": 46,
+            "name": "Veterinarijos fakultetas",
+            "universityId": 5,
+            "forumId": 109
+        },
+        {
+            "id": 47,
+            "name": "Gyvulininkyst\u0117s technologijos fakultetas",
+            "universityId": 5,
+            "forumId": 110
+        },
+        {
+            "id": 48,
+            "name": "J\u016bros tyrim\u0173 institutas",
+            "universityId": 6,
+            "forumId": 111
+        },
+        {
+            "id": 49,
+            "name": "J\u016bros technologij\u0173 ir gamtos moksl\u0173 fakultetas",
+            "universityId": 6,
+            "forumId": 112
+        },
+        {
+            "id": 50,
+            "name": "Socialini\u0173 ir humanitarini\u0173 moksl\u0173 fakultetas",
+            "universityId": 6,
+            "forumId": 113
+        },
+        {
+            "id": 51,
+            "name": "Sveikatos moksl\u0173 fakultetas",
+            "universityId": 6,
+            "forumId": 114
+        },
+        {
+            "id": 52,
+            "name": "Teis\u0117s mokykla",
+            "universityId": 7,
+            "forumId": 115
+        },
+        {
+            "id": 53,
+            "name": "Vie\u0161ojo saugumo akademija",
+            "universityId": 7,
+            "forumId": 116
+        },
+        {
+            "id": 54,
+            "name": "Vie\u0161ojo valdymo ir verslo fakultetas",
+            "universityId": 7,
+            "forumId": 117
+        },
+        {
+            "id": 55,
+            "name": "\u017dmogaus ir visuomen\u0117s studij\u0173 fakultetas",
+            "universityId": 7,
+            "forumId": 118
+        },
+        {
+            "id": 56,
+            "name": "Sporto biomedicinos fakultetas",
+            "universityId": 8,
+            "forumId": 119
+        },
+        {
+            "id": 57,
+            "name": "Sporto edukologijos fakultetas",
+            "universityId": 8,
+            "forumId": 120
+        },
+        {
+            "id": 58,
+            "name": "Sporto vadybos, ekonomikos ir sociologijos katedra",
+            "universityId": 8,
+            "forumId": 121
+        }
+    ],
+    "programs": [
+        {
+            "id": 1,
+            "name": "Informatika",
+            "facultyId": 9,
+            "forumId": 127
+        },
+        {
+            "id": 2,
+            "name": "Program\u0173 sistemos",
+            "facultyId": 9,
+            "forumId": 128
+        },
+        {
+            "id": 3,
+            "name": "Duomen\u0173 mokslas",
+            "facultyId": 9,
+            "forumId": 129
+        },
+        {
+            "id": 4,
+            "name": "Program\u0173 sistem\u0173 in\u017einerija",
+            "facultyId": 9,
+            "forumId": 130
+        },
+        {
+            "id": 5,
+            "name": "Verslo administravimas",
+            "facultyId": 2,
+            "forumId": 131
+        },
+        {
+            "id": 6,
+            "name": "Finansai",
+            "facultyId": 2,
+            "forumId": 132
+        },
+        {
+            "id": 7,
+            "name": "Verslo finansai",
+            "facultyId": 2,
+            "forumId": 133
+        },
+        {
+            "id": 8,
+            "name": "Program\u0173 sistemos",
+            "facultyId": 16,
+            "forumId": 134
+        },
+        {
+            "id": 9,
+            "name": "Informatikos in\u017einerija",
+            "facultyId": 16,
+            "forumId": 135
+        },
+        {
+            "id": 10,
+            "name": "Informatika",
+            "facultyId": 16,
+            "forumId": 136
+        },
+        {
+            "id": 11,
+            "name": "Multimedijos technologijos",
+            "facultyId": 16,
+            "forumId": 137
+        },
+        {
+            "id": 12,
+            "name": "Program\u0173 sistem\u0173 in\u017einerija",
+            "facultyId": 16,
+            "forumId": 138
+        },
+        {
+            "id": 13,
+            "name": "Informacini\u0173 sistem\u0173 in\u017einerija",
+            "facultyId": 16,
+            "forumId": 139
+        },
+        {
+            "id": 14,
+            "name": "Verslo administravimas",
+            "facultyId": 14,
+            "forumId": 140
+        },
+        {
+            "id": 15,
+            "name": "Finansai",
+            "facultyId": 14,
+            "forumId": 141
+        },
+        {
+            "id": 16,
+            "name": "Ekonomika",
+            "facultyId": 14,
+            "forumId": 142
+        },
+        {
+            "id": 17,
+            "name": "Tarptautinis verslas",
+            "facultyId": 14,
+            "forumId": 143
+        },
+        {
+            "id": 18,
+            "name": "Informatika",
+            "facultyId": 24,
+            "forumId": 144
+        },
+        {
+            "id": 19,
+            "name": "Multimedija ir interneto technologijos",
+            "facultyId": 24,
+            "forumId": 145
+        },
+        {
+            "id": 20,
+            "name": "Program\u0173 sistemos",
+            "facultyId": 24,
+            "forumId": 146
+        },
+        {
+            "id": 21,
+            "name": "Taikomoji informatika",
+            "facultyId": 24,
+            "forumId": 147
+        },
+        {
+            "id": 22,
+            "name": "Ekonomika",
+            "facultyId": 21,
+            "forumId": 148
+        },
+        {
+            "id": 23,
+            "name": "Verslo administravimas",
+            "facultyId": 21,
+            "forumId": 149
+        },
+        {
+            "id": 24,
+            "name": "Marketingas ir tarptautin\u0117 komercija",
+            "facultyId": 21,
+            "forumId": 150
+        },
+        {
+            "id": 25,
+            "name": "Finansai",
+            "facultyId": 21,
+            "forumId": 151
+        },
+        {
+            "id": 26,
+            "name": "Informacin\u0117s technologijos",
+            "facultyId": 32,
+            "forumId": 152
+        },
+        {
+            "id": 27,
+            "name": "In\u017einerin\u0117 informatika",
+            "facultyId": 32,
+            "forumId": 153
+        },
+        {
+            "id": 28,
+            "name": "Multimedijos in\u017einerija",
+            "facultyId": 32,
+            "forumId": 154
+        },
+        {
+            "id": 29,
+            "name": "Informacini\u0173 sistem\u0173 program\u0173 in\u017einerija",
+            "facultyId": 32,
+            "forumId": 155
+        },
+        {
+            "id": 30,
+            "name": "Medicina",
+            "facultyId": 39,
+            "forumId": 156
+        },
+        {
+            "id": 31,
+            "name": "Slauga",
+            "facultyId": 39,
+            "forumId": 157
+        },
+        {
+            "id": 32,
+            "name": "Visuomen\u0117s sveikata",
+            "facultyId": 39,
+            "forumId": 158
+        },
+        {
+            "id": 33,
+            "name": "Medicinin\u0117 ir veterinarin\u0117 genetika",
+            "facultyId": 39,
+            "forumId": 159
+        },
+        {
+            "id": 34,
+            "name": "Informatika",
+            "facultyId": 46,
+            "forumId": 160
+        },
+        {
+            "id": 35,
+            "name": "J\u016br\u0173 transporto in\u017einerija",
+            "facultyId": 46,
+            "forumId": 161
+        },
+        {
+            "id": 36,
+            "name": "Laivybos ir uost\u0173 in\u017einerija",
+            "facultyId": 46,
+            "forumId": 162
+        },
+        {
+            "id": 37,
+            "name": "Teis\u0117",
+            "facultyId": 47,
+            "forumId": 163
+        },
+        {
+            "id": 38,
+            "name": "Teis\u0117 ir policijos veikla",
+            "facultyId": 47,
+            "forumId": 164
+        },
+        {
+            "id": 39,
+            "name": "Tarptautin\u0117 ir Europos S\u0105jungos teis\u0117",
+            "facultyId": 47,
+            "forumId": 165
+        },
+        {
+            "id": 40,
+            "name": "Fizinis ugdymas",
+            "facultyId": 51,
+            "forumId": 166
+        },
+        {
+            "id": 41,
+            "name": "Treniravimo sistemos",
+            "facultyId": 51,
+            "forumId": 167
+        },
+        {
+            "id": 42,
+            "name": "K\u016bno kult\u016bros ir sporto edukologija",
+            "facultyId": 51,
+            "forumId": 168
+        }
+    ]
+}

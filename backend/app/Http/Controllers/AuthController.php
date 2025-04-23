@@ -48,21 +48,46 @@ class AuthController extends Controller
     {
         $data = $request->validated();
 
-       if(!$token = auth('api')->attempt($data)) {
-           return response()->json(['error' => 'Unauthorized'], 401);
-       }
+        if(!$token = auth('api')->attempt($data)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
 
-       $user = auth('api')->user();
-       $profile = Profile::where('user_id', $user->id)->first();
+        $user = auth('api')->user();
 
-       $profile->avatar_url = $profile->avatar_url;
+        $avatarUrl = null;
+        if ($user->avatar) {
+            $avatarUrl = url('storage/' . $user->avatar);
+        }
 
-       $refreshToken = auth('api')->claims(['refresh' => true])->tokenById($user->id);
+        $universityName = null;
+        if ($user->university_id) {
+            $university = University::find($user->university_id);
+            if ($university) {
+                $universityName = $university->name;
+            }
+        }
 
-        // Add role information to the access token
+        $refreshToken = auth('api')->claims(['refresh' => true])->tokenById($user->id);
+
         $accessToken = JWTAuth::claims(['role' => $user->role->name])->fromUser($user);
 
-       return $this->respondWithToken($accessToken, $refreshToken, $profile);
+        return response()->json([
+            'access_token' => $accessToken,
+            'refresh_token' => $refreshToken,
+            'token_type' => 'bearer',
+            'user' => [
+                'id' => $user->id,
+                'username' => $user->username,
+                'email' => $user->email,
+                'bio' => $user->bio,
+                'university' => $universityName,
+                'yearOfGraduation' => $user->yearOfGraduation,
+                'status_id' => $user->status_id,
+                'avatar_url' => $avatarUrl,
+                'reputation' => $user->reputation
+            ],
+            'expires_in' => auth('api')->factory()->getTTL(),
+        ]);
     }
 
     public function register(RegisterRequest $request): \Illuminate\Http\JsonResponse
@@ -70,35 +95,56 @@ class AuthController extends Controller
         try{
             $data = $request->validated();
 
-            $user = User::create([
-                'username' => $data['username'],
-                'email' => $data['email'],
-                'password' => Hash::make($data['password']),
-                'role_id' => 2
-            ]);
-
             $avatarPath = null;
             if ($request->hasFile('avatar')) {
                 $avatarPath = $request->file('avatar')->store('avatars', 'public');
             }
 
-            $profile = Profile::create([
-                'user_id' => $user->id,
+            $user = User::create([
                 'username' => $data['username'],
                 'email' => $data['email'],
-                'university' => $data['university'] ?? null,
+                'password' => Hash::make($data['password']),
+                'role_id' => 2, // Default to regular user
+                'bio' => $data['bio'] ?? null,
+                'university_id' => $data['university_id'] ?? null,
                 'yearOfGraduation' => $data['yearOfGraduation'] ?? null,
                 'avatar' => $avatarPath,
-                'bio' => $data['bio'] ?? null,
+                'reputation' => 0
             ]);
 
-            $profile->avatar_url = $profile->avatar_url;
+            $universityName = null;
+            if ($user->university_id) {
+                $university = University::find($user->university_id);
+                if ($university) {
+                    $universityName = $university->name;
+                }
+            }
+
+            $avatarUrl = null;
+            if ($avatarPath) {
+                $avatarUrl = url('storage/' . $avatarPath);
+            }
 
             $token = JWTAuth::claims(['role' => "User"])->fromUser($user);
-
             $refreshToken = auth('api')->claims(['refresh' => true])->tokenById($user->id);
 
-            return $this->respondWithToken($token, $refreshToken, $profile);
+            return response()->json([
+                'access_token' => $token,
+                'refresh_token' => $refreshToken,
+                'token_type' => 'bearer',
+                'user' => [
+                    'id' => $user->id,
+                    'username' => $user->username,
+                    'email' => $user->email,
+                    'bio' => $user->bio,
+                    'university' => $universityName,
+                    'yearOfGraduation' => $user->yearOfGraduation,
+                    'status_id' => $user->status_id,
+                    'avatar_url' => $avatarUrl,
+                    'reputation' => $user->reputation
+                ],
+                'expires_in' => auth('api')->factory()->getTTL(),
+            ]);
         } catch(\Illuminate\Validation\ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
         }
@@ -112,18 +158,33 @@ class AuthController extends Controller
     public function me()
     {
         $user = auth('api')->user();
-        $profile = Profile::where('user_id', $user->id)->first();
+
+        // Get the user's university name if university_id exists
+        $universityName = null;
+        if ($user->university_id) {
+            $university = University::find($user->university_id);
+            if ($university) {
+                $universityName = $university->name;
+            }
+        }
+
+        // Prepare avatar URL
+        $avatarUrl = null;
+        if ($user->avatar) {
+            $avatarUrl = url('storage/' . $user->avatar);
+        }
 
         return response()->json([
             'user' => [
-                'id' => $profile->id,
-                'username' => $profile->username,
-                'email' => $profile->email,
-                'bio' => $profile->bio,
-                'university' => $profile->university->name,
-                'yearOfGraduation' => $profile->yearOfGraduation,
-                'status_id' => $profile->status_id,
-                'avatar_url' => $profile->avatar_url, // Include the full avatar URL
+                'id' => $user->id,
+                'username' => $user->username,
+                'email' => $user->email,
+                'bio' => $user->bio,
+                'university' => $universityName,
+                'yearOfGraduation' => $user->yearOfGraduation,
+                'status_id' => $user->status_id,
+                'avatar_url' => $avatarUrl,
+                'reputation' => $user->reputation
             ],
         ]);
     }
@@ -149,30 +210,37 @@ class AuthController extends Controller
      */
     public function refresh()
     {
-        return $this->respondWithToken(auth('api')->refresh());
-    }
+        $token = auth('api')->refresh();
+        $user = auth('api')->user();
 
-    /**
-     * Get the token array structure.
-     *
-     * @param  string $token
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function respondWithToken($token, $refreshToken, $profile)
-    {
+        // Get university name
+        $universityName = null;
+        if ($user->university_id) {
+            $university = University::find($user->university_id);
+            if ($university) {
+                $universityName = $university->name;
+            }
+        }
+
+        // Get avatar URL
+        $avatarUrl = null;
+        if ($user->avatar) {
+            $avatarUrl = url('storage/' . $user->avatar);
+        }
+
         return response()->json([
             'access_token' => $token,
-            'refresh_token' => $refreshToken,
             'token_type' => 'bearer',
             'user' => [
-                'id' => $profile->id,
-                'username' => $profile->username,
-                'email' => $profile->email,
-                'bio' => $profile->bio,
-                'university' => $profile->university ? $profile->university->name : null,
-                'yearOfGraduation' => $profile->yearOfGraduation,
-                'status_id' => $profile->status_id,
-                'avatar_url' => $profile->avatar_url, // Include the full avatar URL
+                'id' => $user->id,
+                'username' => $user->username,
+                'email' => $user->email,
+                'bio' => $user->bio,
+                'university' => $universityName,
+                'yearOfGraduation' => $user->yearOfGraduation,
+                'status_id' => $user->status_id,
+                'avatar_url' => $avatarUrl,
+                'reputation' => $user->reputation
             ],
             'expires_in' => auth('api')->factory()->getTTL(),
         ]);
@@ -188,20 +256,84 @@ class AuthController extends Controller
             }
 
             $refreshToken = str_replace('Bearer ', '', $refreshToken);
-            // Use the refresh token to get a new access token
+
             $newToken = auth('api')->setToken($refreshToken)->refresh();
 
             $user = auth('api')->user();
-            $profile = Profile::where('user_id', $user->id)->first();
+
+            $universityName = null;
+            if ($user->university_id) {
+                $university = University::find($user->university_id);
+                if ($university) {
+                    $universityName = $university->name;
+                }
+            }
+
+            $avatarUrl = null;
+            if ($user->avatar) {
+                $avatarUrl = url('storage/' . $user->avatar);
+            }
 
             return response()->json([
                 'access_token' => $newToken,
                 'token_type' => 'bearer',
-                'user' => $profile,
+                'user' => [
+                    'id' => $user->id,
+                    'username' => $user->username,
+                    'email' => $user->email,
+                    'bio' => $user->bio,
+                    'university' => $universityName,
+                    'yearOfGraduation' => $user->yearOfGraduation,
+                    'status_id' => $user->status_id,
+                    'avatar_url' => $avatarUrl,
+                    'reputation' => $user->reputation
+                ],
                 'expires_in' => auth('api')->factory()->getTTL(),
             ]);
         } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
             return response()->json(['error' => 'Invalid token'], 401);
         }
+    }
+
+    private function formatUserData($user, $token = null, $refreshToken = null)
+    {
+        $universityName = null;
+        if ($user->university_id) {
+            $university = University::find($user->university_id);
+            if ($university) {
+                $universityName = $university->name;
+            }
+        }
+
+        $avatarUrl = null;
+        if ($user->avatar) {
+            $avatarUrl = url('storage/' . $user->avatar);
+        }
+
+        $response = [
+            'user' => [
+                'id' => $user->id,
+                'username' => $user->username,
+                'email' => $user->email,
+                'bio' => $user->bio,
+                'university' => $universityName,
+                'yearOfGraduation' => $user->yearOfGraduation,
+                'status_id' => $user->status_id,
+                'avatar_url' => $avatarUrl,
+                'reputation' => $user->reputation
+            ]
+        ];
+
+        if ($token) {
+            $response['access_token'] = $token;
+            $response['token_type'] = 'bearer';
+            $response['expires_in'] = auth('api')->factory()->getTTL();
+        }
+
+        if ($refreshToken) {
+            $response['refresh_token'] = $refreshToken;
+        }
+
+        return $response;
     }
 }

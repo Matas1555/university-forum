@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 body {
-    @apply font-iter;
+    @apply font-grotesk;
 }
 
 /* Custom scrollbar styles */

@@ -1,76 +1,201 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../../utils/API";
-import { Label, Input, Field, Textarea, Select, Listbox, ListboxButton, ListboxOptions, ListboxOption} from '@headlessui/react';
-import { NavLink } from "react-router-dom";
+import StarRating from "../starRating/starRating";
 
-export default function UniversityList(){
+export default function UniversityList() {
     const [universities, setUniversities] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [cityFilter, setCityFilter] = useState("");
+    const navigate = useNavigate();
 
     useEffect(() => {
         setIsLoading(true);
         API.get('/universities').then((response) => {
-            console.log(response);
             setUniversities(response.data);
             setIsLoading(false);
-        })
-    }, [])
+        }).catch(error => {
+            console.error("Error fetching universities:", error);
+            setIsLoading(false);
+            // Fallback to mock data if API fails
+            setUniversities([
+                {
+                    id: 1,
+                    name: "Kauno Technologijos universitetas",
+                    location: "Kaunas",
+                    rating: 4.5,
+                    reviewCount: 154,
+                    facultiesCount: 12,
+                    programsCount: 96,
+                    discussionsCount: 542,
+                    picture: "ktu-logo.jpg"
+                },
+                {
+                    id: 2,
+                    name: "Vilniaus universitetas",
+                    location: "Vilnius",
+                    rating: 4.7,
+                    reviewCount: 210,
+                    facultiesCount: 14,
+                    programsCount: 103,
+                    discussionsCount: 685,
+                    picture: "vu-logo.jpg"
+                },
+                {
+                    id: 3,
+                    name: "Vytauto Didžiojo universitetas",
+                    location: "Kaunas",
+                    rating: 4.2,
+                    reviewCount: 89,
+                    facultiesCount: 10,
+                    programsCount: 74,
+                    discussionsCount: 423,
+                    picture: "vdu-logo.jpg"
+                },
+                {
+                    id: 4,
+                    name: "Klaipėdos universitetas",
+                    location: "Klaipėda",
+                    rating: 4.0,
+                    reviewCount: 65,
+                    facultiesCount: 8,
+                    programsCount: 52,
+                    discussionsCount: 287,
+                    picture: "ku-logo.jpg"
+                }
+            ]);
+        });
+    }, []);
 
-    return(
-        <>
+    const handleSearch = () => {
+        console.log("Searching with:", searchQuery, cityFilter);
+    };
 
-        <div className="flex flex-col gap-20 lg:flex-row">
-            <div className="top-32 h-auto w-3/5 m-auto lg:w-1/5 lg:m-0 lg:sticky lg:self-start">
-                <Field className="mb-4">
-                    <Label className="text-blue mb-3" style={{ fontSize:"1.2em"}}>Raktažodis</Label>
-                    <Input type="text" name="email" className="w-full bg-lightest-blue bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg"/>
-                </Field>
-                <Field className="mb-4">
-                    <Label className="text-blue mb-3" style={{ fontSize:"1.2em"}}>Miestas</Label>
-                    <Input type="text" name="email" className="w-full bg-lightest-blue bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:border-blue focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow-lg"/>
-                </Field>
-                <div className="flex gap-4 mt-8">
-                    <button className="pl-4 pr-4 pt-1 pb-2 text-center bg-lightest-blue border-blue rounded-md border-2 border-slate-300 text-blue text-xl hover:bg-blue hover:text-lightest-blue duration-300 transition-colors"  
-                        >Ieškoti
-                    </button>
+    const handleOpenUniversity = (id, name) => {
+        navigate(`/universitetas/${id}`, { 
+            state: { 
+                universityName: name,
+                breadcrumbs: [
+                    { label: 'Pagrindinis', path: '/' },
+                    { label: 'Universitetai', path: '/universitetai' },
+                    { label: name, path: `/universitetas/${id}` }
+                ]
+            } 
+        });
+    };
+
+    // Filter universities based on search query and city
+    const filteredUniversities = universities.filter(uni => {
+        const matchesSearch = uni.name.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesCity = cityFilter ? uni.location.toLowerCase() === cityFilter.toLowerCase() : true;
+        return matchesSearch && matchesCity;
+    });
+
+    return (
+        <div className="flex flex-col gap-8 lg:flex-row">
+            {/* Sidebar filters */}
+            <div className="top-32 h-auto w-full lg:w-1/5 lg:sticky lg:self-start bg-grey rounded-md p-4">
+                <h2 className="text-white font-bold text-xl mb-4">Filtrai</h2>
+                
+                <div className="mb-4">
+                    <label className="text-white block mb-2">Raktažodis</label>
+                    <input 
+                        type="text" 
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-dark text-white rounded-md p-2 border border-light-grey"
+                        placeholder="Ieškoti universiteto..."
+                    />
                 </div>
+                
+                <div className="mb-6">
+                    <label className="text-white block mb-2">Miestas</label>
+                    <select 
+                        value={cityFilter}
+                        onChange={(e) => setCityFilter(e.target.value)}
+                        className="w-full bg-dark text-white rounded-md p-2 border border-light-grey"
+                    >
+                        <option value="">Visi miestai</option>
+                        <option value="Vilnius">Vilnius</option>
+                        <option value="Kaunas">Kaunas</option>
+                        <option value="Klaipėda">Klaipėda</option>
+                        <option value="Šiauliai">Šiauliai</option>
+                    </select>
+                </div>
+                
+                <button 
+                    onClick={handleSearch}
+                    className="w-full bg-lght-blue text-white font-medium py-2 px-4 rounded-md hover:bg-blue-600 transition-colors"
+                >
+                    Ieškoti
+                </button>
             </div>
+            
+            {/* University grid */}
             {isLoading ? (
-                <div className="w-8 h-8 border-4 rounded-full border-dotted border-t-lime-400 animate-spin m-auto mt-0">
+                <div className="flex-1 flex justify-center items-center py-20">
+                    <div className="w-12 h-12 border-4 border-t-lght-blue border-r-lght-blue border-light-grey rounded-full animate-spin"></div>
                 </div>
-            ):(
-                <div className="flex flex-col gap-20 w-4/5 pb-20 m-auto">
-                    {universities.map((value) => (
-                        <NavLink to={`/university`}>
-                        <div key={value.id} className="group border-2 w-full h-60 flex flex-row overflow-hidden relative shadow-none transition-shadow duration-300 cursor-pointer hover:shadow-2xl hover:shadow-gray-500 ">
-                            <div className="relative w-2/5">
-                                <img
-                                    className="border-r-2 absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                                    src={`../../public/assets/${value.picture}`}
-                                    alt="University Logo"
-                                    loading="lazy"
-                                />
-                            </div>
-                            <div className="relative flex-grow flex flex-col justify-center items-center w-3/5 p-4">
-                                <div 
-                                    style={{  fontWeight: 800, fontSize: "1.5em" }} 
-                                    className="text-blue text-center"
-                                >
-                                    {value.name}
+            ) : (
+                <div className="flex-1">
+                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3 md:gap-8">
+                        {filteredUniversities.map((university) => (
+                            <div 
+                                key={university.id}
+                                className="flex flex-col bg-grey rounded-md text-white overflow-hidden hover:bg-dark transition-colors duration-300 cursor-pointer group"
+                                onClick={() => handleOpenUniversity(university.id, university.name)}
+                            >
+                                <div className="relative">
+                                    <img 
+                                        src="../assets/KTU.jpg" 
+                                        alt={university.name}
+                                        className="w-full h-48 object-cover"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = "/assets/university-placeholder.jpg";
+                                        }}
+                                    />
+                                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-dark to-transparent h-1/2"></div>
                                 </div>
-                                <div 
-                                    className="absolute bottom-4 right-4 text-blue text-sm"
-                                >
-                                    {value.location}
+                                <div className="p-4 flex flex-col h-full">
+                                    <h3 className="text-lg font-bold group-hover:text-lght-blue transition-colors duration-300">
+                                        {university.name}
+                                    </h3>
+                                    
+                                    <div className="flex-grow"></div>
+                                    <div className="flex items-center mt-2 mb-3">
+                                        <StarRating rating={university.rating} width={4} />
+                                        <span className="ml-2 text-light-grey text-sm">
+                                            ({university.rating_count} {university.rating_count === 1 
+                                            ? 'atsiliepimas' 
+                                            : (university.rating_count >= 2 && university.rating_count <= 9) 
+                                                ? 'atsiliepimai' 
+                                                : 'atsiliepimų'})
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-end text-sm mt-auto">
+                                        <div>
+                                            <p className="text-light-grey">Fakultetai</p>
+                                            <p className="font-medium">{university.faculty_count}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-light-grey">Studijų programos</p>
+                                            <p className="font-medium">{university.program_count}</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                        ))}
+                    </div>
+                    
+                    {filteredUniversities.length === 0 && (
+                        <div className="bg-grey rounded-md p-8 text-center">
+                            <p className="text-light-grey">Nerasta universitetų pagal pasirinktus kriterijus.</p>
                         </div>
-                        </NavLink>
-                    ))}
+                    )}
                 </div>
             )}
-            
         </div>
-        </>
-    )
+    );
 }

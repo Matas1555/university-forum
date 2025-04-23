@@ -1,38 +1,24 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-
-// Mock data for universities, faculties, and programs
-const universities = [
-  { id: 1, name: 'Kauno Technologijos universitetas' },
-  { id: 2, name: 'Vilniaus universitetas' },
-  { id: 3, name: 'Vytauto Didžiojo universitetas' }
-];
-
-const faculties = [
-  { id: 1, universityId: 1, name: 'Informatikos fakultetas' },
-  { id: 2, universityId: 1, name: 'Ekonomikos fakultetas' },
-  { id: 3, universityId: 1, name: 'Mechanikos fakultetas' },
-  { id: 4, universityId: 2, name: 'Matematikos fakultetas' },
-  { id: 5, universityId: 2, name: 'Fizikos fakultetas' },
-  { id: 6, universityId: 3, name: 'Politikos mokslų fakultetas' }
-];
-
-const programs = [
-  { id: 1, facultyId: 1, name: 'Programų sistemos' },
-  { id: 2, facultyId: 1, name: 'Dirbtinis intelektas' },
-  { id: 3, facultyId: 1, name: 'Informacinės sistemos' },
-  { id: 4, facultyId: 2, name: 'Finansai' },
-  { id: 5, facultyId: 2, name: 'Ekonomika' },
-  { id: 6, facultyId: 3, name: 'Mechanikos inžinerija' },
-  { id: 7, facultyId: 4, name: 'Matematika ir statistika' },
-  { id: 8, facultyId: 5, name: 'Fizika' },
-  { id: 9, facultyId: 6, name: 'Politikos mokslai' }
-];
+import { useForumData } from '../../../context/ForumDataContext';
 
 const ForumMegaPanel = () => {
   const navigate = useNavigate();
   const [hoveredUniversity, setHoveredUniversity] = useState(null);
   const [hoveredFaculty, setHoveredFaculty] = useState(null);
+  const { universities, faculties, programs, isLoading } = useForumData();
+
+  const disableScroll = () => {
+    document.body.style.overflow = 'hidden';
+  };
+
+  const enableScroll = () => {
+    document.body.style.overflow = '';
+  };
+
+  const sortedUniversities = [...universities].sort((a, b) => 
+    a.name.localeCompare(b.name)
+  );
 
   const getFacultiesForUniversity = (universityId) => {
     return faculties.filter(faculty => faculty.universityId === universityId);
@@ -50,7 +36,6 @@ const ForumMegaPanel = () => {
     return faculties.find(faculty => faculty.id === id);
   };
 
-  // Navigation handlers
   const handleNavigateToGeneralForum = (e, path, forumName) => {
     e.preventDefault();
     navigate(path, {
@@ -67,62 +52,60 @@ const ForumMegaPanel = () => {
     window.scrollTo(0, 0);
   };
 
-  const handleNavigateToUniversity = (e, universityId) => {
+  const handleNavigateToUniversity = (e, university) => {
     e.preventDefault();
-    const university = getUniversityById(universityId);
-    navigate(`/forumai/universitetai/${universityId}/irasai`, {
+    const forumId = university.forumId;
+    navigate(`/forumai/universitetai/${university.forumId}/irasai`, {
       state: {
         forumType: 'university',
-        forumId: universityId,
+        forumId: forumId,
         forumName: university.name,
         breadcrumb: [
           { label: 'Forumai', path: '/forumai' },
           { label: 'Universitetai', path: '/pagrindinis' },
-          { label: university.name, path: `/forumai/universitetai/${universityId}/irasai` }
+          { label: university.name, path: `/forumai/universitetai/${university.forumId}/irasai` }
         ]
       }
     });
     window.scrollTo(0, 0);
   };
 
-  const handleNavigateToFaculty = (e, universityId, facultyId) => {
+  const handleNavigateToFaculty = (e, university, faculty) => {
     e.preventDefault();
-    const university = getUniversityById(universityId);
-    const faculty = getFacultyById(facultyId);
-    navigate(`/forumai/universitetai/${universityId}/fakultetai/${facultyId}/irasai`, {
+    const forumId = faculty.forumId;
+    navigate(`/forumai/universitetai/${university.forumId}/fakultetai/${faculty.forumId}/irasai`, {
       state: {
-        forumType: 'university',
-        forumId: universityId,
+        forumType: 'faculty',
+        forumId: forumId,
         forumName: faculty.name,
-        facultyId: facultyId,
+        facultyId: faculty.id,
         breadcrumb: [
           { label: 'Forumai', path: '/forumai' },
           { label: 'Universitetai', path: '/pagrindinis' },
-          { label: university.name, path: `/forumai/universitetai/${universityId}/irasai` },
-          { label: faculty.name, path: `/forumai/universitetai/${universityId}/fakultetai/${facultyId}/irasai` }
+          { label: university.name, path: `/forumai/universitetai/${university.forumId}/irasai` },
+          { label: faculty.name, path: `/forumai/universitetai/${university.forumId}/fakultetai/${faculty.forumId}/irasai` }
         ]
       }
     });
     window.scrollTo(0, 0);
   };
 
-  const handleNavigateToProgram = (e, universityId, facultyId, programId, programName) => {
+  const handleNavigateToProgram = (e, university, faculty, program) => {
     e.preventDefault();
-    const university = getUniversityById(universityId);
-    const faculty = getFacultyById(facultyId);
-    navigate(`/forumai/universitetai/${universityId}/fakultetai/${facultyId}/programos/${programId}/irasai`, {
+    const forumId = program.forumId;
+    navigate(`/forumai/universitetai/${university.forumId}/fakultetai/${faculty.forumId}/programos/${program.forumId}/irasai`, {
       state: {
-        forumType: 'university',
-        forumId: universityId,
-        forumName: programName,
-        facultyId: facultyId,
-        programId: programId,
+        forumType: 'program',
+        forumId: forumId,
+        forumName: program.name,
+        facultyId: faculty.id,
+        programId: program.id,
         breadcrumb: [
           { label: 'Forumai', path: '/forumai' },
           { label: 'Universitetai', path: '/pagrindinis' },
-          { label: university.name, path: `/forumai/universitetai/${universityId}/irasai` },
-          { label: faculty.name, path: `/forumai/universitetai/${universityId}/fakultetai/${facultyId}/irasai` },
-          { label: programName, path: `/forumai/universitetai/${universityId}/fakultetai/${facultyId}/programos/${programId}/irasai` }
+          { label: university.name, path: `/forumai/universitetai/${university.forumId}/irasai` },
+          { label: faculty.name, path: `/forumai/universitetai/${university.forumId}/fakultetai/${faculty.forumId}/irasai` },
+          { label: program.name, path: `/forumai/universitetai/${university.forumId}/fakultetai/${faculty.forumId}/programos/${program.forumId}/irasai` }
         ]
       }
     });
@@ -130,80 +113,56 @@ const ForumMegaPanel = () => {
   };
 
   return (
-    <div className="py-6 px-8 ml-24">
-      <div className="flex">
-        {/* General Forums Section */}
-        <div className="w-1/4 pr-4 border-r border-light-grey">
-          <h3 className="text-white font-medium mb-3">Kategorijos</h3>
-          <ul className="space-y-2">
-            <li>
-              <a 
-                href="/forumai/bendros/irasai" 
-                className="text-light-grey hover:text-lght-blue transition-colors duration-150"
-                onClick={(e) => handleNavigateToGeneralForum(e, '/forumai/bendros/irasai', 'Bendros diskusijos')}
-              >
-                Bendros diskusijos
-              </a>
-            </li>
-            <li>
-              <a 
-                href="/forumai/kategorijos/kursu-apzvalgos/irasai" 
-                className="text-light-grey hover:text-lght-blue transition-colors duration-150"
-                onClick={(e) => handleNavigateToGeneralForum(e, '/forumai/kategorijos/kursu-apzvalgos/irasai', 'Kursų apžvalgos')}
-              >
-                Kursų apžvalgos
-              </a>
-            </li>
-            <li>
-              <a 
-                href="/forumai/kategorijos/studiju-medziaga/irasai" 
-                className="text-light-grey hover:text-lght-blue transition-colors duration-150"
-                onClick={(e) => handleNavigateToGeneralForum(e, '/forumai/kategorijos/studiju-medziaga/irasai', 'Studijų medžiaga')}
-              >
-                Studijų medžiaga
-              </a>
-            </li>
-            <li>
-              <a 
-                href="/forumai/kategorijos/socialinis-gyvenimas/irasai" 
-                className="text-light-grey hover:text-lght-blue transition-colors duration-150"
-                onClick={(e) => handleNavigateToGeneralForum(e, '/forumai/kategorijos/socialinis-gyvenimas/irasai', 'Socialinis gyvenimas')}
-              >
-                Socialinis gyvenimas
-              </a>
-            </li>
-          </ul>
-        </div>
-
+    <div 
+      className="py-6 px-8 ml-24"
+      onMouseEnter={disableScroll}
+      onMouseLeave={enableScroll}
+    >
+      <div className="flex justify-center gap-20">
         {/* University Section */}
         <div className="w-1/4 px-4 relative">
           <div>
             <h3 className="text-white font-medium mb-3">Universitetai</h3>
-            <ul className="space-y-2">
-                {universities.map(university => (
-                <li 
-                  key={university.id}
-                  onMouseEnter={() => {
-                    setHoveredUniversity(university.id);
-                    setHoveredFaculty(null);
-                  }}
-                >
-                  <a
-                    href={`/forumai/universitetai/${university.id}/irasai`}
-                    className={`block text-left w-full ${
-                      hoveredUniversity === university.id 
-                        ? 'text-lght-blue' 
-                        : 'text-light-grey hover:text-lght-blue'
-                    } transition-colors duration-150`}
-                    onClick={(e) => handleNavigateToUniversity(e, university.id)}
-                  >
-                    {university.name}
-                  </a>
-                </li>
-                ))}
-            </ul>
+            {isLoading ? (
+              <p className="text-light-grey">Loading...</p>
+            ) : (
+              <div className="rtl max-h-[450px] overflow-y-auto">
+                <ul className="space-y-2 ltr ml-4">
+                  {sortedUniversities.map(university => {
+                    // Split the university name by spaces
+                    const nameParts = university.name.split(' ');
+                    // The first part to be bold
+                    const firstWord = nameParts[0];
+                    // The rest of the name
+                    const restOfName = nameParts.slice(1).join(' ');
+                    
+                    return (
+                      <li 
+                        key={university.id}
+                        onMouseEnter={() => {
+                          setHoveredUniversity(university.id);
+                          setHoveredFaculty(null);
+                        }}
+                      >
+                        <a
+                          href={`/forumai/universitetai/${university.id}/irasai`}
+                          className={`block text-left w-full ${
+                            hoveredUniversity === university.id 
+                              ? 'text-lght-blue' 
+                              : 'text-lighter-grey hover:text-lght-blue'
+                          } transition-colors duration-150`}
+                          onClick={(e) => handleNavigateToUniversity(e, university)}
+                        >
+                          <span className="font-bold">{firstWord}</span> {restOfName}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
           </div>
-          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-10">
+          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-0">
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
               fill="none" 
@@ -219,34 +178,39 @@ const ForumMegaPanel = () => {
 
         {/* Faculty Section */}
         <div className="w-1/5 pl-4 relative">
-          <div>
-          <h3 className="text-white font-medium mb-3">Fakultetai</h3>
-          {hoveredUniversity ? (
-            <ul className="space-y-2">
-              {getFacultiesForUniversity(hoveredUniversity).map(faculty => (
-                <li 
-                  key={faculty.id}
-                  onMouseEnter={() => setHoveredFaculty(faculty.id)}
-                >
-                  <a
-                    href={`/forumai/universitetai/${hoveredUniversity}/fakultetai/${faculty.id}/irasai`}
-                    className={`block text-left w-full ${
-                      hoveredFaculty === faculty.id 
-                        ? 'text-lght-blue' 
-                        : 'text-light-grey hover:text-lght-blue'
-                    } transition-colors duration-150`}
-                    onClick={(e) => handleNavigateToFaculty(e, hoveredUniversity, faculty.id)}
-                  >
-                    {faculty.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-light-grey italic">Pasirinkite universitetą</p>
-          )}
+          <div className=''>
+            <h3 className="text-white font-medium mb-3">Fakultetai</h3>
+            {isLoading ? (
+              <p className="text-light-grey">Loading...</p>
+            ) : hoveredUniversity ? (
+              <ul className="space-y-2">
+                {getFacultiesForUniversity(hoveredUniversity).map(faculty => {
+                  const university = getUniversityById(hoveredUniversity);
+                  return (
+                    <li 
+                      key={faculty.id}
+                      onMouseEnter={() => setHoveredFaculty(faculty.id)}
+                    >
+                      <a
+                        href={`/forumai/universitetai/${hoveredUniversity}/fakultetai/${faculty.id}/irasai`}
+                        className={`block text-left w-full ${
+                          hoveredFaculty === faculty.id 
+                            ? 'text-lght-blue' 
+                            : 'text-lighter-grey hover:text-lght-blue'
+                        } transition-colors duration-150`}
+                        onClick={(e) => handleNavigateToFaculty(e, university, faculty)}
+                      >
+                        {faculty.name}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="text-light-grey italic">Pasirinkite universitetą</p>
+            )}
           </div>
-          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-10">
+          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-10">
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
               fill="none" 
@@ -263,19 +227,25 @@ const ForumMegaPanel = () => {
         {/* Program Section */}
         <div className="w-1/4 pl-4">
           <h3 className="text-white font-medium mb-3">Studijų programos</h3>
-          {hoveredFaculty ? (
+          {isLoading ? (
+            <p className="text-light-grey">Loading...</p>
+          ) : hoveredFaculty ? (
             <ul className="space-y-2">
-              {getProgramsForFaculty(hoveredFaculty).map(program => (
-                <li key={program.id}>
-                  <a 
-                    href={`/forumai/universitetai/${hoveredUniversity}/fakultetai/${hoveredFaculty}/programos/${program.id}/irasai`}
-                    className="text-light-grey hover:text-lght-blue transition-colors duration-150"
-                    onClick={(e) => handleNavigateToProgram(e, hoveredUniversity, hoveredFaculty, program.id, program.name)}
-                  >
-                    {program.name}
-                  </a>
-                </li>
-              ))}
+              {getProgramsForFaculty(hoveredFaculty).map(program => {
+                const university = getUniversityById(hoveredUniversity);
+                const faculty = getFacultyById(hoveredFaculty);
+                return (
+                  <li key={program.id}>
+                    <a 
+                      href={`/forumai/universitetai/${hoveredUniversity}/fakultetai/${hoveredFaculty}/programos/${program.id}/irasai`}
+                      className="text-lighter-grey hover:text-lght-blue transition-colors duration-150"
+                      onClick={(e) => handleNavigateToProgram(e, university, faculty, program)}
+                    >
+                      {program.name}
+                    </a>
+                  </li>
+                );
+              })}
             </ul>
           ) : (
             <p className="text-light-grey italic">Pasirinkite fakultetą</p>

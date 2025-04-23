@@ -32,9 +32,17 @@ class Post extends Model
         'description',
         'user_id',
         'forum_id',
+        'category_id',
+        'likes',
+        'dislikes'
     ];
 
     protected $hidden = ['created_at', 'updated_at'];
+    
+    protected $attributes = [
+        'likes' => 0,
+        'dislikes' => 0
+    ];
 
     public function user()
     {

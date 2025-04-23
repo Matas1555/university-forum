@@ -20,9 +20,10 @@ export default {
         'dark':'#151f27',
         'grey':'#202e39',
         'light-grey':'#687682',
+        'lighter-grey':'#9fabb5',
         'white':'#f0f0fa',
         'lght-blue':'#0084ff',
-        'red':'#d13030',
+        'red':'#de4343',
         'green':'#27cf15',
         'purple':'#9416d9',
         'orange':'#f08e1f',
@@ -31,12 +32,23 @@ export default {
       },
     },
     fontFamily: {
-      sans: ["'HK Grotesk'", "sans"],
+      grotesk: ["'Hanken Grotesk'", "sans-serif"],
       iter: ["'Inter'", "sans-serif"],
     },
   },
   plugins: [
     require('@tailwindcss/forms'),
+    function({ addUtilities }) {
+      const newUtilities = {
+        '.rtl': {
+          direction: 'rtl',
+        },
+        '.ltr': {
+          direction: 'ltr',
+        },
+      }
+      addUtilities(newUtilities)
+    }
   ],
 }
 
