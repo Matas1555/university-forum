@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class University extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'location', 'picture'];
+    protected $fillable = ['name', 'location', 'picture', 'rating', 'rating_count', 'description'];
     protected $hidden = ['created_at', 'updated_at'];
 
     public function programs()
@@ -35,5 +35,15 @@ class University extends Model
     public function lecturers()
     {
         return $this->hasMany(Lecturer::class, 'university_id');
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(UniversityReview::class, 'university_id');
+    }
+
+    public function clubs()
+    {
+        return $this->hasMany(UniversityClub::class, 'university_id');
     }
 }

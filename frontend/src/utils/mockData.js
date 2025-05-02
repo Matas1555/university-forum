@@ -11,24 +11,6 @@ export const mockData = [
             length: 4,
             type: "Bakalauro"
           },
-          modules: [
-            {
-              semester: 1,
-              modules: [
-                { name: "Informatikos studijų įvadas", rating: 2.1 },
-                { name: "Matematika 1", rating: 4.2 },
-                { name: "Objektinis programavimas 1", rating: 3.5 }
-              ]
-            },
-            {
-              semester: 2,
-              modules: [
-                { name: "Duomenų struktūros", rating: 4.0 },
-                { name: "Matematika 2", rating: 3.8 },
-                { name: "Web technologijos", rating: 4.5 }
-              ]
-            }
-          ],
           reviews: [
             {
               username: "KTUstudentas",

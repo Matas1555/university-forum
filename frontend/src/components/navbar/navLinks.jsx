@@ -18,36 +18,30 @@ const NavButtons = ({ openLoginDialog}) => {
     };
 
     const handleProfileClick = () => {
-        navigate('/profile');
+        navigate('/profilis');
         setOpenProfileMenu(false);
     };
 
     const handleSettingsClick = () => {
-        // Handle settings navigation
         setOpenProfileMenu(false);
     };
 
     const handleLogout = async () => {
         console.log("Logging out...");
         try {
-            // Clear token from backend
             await API.post('/logout');
         } catch (error) {
             console.error("Logout API call failed", error);
-            // Continue with logout even if API call fails
         }
         
-        // Clear all local storage and state
         localStorage.removeItem('ACCESS_TOKEN');
         localStorage.removeItem('REFRESH_TOKEN');
         localStorage.removeItem('USER');
         
-        // Update context state
         setUser(null);
         setToken(null);
         setRefreshToken(null);
         
-        // Navigate to home and close menu
         navigate('/pagrindinis');
         setOpenProfileMenu(false);
     };
@@ -109,15 +103,6 @@ const NavButtons = ({ openLoginDialog}) => {
                                         onClick={handleProfileClick}
                                     >
                                         Profilis
-                                    </button>
-                                    <button 
-                                        className="block w-full text-left px-4 py-2 text-sm text-white m-1 rounded-md ring-1 ring-grey hover:text-lght-blue hover:ring-lght-blue transition-duration-100 ease-linear" 
-                                        role="menuitem" 
-                                        tabIndex="-1" 
-                                        id="menu-item-1" 
-                                        onClick={handleSettingsClick}
-                                    >
-                                        Nustatymai
                                     </button>
                                     <button 
                                         className="block w-full text-left px-4 py-2 text-sm text-white m-1 rounded-md ring-1 ring-grey hover:text-lght-blue hover:ring-lght-blue transition-duration-100 ease-linear" 

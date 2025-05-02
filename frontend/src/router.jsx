@@ -6,6 +6,7 @@ import Profile from "./pages/profile";
 import Post from "./pages/post";
 import Posts from "./pages/posts";
 import University from "./pages/university/university";
+import UniversityStatistics from "./pages/university/universityStatistics";
 import DefaultLayout from "./components/layout/defaultLayout";
 import CreatePost from "./pages/createPost";
 import ForumsList from "./pages/forums/forumsList";
@@ -13,6 +14,9 @@ import LecturersPage from "./pages/lecturers";
 import LecturerPage from "./pages/lecturer";
 import UniversitiesPage from "./pages/universities";
 import TooltipExample from "./components/TooltipExample";
+import RecommendationForm from "./pages/recommendation/RecommendationForm";
+import RecommendationResults from "./pages/recommendation/RecommendationResults";
+
 const router = createBrowserRouter([
     {
         path: '/',
@@ -86,7 +90,6 @@ const router = createBrowserRouter([
                 path: '/forumai/:forumType/irasai/:postId',
                 element: <Post/>,
             },
-            // Originalūs maršrutai
             {
                 path: '/profilis',
                 element: <Profile/>,
@@ -98,6 +101,10 @@ const router = createBrowserRouter([
             {
                 path: '/universitetas/:universityId',
                 element: <University/>,
+            },
+            {
+                path: '/universitetas/:id/statistika',
+                element: <UniversityStatistics/>,
             },
             {
                 path: '/registracija',
@@ -118,6 +125,14 @@ const router = createBrowserRouter([
             {
                 path: '/universitetai',
                 element: <UniversitiesPage/>,
+            },
+            {
+                path: '/rekomendacijos',
+                element: <RecommendationForm/>,
+            },
+            {
+                path: '/recommendation-results',
+                element: <RecommendationResults/>,
             },
         ],
     },

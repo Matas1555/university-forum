@@ -85,7 +85,6 @@ export default function UniversityList() {
         });
     };
 
-    // Filter universities based on search query and city
     const filteredUniversities = universities.filter(uni => {
         const matchesSearch = uni.name.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesCity = cityFilter ? uni.location.toLowerCase() === cityFilter.toLowerCase() : true;
@@ -95,7 +94,7 @@ export default function UniversityList() {
     return (
         <div className="flex flex-col gap-8 lg:flex-row">
             {/* Sidebar filters */}
-            <div className="top-32 h-auto w-full lg:w-1/5 lg:sticky lg:self-start bg-grey rounded-md p-4">
+            <div className="top-32 h-auto w-full lg:w-1/5 lg:sticky lg:self-start bg-gradient-to-br from-dark to-grey border-l-2 border-lght-blue rounded-md p-4">
                 <h2 className="text-white font-bold text-xl mb-4">Filtrai</h2>
                 
                 <div className="mb-4">

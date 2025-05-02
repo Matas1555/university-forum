@@ -168,6 +168,13 @@ const MobileMegaMenu = ({ isOpen }) => {
         <NavLink to="/destytojai" className="block text-white hover:text-lght-blue transition-colors duration-150 py-2">
           Dėstytojai
         </NavLink>
+        
+        <NavLink to="/rekomendacijos" className="block bg-gradient-to-r from-lght-blue to-blue-500 text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-400 transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 relative">
+          <span className="text-lg">Rekomendacijos</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke="none" className="w-6 h-6 text-yellow-300 animate-pulse">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+          </svg>
+        </NavLink>
       </div>
     </div>
   );

@@ -19,6 +19,7 @@ export default function DiscussionList ({ listName, IconComponent, discussions }
             key={index}
             className={`flex w-full justify-between gap-2 pt-2 p-2 pb-2 mb-3 pr-2 cursor-pointer hover:bg-grey hover:rounded-md transition-all duration-500 ease-in-out ${index >= visibleCount ? 'max-h-0 opacity-0' : 'max-h-full opacity-100'}`}
             style={{ overflow: 'hidden' }}
+            onClick={discussion.onClick}
           >
             <div>
             <p className="text-white font-light text-base">{discussion.title}</p>

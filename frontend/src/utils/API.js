@@ -193,6 +193,10 @@ export const LecturerAPI = {
     
     createReview: async (lecturerId, reviewData) => {
         return await API.post(`/lecturers/${lecturerId}/reviews`, reviewData);
+    },
+    
+    deleteReview: async (reviewId) => {
+        return await API.delete(`/lecturer-reviews/${reviewId}`);
     }
 };
 
@@ -207,6 +211,46 @@ export const UniversityAPI = {
     
     getFacultiesWithPrograms: async (universityId) => {
         return await API.get(`/universities/${universityId}/faculties-with-programs`);
+    },
+
+    getProgramById: async (programId) => {
+        return await API.get(`/programs/${programId}`);
+    },
+    
+    getUniversityReviews: async (universityId) => {
+        return await API.get(`/universities/${universityId}/reviews`);
+    },
+    
+    createUniversityReview: async (universityId, reviewData) => {
+        return await API.post(`/universities/${universityId}/reviews`, reviewData);
+    },
+    
+    deleteUniversityReview: async (reviewId) => {
+        return await API.delete(`/university-reviews/${reviewId}`);
+    },
+
+    getProgramReviews: async (programId, page = 1) => {
+        return await API.get(`/programs/${programId}/reviews`, { params: { page } });
+    },
+    
+    createProgramReview: async (programId, reviewData) => {
+        return await API.post(`/programs/${programId}/reviews`, reviewData);
+    },
+    
+    updateProgramReview: async (reviewId, reviewData) => {
+        return await API.put(`/program-reviews/${reviewId}`, reviewData);
+    },
+    
+    deleteProgramReview: async (reviewId) => {
+        return await API.delete(`/program-reviews/${reviewId}`);
+    },
+    
+    hasUserReviewedProgram: async (programId) => {
+        return await API.get(`/programs/${programId}/user-reviewed`);
+    },
+    
+    filterRecommendations: async (preferences) => {
+        return await API.post('/recommendations/filter', preferences);
     }
 }; 
 

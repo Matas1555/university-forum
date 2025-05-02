@@ -383,7 +383,7 @@ export const Posts = () => {
                 <div className="flex flex-col items-end w-11/12 lg:w-7/12">
                     {currentView === 'faculties' && (
                         <div className="w-full mb-6">
-                            <h1 className="text-white font-bold text-xl mb-3 ml-2">Fakultetai</h1>
+                            <h1 className="text-white font-bold text-xl mb-3 ml-2">Fakultetų forumai</h1>
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 border-t-2 border-b-2 pt-4 pb-4 border-light-grey rounded-md px-1 mb-6 min-h-[200px]">
                                 {loading ? (
                                     <div className="text-white text-center py-8 col-span-2 flex justify-center items-center">
@@ -504,7 +504,7 @@ export const Posts = () => {
 
                     {currentView === 'programs' && (
                         <div className="w-full mb-6">
-                            <h1 className="text-white font-bold text-xl mb-3 ml-2">Studijų programos</h1>
+                            <h1 className="text-white font-bold text-xl mb-3 ml-2">Studijų programų forumai</h1>
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 animate-fade-in-up border-t-2 border-b-2 pt-4 pb-4 border-light-grey rounded-md px-1 mb-6 min-h-[200px]">
                                 {loading ? (
                                     <div className="text-white text-center py-8 col-span-2 flex justify-center items-center">

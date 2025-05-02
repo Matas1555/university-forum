@@ -14,10 +14,8 @@ const MobileUniversity = () => {
     const location = useLocation();
     const params = useParams();
     
-
     const universityId = params.universityId || (location.state && location.state.universityId) || 1;
 
-    
     const [destytojaiActive, setStojimaiActive] = useState(true);
     const [moduliaiActive, setModuliaiActive] = useState(false);
     const [atsiliepimaiActive, setAtsiliepimaiActive] = useState(false);

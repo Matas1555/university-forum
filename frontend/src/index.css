@@ -8,15 +8,14 @@ body {
     @apply font-grotesk;
 }
 
-/* Custom scrollbar styles */
 @layer utilities {
-  /* Firefox */
+
   * {
     scrollbar-width: thin;
     scrollbar-color: var(--color-grey) var(--color-dark);
   }
   
-  /* Chrome, Edge, and Safari */
+
   *::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -32,7 +31,6 @@ body {
     border-radius: 14px;
   }
   
-  /* Specifically style ListboxOptions scrollbars */
   [role="listbox"]::-webkit-scrollbar {
     width: 6px;
   }
@@ -49,5 +47,114 @@ body {
   :root {
     --color-lght-blue: #0084ff;
     --color-dark: #151f27;
+  }
+}
+
+.page-transition {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.page-transition.fadeIn {
+  animation: fadeIn 0.4s ease-in-out forwards;
+}
+
+.page-transition.fadeOut {
+  animation: fadeOut 0.3s ease-in-out forwards;
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+.page-transition.slideIn {
+  animation: slideIn 0.4s ease-in-out forwards;
+}
+
+.page-transition.slideOut {
+  animation: slideOut 0.3s ease-in-out forwards;
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+}
+
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOut {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+}
+
+.page-transition.zoomIn {
+  animation: zoomIn 0.4s ease-in-out forwards;
+}
+
+.page-transition.zoomOut {
+  animation: zoomOut 0.3s ease-in-out forwards;
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+}
+
+@keyframes zoomIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes zoomOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.05);
   }
 }

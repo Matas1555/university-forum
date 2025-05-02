@@ -19,7 +19,6 @@ const Tooltip = ({
 }) => {
   const [isVisible, setIsVisible] = useState(false);
 
-  // Helper function to determine arrow positioning classes
   const getArrowClasses = () => {
     switch (position) {
       case 'top':
@@ -27,15 +26,14 @@ const Tooltip = ({
       case 'bottom':
         return 'top-0 left-1/2 transform -translate-x-1/2 -translate-y-[200%] border-l-8 border-r-8 border-b-8 border-l-transparent border-r-transparent border-b-white';
       case 'left':
-        return 'right-0 top-1/2 transform translate-x-full -translate-y-1/2 border-t-8 border-b-8 border-l-8 border-t-transparent border-b-transparent border-l-white';
+        return 'right-0 top-1/2 transform translate-x-[-200%] -translate-y-1/2 border-t-8 border-b-8 border-l-8 border-t-transparent border-b-transparent border-l-white';
       case 'right':
-        return 'left-0 top-1/2 transform -translate-x-full -translate-y-1/2 border-t-8 border-b-8 border-r-8 border-t-transparent border-b-transparent border-r-white';
+        return 'left-0 top-1/2 transform -translate-x-[200%] -translate-y-1/2 border-t-8 border-b-8 border-r-8 border-t-transparent border-b-transparent border-r-white';
       default:
-        return 'bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white';
+        return 'bottom-0 left-1/2 transform -translate-x-1/2 translate-y-[-200%] border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white';
     }
   };
 
-  // Helper function to determine positioning classes for the tooltip
   const getPositionClasses = () => {
     switch (position) {
       case 'top':

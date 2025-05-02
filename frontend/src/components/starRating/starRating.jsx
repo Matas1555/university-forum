@@ -1,7 +1,6 @@
 import React from 'react';
 
 const StarRating = ({ rating = 0, width = 4,  color='light-grey'}) => {
-  // Convert rating to a number and default to 0 if it's null, undefined, or not a valid number
   const validRating = isNaN(Number(rating)) ? 0 : Number(rating);
   
   const roundedRating = Math.round(validRating);

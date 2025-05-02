@@ -194,9 +194,76 @@ const LecturersPage = () => {
     return (
         <div className="flex flex-col justify-center items-center mt-10">
             <div className="flex flex-col gap-5 justify-center items-center w-10/12">
-                <div className='flex flex-col bg-grey p-4 gap-3 rounded-md items-center justify-center mb-6 w-full'>
-                    <h1 className="text-white text-4xl font-bold mb-8 mt-6">Dėstytojai</h1>
-                    <p className="text-white mb-6 font-medium">Čia galite rasti žinomus universitetų dėstytojus, bendrą informaciją apie juos ir jų įvertinimus. Nepamirškite palikti savo atsiliepimu.</p>
+                <div className="bg-gradient-to-br from-dark to-grey rounded-lg border-l-2 border-lght-blue shadow-lg overflow-hidden mb-10 w-full">
+                    <div className="p-8 relative">
+                        {/* Background decoration */}
+                        <div className="absolute top-10 right-10 w-40 h-40 bg-lght-blue/5 rounded-full blur-2xl"></div>
+                        <div className="absolute bottom-10 left-10 w-32 h-32 bg-purple-500/5 rounded-full blur-xl"></div>
+                        
+                        {/* Header content */}
+                        <div className=" flex flex-row gap-10 relative z-10 w-full">
+                            <div className="w-8/12 space-y-8">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="bg-lght-blue/20 p-2 rounded-md">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8 text-lght-blue">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                        </svg>
+                                    </div>
+                                    <h1 className="text-white text-4xl font-bold">Dėstytojai ir akademikai</h1>
+                                </div>
+                                
+                                <p className="text-light-grey leading-relaxed mb-6">
+                                    Susipažinkite su Lietuvos universitetų dėstytojais, paskaitų vedėjais ir mokslininkais. 
+                                    Šiame puslapyje rasite išsamią informaciją apie dėstytojų specializacijas, studentų atsiliepimus
+                                    ir kitas aktualias detales, kurios padės geriau pažinti akademinę bendruomenę.
+                                </p>
+
+                                <p className="text-white font-medium">Naršykite, filtruokite ir atraskite dėstytojus pagal savo poreikius!</p>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+                                <div className="bg-dark/50 rounded-lg p-4">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-lght-blue">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                                        </svg>
+                                        <h3 className="text-white font-semibold">Daugiau nei 500+ dėstytojų</h3>
+                                    </div>
+                                    <p className="text-light-grey text-sm">Išsami duomenų bazė su dėstytojų profiliais iš visų Lietuvos universitetų.</p>
+                                </div>
+                                
+                                <div className="bg-dark/50 rounded-lg p-4">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-lght-blue">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+                                        </svg>
+                                        <h3 className="text-white font-semibold">Studentų įvertinimai</h3>
+                                    </div>
+                                    <p className="text-light-grey text-sm">Skaitykite autentiškus studentų atsiliepimus ir įvertinimus apie dėstytojų darbo metodus.</p>
+                                </div>
+                                
+                                <div className="bg-dark/50 rounded-lg p-4">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-lght-blue">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                        </svg>
+                                        <h3 className="text-white font-semibold">Patogus filtravimas</h3>
+                                    </div>
+                                    <p className="text-light-grey text-sm">Naudokite paiešką ir filtrus norėdami greitai rasti dėstytojus pagal universitetą, fakultetą arba vardą.</p>
+                                </div>
+                                
+                                <div className="bg-dark/50 rounded-lg p-4">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-lght-blue">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                        </svg>
+                                        <h3 className="text-white font-semibold">Palikite atsiliepimą</h3>
+                                    </div>
+                                    <p className="text-light-grey text-sm">Dalinkitės savo patirtimi ir padėkite kitiems studentams pasirinkti tinkamus dėstytojus.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div className="flex flex-row gap-5 justify-center w-full">
                 <div className="flex flex-col items-center w-full lg:w-full">

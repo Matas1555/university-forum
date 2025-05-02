@@ -488,7 +488,6 @@ const DesktopUniversity = () => {
 const ModulesSection = ({ modules }) => {
     const [selectedSemester, setSelectedSemester] = useState(null);
 
-    // Auto-select first semester when modules load
     useEffect(() => {
         if (modules.length > 0 && !selectedSemester) {
             setSelectedSemester(modules[0].semester);
