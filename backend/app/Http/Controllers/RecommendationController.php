@@ -46,14 +46,12 @@ class RecommendationController extends Controller
 
             $preferences = $request->all();
             
-            // Start with all programs
             $query = Program::with(['university', 'faculty']);
             Log::info('Initial query - all programs');
             $initialCount = $query->count();
             Log::info("Initial program count: {$initialCount}");
             $steps = ['Initial count' => $initialCount];
 
-            // Degree Type Filter
             if (isset($preferences['academicPreferences']['degreeType'])) {
                 $degreeType = $preferences['academicPreferences']['degreeType'];
                 $query->where('magistras', $degreeType === 'magistras');
@@ -62,24 +60,21 @@ class RecommendationController extends Controller
                 $steps['After degree type filter'] = $countAfterDegree;
             }
 
-            // Field of Study Filter - improved for faculty names and partial matches
             if (!empty($preferences['academicPreferences']['fieldOfStudy'])) {
                 $fields = $preferences['academicPreferences']['fieldOfStudy'];
                 Log::info("Filtering for fields: " . implode(', ', $fields));
                 
-                // Use a more flexible approach that checks for partial matches in titles, descriptions, and faculty names
+
                 $query->where(function ($query) use ($fields) {
                     foreach ($fields as $field) {
                         $fieldLower = strtolower($field);
                         Log::info("Looking for field: {$field}");
                         
-                        // Check program title and description using LIKE for partial matches
                         $query->orWhere('title', 'LIKE', "%{$field}%")
                               ->orWhere(DB::raw('LOWER(title)'), 'LIKE', "%{$fieldLower}%")
                               ->orWhere('description', 'LIKE', "%{$field}%")
                               ->orWhere(DB::raw('LOWER(description)'), 'LIKE', "%{$fieldLower}%");
                         
-                        // Also check field variations (stem words) for Lithuanian language
                         $fieldStems = $this->getFieldStems($field);
                         Log::info("Field stem variations: " . implode(', ', $fieldStems));
                         
@@ -88,12 +83,10 @@ class RecommendationController extends Controller
                                   ->orWhere('description', 'LIKE', "%{$stem}%");
                         }
                         
-                        // Check faculty names too
                         $query->orWhereHas('faculty', function($q) use ($field, $fieldLower, $fieldStems) {
                             $q->where('name', 'LIKE', "%{$field}%")
                               ->orWhere(DB::raw('LOWER(name)'), 'LIKE', "%{$fieldLower}%");
                               
-                            // Also check faculty name with stem variations
                             foreach ($fieldStems as $stem) {
                                 $q->orWhere('name', 'LIKE', "%{$stem}%");
                             }
@@ -106,7 +99,6 @@ class RecommendationController extends Controller
                 $steps['After field of study filter'] = $countAfterFields;
             }
 
-            // Location Filter - improved to check within full address
             if (!empty($preferences['academicPreferences']['locations'])) {
                 $locations = $preferences['academicPreferences']['locations'];
                 Log::info("Filtering for locations: " . implode(', ', $locations));
@@ -117,7 +109,6 @@ class RecommendationController extends Controller
                             $locationLower = strtolower($location);
                             Log::info("Looking for location: {$location} in university address");
                             
-                            // Search for the city name within the full address
                             $q->orWhere('location', 'LIKE', "%{$location}%")
                               ->orWhere(DB::raw('LOWER(location)'), 'LIKE', "%{$locationLower}%");
                         }
@@ -129,7 +120,6 @@ class RecommendationController extends Controller
                 $steps['After location filter'] = $countAfterLocation;
             }
 
-            // Minimum Rating Filter
             if (isset($preferences['academicPreferences']['minRating']) && $preferences['academicPreferences']['minRating'] > 0) {
                 $minRating = $preferences['academicPreferences']['minRating'];
                 $query->where('rating', '>=', $minRating);
@@ -138,7 +128,6 @@ class RecommendationController extends Controller
                 $steps['After minimum rating filter'] = $countAfterRating;
             }
 
-            // Financial Factors
             if (isset($preferences['financialFactors'])) {
                 if (isset($preferences['financialFactors']['stateFinanced']) && 
                     $preferences['financialFactors']['stateFinanced'] === false &&
@@ -157,55 +146,39 @@ class RecommendationController extends Controller
                 }
             }
             
-            // Program Size Filter - fixed for varchar field and made less restrictive
             if (isset($preferences['programSize'])) {
                 Log::info("Filtering for program size: {$preferences['programSize']}");
                 
-                // Instead of applying it as a hard filter, use it as a ranking factor
-                // This will be handled when calculating relevance scores in the frontend
                 
-                // Log this change
                 Log::info("Program size will be used as ranking factor rather than hard filter");
                 $steps['Program size as ranking factor'] = 'Enabled';
             }
             
-            // Difficulty Level Preference - made less restrictive 
             if (isset($preferences['studyPreferences']['difficultyLevel'])) {
                 $difficultyLevel = $preferences['studyPreferences']['difficultyLevel'];
                 Log::info("Filtering for difficulty level: {$difficultyLevel}");
                 
-                // Instead of applying it as a hard filter, use it as a ranking factor
-                // This will be handled when calculating relevance scores in the frontend
-                
-                // Log this change
                 Log::info("Difficulty level will be used as ranking factor rather than hard filter");
                 $steps['Difficulty level as ranking factor'] = 'Enabled';
             }
 
-            // Get results with all filters
             $strictFilteredPrograms = $query->get();
             Log::info("Final strict filtered count: {$strictFilteredPrograms->count()} programs");
             $steps['Final strict filtered count'] = $strictFilteredPrograms->count();
             
-            // Always create relaxed filters to show alternative options
             Log::info("Creating relaxed filter query to provide additional options");
             
-            // Start with a new query
             $relaxedQuery = Program::with(['university', 'faculty']);
             
-            // Keep only the most basic filters:
-            // 1. Degree type if specified
             if (isset($preferences['academicPreferences']['degreeType'])) {
                 $degreeType = $preferences['academicPreferences']['degreeType'];
                 $relaxedQuery->where('magistras', $degreeType === 'magistras');
             }
             
-            // 2. At least one field of study or location if specified
             if (!empty($preferences['academicPreferences']['fieldOfStudy']) || 
                 !empty($preferences['academicPreferences']['locations'])) {
                 
                 $relaxedQuery->where(function($query) use ($preferences) {
-                    // Field of study relaxed search
                     if (!empty($preferences['academicPreferences']['fieldOfStudy'])) {
                         $fields = $preferences['academicPreferences']['fieldOfStudy'];
                         foreach ($fields as $field) {
@@ -213,7 +186,6 @@ class RecommendationController extends Controller
                             $query->orWhere('title', 'LIKE', "%{$field}%")
                                   ->orWhere(DB::raw('LOWER(title)'), 'LIKE', "%{$fieldLower}%");
                                   
-                            // Also look in faculty names
                             $query->orWhereHas('faculty', function($q) use ($field, $fieldLower) {
                                 $q->where('name', 'LIKE', "%{$field}%")
                                   ->orWhere(DB::raw('LOWER(name)'), 'LIKE', "%{$fieldLower}%");
@@ -221,7 +193,6 @@ class RecommendationController extends Controller
                         }
                     }
                     
-                    // Location relaxed search
                     if (!empty($preferences['academicPreferences']['locations'])) {
                         $locations = $preferences['academicPreferences']['locations'];
                         foreach ($locations as $location) {
@@ -235,7 +206,6 @@ class RecommendationController extends Controller
                 });
             }
             
-            // Get the relaxed filter results, but exclude any programs already in the strict results
             $strictProgramIds = $strictFilteredPrograms->pluck('id')->toArray();
             
             if (!empty($strictProgramIds)) {
@@ -246,7 +216,6 @@ class RecommendationController extends Controller
             Log::info("Relaxed filter found: {$relaxedFilteredPrograms->count()} additional programs");
             $steps['Relaxed filter additional programs'] = $relaxedFilteredPrograms->count();
 
-            // Transform strict filtered results
             $strictResult = $strictFilteredPrograms->map(function ($program) {
                 return [
                     'id' => $program->id,
@@ -391,6 +360,7 @@ class RecommendationController extends Controller
                 'studyPreferences.practicalOrientation' => 'nullable|boolean',
                 'interests' => 'nullable|string|max:500',
                 'extracurricularActivities' => 'nullable|string|max:500',
+                'careerGoals' => 'nullable|array',
             ]);
 
             if ($validator->fails()) {
@@ -409,7 +379,7 @@ class RecommendationController extends Controller
             }
             
             // Get filtered programs
-            $filteredPrograms = $query->limit(10)->get();
+            $filteredPrograms = $query->limit(15)->get();
             
             // Transform programs for AI input
             $programsData = $filteredPrograms->map(function ($program) {
@@ -437,12 +407,93 @@ class RecommendationController extends Controller
             })->toArray();
             
             // Get AI recommendations
-            $recommendations = $this->openAIService->getRecommendations($preferences, $programsData);
+            $aiRecommendations = $this->openAIService->getRecommendations($preferences, $programsData);
             
+            // Process AI recommendations to match with programs
+            $strictProgramIds = [];
+            $relaxedProgramIds = [];
+            
+            if (is_array($aiRecommendations)) {
+                // Extract program IDs from AI recommendations
+                if (isset($aiRecommendations['strict_programs']) && is_array($aiRecommendations['strict_programs'])) {
+                    foreach ($aiRecommendations['strict_programs'] as $recommendation) {
+                        if (isset($recommendation['program_id'])) {
+                            $strictProgramIds[] = $recommendation['program_id'];
+                        }
+                    }
+                }
+                
+                if (isset($aiRecommendations['relaxed_programs']) && is_array($aiRecommendations['relaxed_programs'])) {
+                    foreach ($aiRecommendations['relaxed_programs'] as $recommendation) {
+                        if (isset($recommendation['program_id'])) {
+                            $relaxedProgramIds[] = $recommendation['program_id'];
+                        }
+                    }
+                }
+            }
+            
+            $strictPrograms = $programsData;
+            $relaxedPrograms = [];
+            
+            if (!empty($strictProgramIds) || !empty($relaxedProgramIds)) {
+                $strictPrograms = array_filter($programsData, function($program) use ($strictProgramIds) {
+                    return in_array($program['id'], $strictProgramIds);
+                });
+                
+                $relaxedPrograms = array_filter($programsData, function($program) use ($relaxedProgramIds, $strictProgramIds) {
+                    return in_array($program['id'], $relaxedProgramIds) && !in_array($program['id'], $strictProgramIds);
+                });
+                
+                $strictPrograms = array_values($strictPrograms);
+                $relaxedPrograms = array_values($relaxedPrograms);
+            }
+
+            if (is_array($aiRecommendations)) {
+                if (isset($aiRecommendations['strict_programs']) && is_array($aiRecommendations['strict_programs'])) {
+                    $explanationsMap = [];
+                    foreach ($aiRecommendations['strict_programs'] as $recommendation) {
+                        if (isset($recommendation['program_id'])) {
+                            $explanationsMap[$recommendation['program_id']] = [
+                                'explanation' => $recommendation['explanation'] ?? null,
+                                'strengths' => $recommendation['strengths'] ?? [],
+                                'weaknesses' => $recommendation['weaknesses'] ?? [],
+                                'match_percentage' => $recommendation['match_percentage'] ?? 0
+                            ];
+                        }
+                    }
+                    
+                    foreach ($strictPrograms as &$program) {
+                        if (isset($explanationsMap[$program['id']])) {
+                            $program['ai_explanation'] = $explanationsMap[$program['id']];
+                        }
+                    }
+                }
+                
+                if (isset($aiRecommendations['relaxed_programs']) && is_array($aiRecommendations['relaxed_programs'])) {
+                    $explanationsMap = [];
+                    foreach ($aiRecommendations['relaxed_programs'] as $recommendation) {
+                        if (isset($recommendation['program_id'])) {
+                            $explanationsMap[$recommendation['program_id']] = [
+                                'explanation' => $recommendation['explanation'] ?? null,
+                                'strengths' => $recommendation['strengths'] ?? [],
+                                'weaknesses' => $recommendation['weaknesses'] ?? [],
+                                'match_percentage' => $recommendation['match_percentage'] ?? 0
+                            ];
+                        }
+                    }
+                    
+                    foreach ($relaxedPrograms as &$program) {
+                        if (isset($explanationsMap[$program['id']])) {
+                            $program['ai_explanation'] = $explanationsMap[$program['id']];
+                        }
+                    }
+                }
+            }
+
             return response()->json([
-                'ai_recommendations' => $recommendations,
-                'programs_analyzed' => count($programsData),
-                'programs' => $programsData
+                'strict_programs' => $strictPrograms,
+                'relaxed_programs' => $relaxedPrograms,
+                'programs_analyzed' => count($programsData)
             ], 200);
 
         } catch (\Exception $e) {

@@ -23,7 +23,6 @@ const Post = () => {
     const [error, setError] = useState(null);
     const [isExpanded, setIsExpanded] = useState(false);
     const [comment, setComment] = useState("");
-    const [userInteractions, setUserInteractions] = useState({});
     const [errorMessage, setErrorMessage] = useState('');
     const [commentSubmitting, setCommentSubmitting] = useState(false);
     const [comments, setComments] = useState([]);
@@ -40,9 +39,6 @@ const Post = () => {
         if (params.postId) {
             fetchComments();
         }
-        if (user && token) {
-            fetchUserInteractions();
-        }
     }, [params.postId, user, token]);
 
     const fetchPost = async () => {
@@ -51,6 +47,20 @@ const Post = () => {
                 setLoading(true);
                 const response = await ForumAPI.getPost(params.postId);
                 setPostData(response.data);
+                
+                const viewedKey = `viewed_post_${params.postId}`;
+                if (!sessionStorage.getItem(viewedKey)) {
+                    try {
+                        await ForumAPI.incrementPostViews(params.postId);
+                        sessionStorage.setItem(viewedKey, 'true');
+                        setPostData(prevData => ({
+                            ...prevData,
+                            views: (prevData.views || 0) + 1
+                        }));
+                    } catch (viewError) {
+                        console.error('Error tracking view:', viewError);
+                    }
+                }
                 
                 if (response.data.forum_id) {
                     try {
@@ -82,26 +92,46 @@ const Post = () => {
         try {
             setCommentsLoading(true);
             const response = await ForumAPI.getPostComments(params.postId);
-            setComments(response.data);
+            
+            const commentsMap = {};
+            
+            response.data.forEach(comment => {
+                commentsMap[comment.id] = comment;
+            });
+            
+            const flattenComments = (comments, result = []) => {
+                comments.forEach(comment => {
+                    const replyingToUser = comment.parent_id && commentsMap[comment.parent_id] 
+                        ? commentsMap[comment.parent_id].user 
+                        : null;
+                        
+                    result.push({
+                        ...comment,
+                        replyingToUser
+                    });
+                    
+                    if (comment.replies && comment.replies.length > 0) {
+                        flattenComments(comment.replies, result);
+                    }
+                });
+                return result;
+            };
+            
+            const flatComments = flattenComments(response.data);
+            
+            const sortedComments = flatComments.sort((a, b) => {
+
+                if (a.date && b.date) {
+                    return new Date(a.date) - new Date(b.date);
+                }
+                return 0;
+            });
+            
+            setComments(sortedComments);
             setCommentsLoading(false);
         } catch (error) {
             console.error('Error fetching comments:', error);
             setCommentsLoading(false);
-        }
-    };
-    
-    const fetchUserInteractions = async () => {
-        try {
-            const response = await API.get('/user/post-interactions');
-            
-            const interactionsMap = {};
-            response.data.forEach(interaction => {
-                interactionsMap[interaction.post_id] = interaction.type;
-            });
-            
-            setUserInteractions(interactionsMap);
-        } catch (error) {
-            console.error('Failed to fetch user interactions', error);
         }
     };
 
@@ -113,33 +143,20 @@ const Post = () => {
             return;
         }
         
-        const currentInteraction = userInteractions[postData.id];
+        const currentInteraction = postData.user_interaction;
         
         const updatedPost = { ...postData };
         
         if (currentInteraction === 'like') {
             updatedPost.likes = Math.max(0, updatedPost.likes - 1);
-            
-            setUserInteractions(prev => {
-                const newInteractions = { ...prev };
-                delete newInteractions[postData.id];
-                return newInteractions;
-            });
+            updatedPost.user_interaction = null;
         } else if (currentInteraction === 'dislike') {
             updatedPost.likes = updatedPost.likes + 1;
             updatedPost.dislikes = Math.max(0, updatedPost.dislikes - 1);
-            
-            setUserInteractions(prev => ({
-                ...prev,
-                [postData.id]: 'like'
-            }));
+            updatedPost.user_interaction = 'like';
         } else {
             updatedPost.likes = updatedPost.likes + 1;
-            
-            setUserInteractions(prev => ({
-                ...prev,
-                [postData.id]: 'like'
-            }));
+            updatedPost.user_interaction = 'like';
         }
         
         setPostData(updatedPost);
@@ -162,7 +179,6 @@ const Post = () => {
         } catch (error) {
             console.error('Failed to like post', error);
             
-            // Reset to original data
             fetchPost();
             
             if (error.response?.status === 401) {
@@ -170,8 +186,6 @@ const Post = () => {
             } else {
                 setErrorMessage('Nepavyko įvertinti įrašo. Bandykite dar kartą.');
             }
-            
-            fetchUserInteractions();
         }
     };
     
@@ -183,33 +197,20 @@ const Post = () => {
             return;
         }
         
-        const currentInteraction = userInteractions[postData.id];
+        const currentInteraction = postData.user_interaction;
         
         const updatedPost = { ...postData };
         
         if (currentInteraction === 'dislike') {
             updatedPost.dislikes = Math.max(0, updatedPost.dislikes - 1);
-            
-            setUserInteractions(prev => {
-                const newInteractions = { ...prev };
-                delete newInteractions[postData.id];
-                return newInteractions;
-            });
+            updatedPost.user_interaction = null;
         } else if (currentInteraction === 'like') {
             updatedPost.dislikes = updatedPost.dislikes + 1;
             updatedPost.likes = Math.max(0, updatedPost.likes - 1);
-            
-            setUserInteractions(prev => ({
-                ...prev,
-                [postData.id]: 'dislike'
-            }));
+            updatedPost.user_interaction = 'dislike';
         } else {
             updatedPost.dislikes = updatedPost.dislikes + 1;
-            
-            setUserInteractions(prev => ({
-                ...prev,
-                [postData.id]: 'dislike'
-            }));
+            updatedPost.user_interaction = 'dislike';
         }
         
         setPostData(updatedPost);
@@ -242,14 +243,12 @@ const Post = () => {
             } else {
                 setErrorMessage('Nepavyko įvertinti įrašo. Bandykite dar kartą.');
             }
-            
-            fetchUserInteractions();
         }
     };
 
     const handleShare = (e) => {
         e.preventDefault();
-        const url = window.location.origin + `/forumai/irasai/${postData.id}`;
+        const url = window.location.href;
         navigator.clipboard.writeText(url)
           .then(() => {
             alert('Nuoroda nukopijuota!');
@@ -277,8 +276,63 @@ const Post = () => {
             { label: 'Forumai', path: '/forumai' }
         ];
         
-        // Add paths based on URL parameters
-        if (params.universityId) {
+        if (postData.forum_info) {
+            const forumInfo = postData.forum_info;
+            
+            if (forumInfo.entity_type === 'university') {
+                items.push(
+                    { label: 'Universitetai', path: '/forumai/universitetai' },
+                    { 
+                        label: truncateText(forumInfo.university_name || 'Universitetas'), 
+                        path: forumInfo.navigation_path || `/forumai/universitetai/${forumInfo.entity_id}/irasai`,
+                    }
+                );
+            } 
+            else if (forumInfo.entity_type === 'faculty') {
+                items.push(
+                    { label: 'Universitetai', path: '/forumai/universitetai' },
+                    { 
+                        label: truncateText(forumInfo.university_name || 'Universitetas'), 
+                        path: `/forumai/universitetai/${forumInfo.university_id}/irasai`,
+                    },
+                    { 
+                        label: 'Fakultetai', 
+                        path: `/forumai/universitetai/${forumInfo.university_id}/fakultetai` 
+                    },
+                    { 
+                        label: truncateText(forumInfo.faculty_name || 'Fakultetas'),
+                        path: forumInfo.navigation_path || `/forumai/universitetai/${forumInfo.university_id}/fakultetai/${forumInfo.entity_id}/irasai`,
+                    }
+                );
+            } 
+            else if (forumInfo.entity_type === 'program') {
+                items.push(
+                    { label: 'Universitetai', path: '/forumai/universitetai' },
+                    { 
+                        label: truncateText(forumInfo.university_name || 'Universitetas'), 
+                        path: `/forumai/universitetai/${forumInfo.university_id}/irasai`,
+                    },
+                    { 
+                        label: 'Fakultetai', 
+                        path: `/forumai/universitetai/${forumInfo.university_id}/fakultetai` 
+                    },
+                    { 
+                        label: truncateText(forumInfo.faculty_name || 'Fakultetas'),
+                        path: `/forumai/universitetai/${forumInfo.university_id}/fakultetai/${forumInfo.faculty_id}/irasai`,
+                    },
+                    { 
+                        label: 'Programos', 
+                        path: `/forumai/universitetai/${forumInfo.university_id}/fakultetai/${forumInfo.faculty_id}/programos`
+                    },
+                    { 
+                        label: truncateText(forumInfo.program_name || 'Programa'),
+                        path: forumInfo.navigation_path || `/forumai/universitetai/${forumInfo.university_id}/fakultetai/${forumInfo.faculty_id}/programos/${forumInfo.entity_id}/irasai`,
+                    }
+                );
+            }
+        }
+        // Fallback to old method if forum_info is not available
+        else if (params.universityId) {
             items.push(
                 { label: 'Universitetai', path: '/forumai/universitetai' },
                 { 
@@ -287,7 +341,6 @@ const Post = () => {
                     universityId: params.universityId
                 }
             );
-        }
         
         if (params.facultyId && forumInfo.facultyName) {
             items.push(
@@ -318,6 +371,7 @@ const Post = () => {
                     programId: params.programId
                 }
             );
+            }
         }
         
         if (params.categoryId && forumInfo.categoryName) {
@@ -370,16 +424,13 @@ const Post = () => {
             setComment('');
             setIsExpanded(false);
             
-            // Immediately update comment count in the UI
             setPostData(prevPostData => ({
                 ...prevPostData,
                 comments_count: (prevPostData.comments_count || 0) + 1
             }));
             
-            // Fetch the updated comments
             await fetchComments();
             
-            // Refresh post data to ensure all data is in sync with server
             await fetchPost();
             
         } catch (error) {
@@ -418,10 +469,75 @@ const Post = () => {
     }
     
     return (
-        <div className="mb-10 w-4/5 m-auto">
+        <div className="container mx-auto px-4 mb-10">
             {/* Breadcrumb */}
-            <div className="mb-4">
-                <Breadcrumb items={generateBreadcrumbItems()} />
+            <nav className="bg-dark p-4 mb-6 rounded-md border border-light-grey/20">
+                <ol className="flex flex-wrap items-center text-sm">
+                    <li className="flex items-center">
+                        <a href="/forumai" className="text-lght-blue hover:underline">Forumas</a>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mx-2 text-lighter-grey">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                        </svg>
+                    </li>
+                    {generateBreadcrumbItems().map((item, index) => (
+                        <li key={index} className="flex items-center">
+                            {index < generateBreadcrumbItems().length - 1 ? (
+                                <>
+                                    <a href={item.path} className="text-lght-blue hover:underline">{item.label}</a>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mx-2 text-lighter-grey">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                    </svg>
+                                </>
+                            ) : (
+                                <span className="text-white font-medium">{item.label}</span>
+                            )}
+                        </li>
+                    ))}
+                </ol>
+            </nav>
+
+            {/* Thread Header */}
+            <div className="bg-grey rounded-lg mb-6 border-l-4 border-lght-blue">
+                <div className="p-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-white text-2xl font-bold">{postData.title}</h1>
+                            <div className="flex flex-wrap items-center gap-2 mt-2 text-sm text-lighter-grey">
+                                <span className="text-lght-blue">
+                                    {postData.forum_info ? (
+                                        <span>
+                                            {postData.forum_info.entity_type === 'university' && postData.forum_info.university_name ? 
+                                                `${postData.forum_info.university_name} - Universiteto forumas` : 
+                                                postData.forum_info.entity_type === 'faculty' && postData.forum_info.faculty_name ? 
+                                                `${postData.forum_info.faculty_name} - Fakulteto forumas` :
+                                                postData.forum_info.entity_type === 'program' && postData.forum_info.program_name ?
+                                                `${postData.forum_info.program_name} - Programos forumas` :
+                                                postData.forum || "Forumas"}
+                                        </span>
+                                    ) : (
+                                        postData.forum || "Forumas"
+                                    )}
+                                </span>
+                                <span>•</span>
+                                <span>{postData.created_at || postData.date}</span>
+                                <span>•</span>
+                                <span>{comments.length} atsakymai</span>
+                                <span>•</span>
+                                <span>{postData.views || 0} peržiūros</span>
+                                <span>•</span>
+                                <span>{postData.likes + postData.dislikes} įvertinimai</span>
+                            </div>
+                        </div>
+                        {user && (
+                            <button 
+                                onClick={() => window.location.href = '/kurti-irasa'} 
+                                className="bg-lght-blue text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors hidden md:block"
+                            >
+                                Sukurti naują įrašą
+                            </button>
+                        )}
+                    </div>
+                </div>
             </div>
 
             {errorMessage && (
@@ -436,154 +552,169 @@ const Post = () => {
                 </div>
             )}
 
-            <div className="flex flex-row gap-2 mb-2 justify-center cursor-pointer text-xxxs sm:text-sm sm:justify-end">
-                {postData.categories && Array.isArray(postData.categories) && postData.categories.length > 0 ? (
-                    postData.categories.map((category, catIndex) => {
+            {/* Categories */}
+            {postData.categories && Array.isArray(postData.categories) && postData.categories.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                    {postData.categories.map((category, catIndex) => {
                         const categoryName = typeof category === 'object' ? category.name : category;
-                        const color = category.color;
+                        const color = category.color || 'lght-blue';
                         return (
                             <div
                                 key={catIndex}
-                                className={`ring-1 ring-${color} rounded-md p-1 px-2 font-medium text-${color} mt-2`}
+                                className={`ring-1 ring-${color} rounded-full py-1 px-3 text-xs font-medium text-${color}`}
                             >
                                 {categoryName}
                             </div>
                         );
-                    })
-                ) : (
-                    null
-                )}
-            </div>
+                    })}
+                </div>
+            )}
 
-            <div className="w-full bg-grey text-white rounded-md p-4 h-1/2 m-auto">
-                <div className="flex flex-col gap-10">
-                    <div className="flex flex-col gap-4">
-                        <div className="flex flex-row items-center justify-between gap-4">
-                            <div className="flex flex-row gap-2 items-center">
+            {/* Original Post Panel */}
+            <div className="bg-grey rounded-lg mb-6 overflow-hidden border border-light-grey/20">
+                {/* Post Header */}
+                <div className="bg-dark p-4 border-b border-light-grey/20 flex items-center justify-between">
+                    <div className="flex items-center">
+                        <div className="mr-3">
                                 <img 
                                     src={postData.user_avatar ? `http://127.0.0.1:5000/storage/${postData.user_avatar}` : profilePicture} 
-                                    className="size-8 md:size-10 rounded-full object-cover border border-light-grey" 
+                                className="w-10 h-10 rounded-full object-cover border border-light-grey" 
                                     alt="Profile" 
                                 />
-                                <div className="flex flex-col items-start justify-start gap-1">
-                                    <span className="text-white text-xs font-medium md:text-base">{postData.user || postData.username || 'Unknown'}</span>
-                                    <span className="text-xxs font-medium text-light-grey md:text-xs">{postData.user_status?.name || 'Studentas'} • {postData.date || postData.created_at || ''}</span>
                                 </div>
+                        <div>
+                            <div className="text-white font-medium">{postData.user || postData.username || 'Unknown'}</div>
+                            <div className="text-lighter-grey text-xs flex items-center gap-2">
+                                <span>{postData.user_status?.name || 'Studentas'}</span>
+                                
                             </div>
-                            <button className='text-white hover:bg-lght-blue rounded-full -translate-y-2 p-1 transition-colors duration-150 ease-linear'>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
-                                </svg>
-                            </button>
-                        </div>
-                        <div className="font-medium text-lg md:text-3xl">
-                            {postData.title}
-                        </div>
-                        <div className="text-sm mt-3 md:text-base font-light text-white">
-                            {postData.content || postData.description}
                         </div>
                     </div>
-                    
                     <div>
-                        <div className="flex flex-row gap-4 mb-4">
+                    <span className="text-lighter-grey text-md font-medium">{postData.date || postData.created_at || ''}</span>
+                        </div>
+                        </div>
+                
+                {/* Post Content */}
+                <div className="p-6">
+                    <div className="text-white prose prose-invert max-w-none mb-8">
+                        <div dangerouslySetInnerHTML={{ __html: postData.content || postData.description }} />
+                    </div>
+                    
+                    {/* Post Actions */}
+                    <div className="flex items-center gap-4 pt-4 border-t border-light-grey/20">
                             <div 
-                                className={`flex flex-row gap-2 p-2 rounded-md hover:bg-dark cursor-pointer
-                                    ${userInteractions[postData.id] === 'like' 
-                                        ? 'bg-dark text-lght-blue' 
-                                        : 'hover:text-lght-blue text-white transition-colors duration-150 ease-linear'}`}
+                            className={`flex items-center gap-1 cursor-pointer md:text-sm transition-colors duration-150 hover:bg-dark/30 p-1.5 rounded-md ${postData.user_interaction === 'like' ? 'text-lght-blue bg-dark/20' : 'hover:text-lght-blue text-lighter-grey'}`}
                                 onClick={handleLike}
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
                                     <path fillRule="evenodd" d="M11.47 2.47a.75.75 0 0 1 1.06 0l7.5 7.5a.75.75 0 1 1-1.06 1.06l-6.22-6.22V21a.75.75 0 0 1-1.5 0V4.81l-6.22 6.22a.75.75 0 1 1-1.06-1.06l7.5-7.5Z" clipRule="evenodd" />
                                 </svg>
-                                <p className="flex gap-1">{postData.likes || postData.like_count || 0}</p>
+                            <span>{postData.likes || postData.like_count || 0}</span>
                             </div>
                             <div 
-                                className={`flex flex-row gap-2 p-2 mr-6 rounded-md hover:bg-dark cursor-pointer
-                                    ${userInteractions[postData.id] === 'dislike' 
-                                        ? 'bg-dark text-red' 
-                                        : 'hover:text-red text-white transition-colors duration-150 ease-linear'}`}
+                            className={`flex items-center gap-1 cursor-pointer md:text-sm transition-colors duration-150 hover:bg-dark/30 p-1.5 rounded-md ${postData.user_interaction === 'dislike' ? 'text-red bg-dark/20' : 'hover:text-red text-lighter-grey'}`}
                                 onClick={handleDislike}
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6 rotate-180">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 rotate-180">
                                     <path fillRule="evenodd" d="M11.47 2.47a.75.75 0 0 1 1.06 0l7.5 7.5a.75.75 0 1 1-1.06 1.06l-6.22-6.22V21a.75.75 0 0 1-1.5 0V4.81l-6.22 6.22a.75.75 0 1 1-1.06-1.06l7.5-7.5Z" clipRule="evenodd" />
                                 </svg>
-                                <p className="flex gap-1">{postData.dislikes || 0}</p>
+                            <span>{postData.dislikes || 0}</span>
                             </div>
-                            <div 
-                                className="flex flex-row gap-2 p-2 rounded-md text-white hover:bg-dark hover:text-lght-blue transition-colors duration-150 ease-linear cursor-pointer"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+                        <div className="flex items-center gap-1 md:text-sm text-lighter-grey p-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                 </svg>
-                                <p className="flex gap-1">{postData.comment_count || postData.comments_count || (postData.comments && postData.comments.length) || 0}</p>
+                            <span>{postData.views || 0}</span>
                             </div>
                             <div 
-                                className="flex flex-row gap-2 p-2 rounded-md text-white hover:bg-dark hover:text-lght-blue transition-colors duration-150 ease-linear cursor-pointer"
+                            className="flex items-center gap-1 cursor-pointer hover:text-lght-blue md:text-sm transition-colors duration-150 hover:bg-dark/30 p-1.5 rounded-md text-lighter-grey"
                                 onClick={handleShare}
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
                                     <path fillRule="evenodd" d="M15.75 4.5a3 3 0 1 1 .825 2.066l-8.421 4.679a3.002 3.002 0 0 1 0 1.51l8.421 4.679a3 3 0 1 1-.729 1.31l-8.421-4.678a3 3 0 1 1 0-4.132l8.421-4.679a3 3 0 0 1-.096-.755Z" clipRule="evenodd" />
                                 </svg>
-                                <p className="flex gap-1">Dalintis</p>
-                            </div>
+                            <span>Dalintis</span>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Reply Box */}
                         {user && (
-                            <div className="flex flex-row items-center gap-2 w-full">
+                <div className="bg-grey rounded-lg p-4 border border-lght-blue mb-6">
+                    <h3 className="text-white font-medium mb-3">Pridėti atsakymą</h3>
                             {isExpanded ? (
-                                <div className="relative w-full">
-                                    <div className="ring-1 rounded-md ring-light-grey">
+                        <div className="relative rounded-md p-4">
+                            <div className="mb-8 ring-1 rounded-md ring-light-grey">
                                         <RichTextEditor 
                                             value={comment}
                                             onChange={(content) => setComment(content)}
-                                            placeholder="Tekstas"
+                                    placeholder="Parašykite komentarą..."
                                         />
                                     </div>
 
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    className="ring-1 ring-light-grey text-white px-3 py-1 rounded-md text-sm hover:bg-dark-blue transition"
+                                    onClick={() => setIsExpanded(false)}
+                                    disabled={commentSubmitting}
+                                >
+                                    Atšaukti
+                                </button>
                                     <button
-                                        className="absolute bottom-2 right-2 bg-lght-blue text-white px-3 py-1 rounded-md text-sm hover:bg-dark-blue transition" 
+                                    className="bg-lght-blue text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 transition" 
                                         onClick={handleComment}
                                         disabled={commentSubmitting}
                                     >
                                         {commentSubmitting ? 'Siunčiama...' : 'Komentuoti'}
                                     </button>
-                                    <button
-                                        className="absolute bottom-2 right-28 ring-1 ring-light-grey text-white px-3 py-1 rounded-md text-sm hover:bg-dark-blue transition"
-                                        onClick={() => setIsExpanded(false)}
-                                        disabled={commentSubmitting}
-                                    >
-                                        Atšaukti
-                                    </button>
+                            </div>
                                 </div>
                             ) : (
-                                <input
-                                    className="bg-grey ring-1 ring-light-grey rounded-md p-3 w-full text-sm font:ring-lght-blue"
-                                    placeholder="Palikite komentarą"
-                                    value={comment}
-                                    onChange={(e) => setComment(e.target.value)}
-                                    onFocus={() => setIsExpanded(true)}
-                                />
+                        <div onClick={() => setIsExpanded(true)} className="border border-light-grey/40 rounded-md cursor-text p-3 text-lighter-grey hover:border-lght-blue focus:border-lght-blue transition-colors">
+                            Spustelėkite čia, kad pradėtumėte rašyti atsakymą...
+                        </div>
                                 )}
                             </div>
                         )}
-                    </div>
+
+            {/* Replies Header */}
+            <div className="bg-dark p-4 rounded-t-lg border border-light-grey/20 flex justify-between items-center mb-0">
+                <h2 className="text-white text-lg font-medium">
+                    Atsakymai ({postData.comment_count || postData.comments_count || (postData.comments && postData.comments.length) || 0})
+                </h2>
+                <div className="text-xs text-lighter-grey">
+                    Rikiuoti pagal:
+                    <select className="ml-2 bg-dark text-white border border-light-grey/30 rounded px-2 py-1 text-xs">
+                        <option value="oldest">Seniausias</option>
+                        <option value="newest">Naujausias</option>
+                        <option value="likes">Daugiausiai patiktukų</option>
+                    </select>
                 </div>
             </div>
-            <div className="mt-4">
+
+            {/* Comments Section */}
+            <div className="bg-grey rounded-b-lg overflow-hidden border-x border-b border-light-grey/20 mb-6">
                 {commentsLoading ? (
-                    <div className="text-light-grey text-center py-4 flex justify-center items-center">
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-light-grey" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <div className="text-lighter-grey text-center py-6 flex justify-center items-center">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-lighter-grey" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                         <span>Kraunami komentarai...</span>
                     </div>
-                ) : comments && Array.isArray(comments) && comments.length > 0 ? (
-                    comments.map((comment, index) => (
+                ) : (
+                    <div>
+                        {comments && Array.isArray(comments) && comments.length > 0 ? (
+                            <div>
+                                {comments.map((comment, index) => (
+                                    <div key={index} className="border-b border-light-grey/20 last:border-b-0">
                         <Comment 
                             key={index} 
                             comment={comment} 
-                            level={1} 
+                                            replyingTo={comment.replyingToUser}
                             onCommentAdded={fetchComments} 
                             post_user_id={postData.user_id}
                             updatePostCommentCount={() => {
@@ -593,9 +724,37 @@ const Post = () => {
                                 }));
                             }}
                         />
-                    ))
-                ) : (
-                    <p className="text-light-grey text-sm">Nėra komentarų.</p>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="p-8 text-center text-lighter-grey">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                                </svg>
+                                <p className="text-lg">Nėra komentarų</p>
+                                <p className="mt-2">Būkite pirmas, kuris pakomentuos šį įrašą!</p>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {/* Forum Navigation */}
+            <div className="flex flex-wrap gap-3 justify-between">
+                <a href={postData.forum_info?.navigation_path || location.state?.referrer || '/forumai'} className="text-lght-blue hover:underline flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                    </svg>
+                    Grįžti į {postData.forum_info ? postData.forum_info.title : 'įrašų sąrašą'}
+                </a>
+                {user && (
+                    <a href="/kurti-irasa" className="text-lght-blue hover:underline flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        Sukurti naują įrašą
+                    </a>
                 )}
             </div>
         </div>

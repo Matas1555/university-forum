@@ -5,15 +5,7 @@ import UniversityList from "../components/lists/universityList";
 import PostList from "../components/lists/postList";
 import DiscussionList from "../components/lists/discussionList";
 import { ArchiveIcon, NewsIcon } from "../components/icons";
-import KTUlogo from "../assets/KTU-logo.png";
-import VDUlogo from "../assets/VDU-logo.png";
-import VUlogo from "../assets/VU-logo.png";
-import MRUlogo from "../assets/MRU-logo.png";
-//import Campus from "../assets/campus.svg";
 import Campus from "../assets/campus2.png";
-import KTU from "../assets/KTU.jpg";
-import VDU from "../assets/VDU.jpg";
-import VU from "../assets/VU.jpg";
 import StarRating from "../components/starRating/starRating";
 import drawnArrow from "../assets/drawn_Arrow.png";
 import PeopleTalking from "../assets/peopleTalking-removebg-preview.png";
@@ -85,7 +77,6 @@ const Home = () => {
     }
   }, [user, token]);
   
-  // Fetch user's posts if user is logged in
   const fetchUserPosts = async () => {
     if (!user || !token) return;
     
@@ -95,12 +86,12 @@ const Home = () => {
         params: { user_id: user.id } 
       });
       
-      // Format posts for discussion list
       const formattedPosts = response.data.map(post => ({
         id: post.id,
         title: post.title,
         created_at: formatDate(post.created_at),
-        comments_count: post.comments_count || 0
+        comments_count: post.comments_count || 0,
+        forum_info: post.forum_info || null
       }));
       
       setUserPosts(formattedPosts);
@@ -111,7 +102,6 @@ const Home = () => {
     }
   };
   
-  // Fetch latest posts for everyone
   const fetchLatestPosts = async () => {
     try {
       setLatestPostsLoading(true);
@@ -123,12 +113,12 @@ const Home = () => {
         }
       });
       
-      // Format posts for discussion list
       const formattedPosts = response.data.map(post => ({
         id: post.id,
         title: post.title,
         created_at: formatDate(post.created_at),
-        comments_count: post.comments_count || 0
+        comments_count: post.comments_count || 0,
+        forum_info: post.forum_info || null
       }));
       
       setLatestPosts(formattedPosts);
@@ -139,51 +129,118 @@ const Home = () => {
     }
   };
   
-  // Format date for displaying
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
     return date.toLocaleDateString('lt-LT');
   };
   
-  // Handle navigation to post page
-  const handlePostClick = (postId) => {
-    navigate(`/irasai/${postId}`, { 
-      state: { 
-        breadcrumb: [
-          { label: 'Įrašai', path: '/irasai' },
-          { label: 'Įrašas', path: `/irasai/${postId}` }
-        ]
-      } 
-    });
+  const getPostUrl = (discussion) => {
+    if (!discussion.forum_info) return `/irasai/${discussion.id}`;
+    
+    const { forum_info } = discussion;
+    
+    if (forum_info.entity_type === 'university') {
+      return `/forumai/universitetai/${forum_info.entity_id}/irasai/${discussion.id}`;
+    } else if (forum_info.entity_type === 'faculty') {
+      return `/forumai/universitetai/${forum_info.university_id}/fakultetai/${forum_info.entity_id}/irasai/${discussion.id}`;
+    } else if (forum_info.entity_type === 'program') {
+      return `/forumai/universitetai/${forum_info.university_id}/fakultetai/${forum_info.faculty_id}/programos/${forum_info.entity_id}/irasai/${discussion.id}`;
+    } else if (forum_info.entity_type === 'general') {
+      return `/forumai/bendros-diskusijos/irasai/${discussion.id}`;
+    }
+    
+    return `/irasai/${discussion.id}`;
+  };
+  
+  const handlePostClick = (postId, forum_info) => {
+    if (forum_info) {
+      const url = getPostUrl({ id: postId, forum_info });
+      navigate(url, { 
+        state: { 
+          entityType: forum_info.entity_type,
+          entityId: forum_info.entity_id,
+          universityId: forum_info.university_id,
+          facultyId: forum_info.faculty_id,
+          breadcrumb: [
+            { label: 'Įrašai', path: '/irasai' },
+            { label: 'Įrašas', path: url }
+          ]
+        } 
+      });
+    } else {
+      navigate(`/irasai/${postId}`, { 
+        state: { 
+          breadcrumb: [
+            { label: 'Įrašai', path: '/irasai' },
+            { label: 'Įrašas', path: `/irasai/${postId}` }
+          ]
+        } 
+      });
+    }
     window.scrollTo(0, 0);
   };
 
-  // For DiscussionList, add onClick to handle navigation
   const enhanceDiscussionsWithClick = (discussions) => {
     return discussions.map(discussion => ({
       ...discussion,
-      onClick: () => handlePostClick(discussion.id)
+      onClick: () => handlePostClick(discussion.id, discussion.forum_info)
     }));
   };
 
-  const getUniversityLogo = (universityName) => {
-    if (!universityName) {
-      return { src: KTUlogo, className: "size-12 m-3 rounded-sm" };
+  const getForumLogo = (forum) => {
+    if (forum && forum.logo_path) {
+      return (
+        <img 
+          src={`src/assets/${forum.logo_path}`} 
+          className="w-12 h-12 object-contain max-w-full max-h-full" 
+          alt={forum.title || "Forum"}
+          onError={(e) => {
+            e.target.style.display = 'none';
+            e.target.nextSibling.style.display = 'block';
+          }}
+        />
+      );
     }
     
-    if (universityName.includes('KTU') || universityName.includes('Kaun')) {
-      return { src: KTUlogo, className: "size-12 m-3 rounded-sm" };
-    } else if (universityName.includes('VDU') || universityName.includes('Vytaut')) {
-      return { src: VDUlogo, className: "size-10 m-3 rounded-sm invert" };
-    } else if (universityName.includes('VU') || universityName.includes('Vilnia')) {
-      return { src: VUlogo, className: "size-10 m-3 rounded-sm invert" };
-    } else if (universityName.includes('MRU') || universityName.includes('Mykol')) {
-      return { src: MRUlogo, className: "size-6 w-20 m-3 rounded-sm" };
-    } else {
-      // Default logo
-      return { src: KTUlogo, className: "size-12 m-3 rounded-sm" };
+    // Special case for general discussion forum (ID 358)
+    if (forum && forum.id === 358) {
+      return (
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          fill="none" 
+          viewBox="0 0 24 24" 
+          strokeWidth="1.5" 
+          stroke="currentColor" 
+          className="w-10 h-10 text-lght-blue"
+        >
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" 
+          />
+        </svg>
+      );
     }
+    
+    // Default SVG icon if no logo is provided
+    return (
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        fill="none" 
+        viewBox="0 0 24 24" 
+        strokeWidth="1.5" 
+        stroke="currentColor" 
+        className="w-10 h-10 text-lght-blue"
+        style={{ display: forum?.logo_path ? 'none' : 'block' }}
+      >
+        <path 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21"
+        />
+      </svg>
+    );
   };
   
   const showUniversitetai = () => {
@@ -211,7 +268,22 @@ const Home = () => {
   };
   
   const handleOpenForum = (forumId, forumName, universityName, entityId) => {
-    navigate(`/forumai/universitetai/${forumId}/irasai`, { 
+    // Special case for general discussion forum
+    if (forumId === 358 || forumName === 'Bendros diskusijos') {
+      navigate(`/forumai/bendros-diskusijos/irasai`, { 
+        state: { 
+          forumType: 'general',
+          forumId: forumId, 
+          forumName: forumName,
+          entityType: 'general',
+          entityId: null,
+          breadcrumb: [
+            { label: 'Bendros diskusijos', path: `/forumai/bendros-diskusijos/irasai` }
+          ]
+        } 
+      });
+    } else {
+      navigate(`/forumai/universitetai/${entityId || forumId}/irasai`, { 
       state: { 
         forumType: 'university',
         forumId: forumId, 
@@ -219,12 +291,12 @@ const Home = () => {
         entityType: 'university',
         entityId: entityId || forumId,
         breadcrumb: [
-          { label: 'Forumai', path: '/forumai' },
           { label: 'Universitetai', path: '/pagrindinis' },
-          { label: universityName || forumName, path: `/forumai/universitetai/${forumId}/irasai` }
+          { label: universityName || forumName, path: `/forumai/universitetai/${entityId || forumId}/irasai` }
         ]
       } 
     });
+    }
     window.scrollTo(0, 0);
   }
 
@@ -291,7 +363,7 @@ const Home = () => {
                   <p className="text-white font-light text-base">Jūsų įrašai</p>
                 </div>
                 <div className="rounded-md p-4 border border-light-grey/30 text-center">
-                  <p className="text-light-grey">Jūs dar nesukūrėte įrašų.</p>
+                  <p className="text-lighter-grey">Jūs dar nesukūrėte įrašų.</p>
                   <button 
                     onClick={() => navigate('/kurti-irasa')} 
                     className="mt-4 bg-lght-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition-colors"
@@ -327,7 +399,7 @@ const Home = () => {
               <p className="text-white font-light text-base">Naujausi įrašai</p>
             </div>
             <div className="rounded-md p-4 border border-light-grey/30 text-center">
-              <p className="text-light-grey">Šiuo metu nėra naujų įrašų.</p>
+              <p className="text-lighter-grey">Šiuo metu nėra naujų įrašų.</p>
             </div>
           </div>
         )}
@@ -411,7 +483,7 @@ const Home = () => {
                 <h2 className="text-white font-bold text-2xl md:text-3xl">Universiteto rekomendacijų sistema</h2>
               </div>
               
-              <p className="text-light-grey mb-6">
+              <p className="text-lighter-grey mb-6">
                 Nežinote, kurį universitetą ar studijų programą pasirinkti? Mūsų rekomendacijų sistema 
                 panaudos dirbtinį intelektą, kad analizuotų forumo diskusijas, atsiliepimus ir programų 
                 aprašymus, ir pasiūlys jums geriausiai tinkančias studijų galimybes.
@@ -454,7 +526,7 @@ const Home = () => {
                         <p className="text-white font-medium">KTU - Informatika</p>
                         <div className="flex items-center">
                           <StarRating rating={4.8} width={3} color="white" />
-                          <span className="text-light-grey text-xs ml-1">98% atitikimas</span>
+                          <span className="text-lighter-grey text-xs ml-1">98% atitikimas</span>
                         </div>
                       </div>
                     </div>
@@ -469,7 +541,7 @@ const Home = () => {
                         <p className="text-white font-medium">VU - Programų sistemos</p>
                         <div className="flex items-center">
                           <StarRating rating={4.6} width={3} color="white" />
-                          <span className="text-light-grey text-xs ml-1">95% atitikimas</span>
+                          <span className="text-lighter-grey text-xs ml-1">95% atitikimas</span>
                         </div>
                       </div>
                     </div>
@@ -484,7 +556,7 @@ const Home = () => {
                         <p className="text-white font-medium">VDU - Multimedijos inžinerija</p>
                         <div className="flex items-center">
                           <StarRating rating={4.5} width={3} color="white" />
-                          <span className="text-light-grey text-xs ml-1">92% atitikimas</span>
+                          <span className="text-lighter-grey text-xs ml-1">92% atitikimas</span>
                         </div>
                       </div>
                     </div>
@@ -525,67 +597,100 @@ const Home = () => {
           {!loading && activeSection === 'universitetai' && contentVisible && (
             <>
           <div className="my-10">              
-            <div 
-                className="bg-grey rounded-md flex flex-row align-middle justify-between border-l-2 border-light-grey items-center hover:bg-dark cursor-pointer transition-colors transition: duration-150 ease-linear" 
-                onClick={() => handleOpenForum(1, 'Bendros diskusijos', 'General', null)}
-          >
-            <div className="flex flex-row items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-20 bg-dark m-2 p-4 rounded-md text-light-grey">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-lght-blue/20 p-1.5 rounded-md">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-lght-blue">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21" />
                 </svg>
-                <div>
-                  <p className="text-white ml-5 text-2xl font-medium">Bendros diskusijos</p> 
-                  <p className="text-light-grey ml-5 text-md font-medium">Tai yra forumus bendroms diskusijoms apie viską, kas susiję su universiteto gyvenimu.</p>
+              </div>
+              <h2 className="text-white font-bold text-lg">Universitetų forumai</h2>
+            </div>
+
+            {forumsLoading ? (
+              <div className="flex justify-center my-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-lght-blue"></div>
+              </div>
+            ) : (
+              <div className="space-y-3 mb-10">
+                {/* Featured forum - always visible at the top */}
+                <div 
+                  className="bg-gradient-to-r from-dark/70 to-grey/80 rounded-lg p-4 border border-light-grey/30 hover:border-lght-blue/50 shadow-md hover:shadow-lg transition-all duration-200 group cursor-pointer" 
+                  onClick={() => handleOpenForum(358, 'Bendros diskusijos', 'General', null)}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="bg-dark/70 p-3 rounded-md group-hover:bg-lght-blue/20 transition-colors flex items-center justify-center w-16 h-16 min-w-[4rem] min-h-[4rem]">
+                      {getForumLogo(forums.find(forum => forum.id === 358))}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-white font-semibold text-lg group-hover:text-lght-blue transition-colors">Bendros diskusijos</h3>
+                          <p className="text-lighter-grey text-sm mt-1">Tai yra forumas bendroms diskusijoms apie viską, kas susiję su universiteto gyvenimu.</p>
+                        </div>
+                        <div className="flex flex-col items-center bg-dark/60 rounded-full w-16 h-16 justify-center group-hover:bg-lght-blue/20 transition-colors">
+                          <span className="text-white font-medium text-lg">
+                            {forums.find(forum => forum.id === 358)?.post_count || 0}
+                          </span>
+                          <span className="text-lighter-grey text-xs">įrašų</span>
             </div>
             </div>
-                <div className="m-3 mr-5">
-                  <p className="text-white font-medium text-xl">256</p>
-                  <p className="text-light-grey font-medium text-xl">Įrašų</p>
           </div>
             </div>
           </div>
 
-          <div className="text-white font-medium text-md ml-3">
-            <h1>Universitetų forumai</h1>
-          </div>
-
-
-          
-          {forumsLoading ? (
-            <div className="flex justify-center mt-10">
-              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-lght-blue"></div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 animate-fade-in-up border-t-2 pt-4 border-light-grey rounded-md px-1 mb-10">
-              {forums.map((forum) => {
-                const logo = getUniversityLogo(forum.university_name);
+                {/* University forums grid */}
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 animate-fade-in-up">
+                  {forums
+                    .filter(forum => forum.id !== 358) // Filter out the general discussions forum
+                    .map((forum) => {
+                    const logo = getForumLogo(forum);
+                    const postCount = forum.post_count || 0;
+                    
+                    let activityLevel = "Žemas aktyvumas";
+                    let activityColor = "bg-gray-500/20 text-gray-400/80";
+                    
+                    if (postCount > 50) {
+                      activityLevel = "Aukštas aktyvumas";
+                      activityColor = "bg-green-500/20 text-green-400/80";
+                    } else if (postCount > 10) {
+                      activityLevel = "Vidutinis aktyvumas";
+                      activityColor = "bg-yellow-500/20 text-yellow-400/80";
+                    }
+                    
                 return (
                   <div 
                     key={forum.id}
-                    className="bg-grey rounded-md flex flex-row align-middle justify-between border-l-2 border-light-grey items-center hover:bg-dark cursor-pointer transition-colors transition: duration-150 ease-linear" 
+                        className="bg-dark/90 hover:bg-grey/40 rounded-lg p-3 border border-light-grey/20 hover:border-lght-blue/40 shadow-sm hover:shadow-md transition-all duration-200 group cursor-pointer" 
                     onClick={() => handleOpenForum(forum.id, forum.title, forum.university_name, forum.entity_id)}
                   >
-                    <div className="flex flex-row items-center">
-                      <img src={logo.src} className={logo.className} alt={forum.university_name || "University"} />
-                      <div>
-                        <p className="text-white text-sm font-medium">{forum.title}</p>
+                        <div className="flex items-center gap-3">
+                          <div className="flex-shrink-0 bg-dark/80 p-2 rounded-md overflow-hidden group-hover:bg-lght-blue/10 transition-colors flex items-center justify-center w-16 h-16 min-w-[4rem] min-h-[4rem]">
+                            {logo}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-white font-medium text-sm truncate group-hover:text-lght-blue transition-colors">{forum.title}</h3>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className={`${activityColor} text-xs px-1.5 py-0.5 rounded`}>{activityLevel}</span>
+                              <div className="flex items-center text-lighter-grey text-xs">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3 mr-1">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+                                </svg>
+                                {postCount}
+                              </div>
                       </div>
             </div>
-            <div className="m-3 text-end">
-                      <p className="text-white font-medium text-sm">{forum.post_count || 0}</p>
-              <p className="text-light-grey font-medium">
-                {forum.post_count === 1 
-                ? 'įrašas' 
-                : (forum.post_count >= 2 && forum.post_count <= 9) 
-                    ? 'įrašai' 
-                    : 'įrašų'}
-              </p>
+                          <div className="flex-shrink-0 flex flex-col gap-1 bg-dark/60 rounded-full w-16 h-16 items-center justify-center group-hover:bg-lght-blue/20 transition-colors">
+                            <span className="text-white text-sm font-semibold">{postCount}</span>
+                            <span className="text-lighter-grey text-xs">įrašų</span>
+                          </div>
             </div>
           </div>
                 );
               })}
+                </div>
             </div>
           )}
+          </div>
             </>
           )}
 

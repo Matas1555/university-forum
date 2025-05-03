@@ -208,17 +208,59 @@ const RecommendationForm = () => {
     try {
       console.log("Submitting preferences:", preferences);
       
-      const response = await UniversityAPI.filterRecommendations(preferences);
-      console.log("Filtered programs:", response.data);
+      // Map the numeric difficulty level to string values
+      const mapDifficultyLevel = (level) => {
+        if (level < 33) return 'easy';
+        if (level < 66) return 'moderate';
+        return 'challenging';
+      };
+      
+      // Format preferences for API
+      const formattedPreferences = {
+        ...preferences,
+        interests: Array.isArray(preferences.interests) ? preferences.interests.join(', ') : preferences.interests,
+        studyPreferences: {
+          ...preferences.studyPreferences,
+          difficultyLevel: mapDifficultyLevel(preferences.studyPreferences.difficultyLevel)
+        }
+      };
+      
+      console.log("Formatted preferences:", formattedPreferences);
+      
+      // First attempt with AI-powered recommendations
+      try {
+        console.log("Getting AI recommendations...");
+        const aiResponse = await UniversityAPI.getAIRecommendations(formattedPreferences);
+        console.log("AI recommendations:", aiResponse.data);
+        
+        localStorage.setItem('filteredPrograms', JSON.stringify(aiResponse.data));
+        localStorage.setItem('recommendationPreferences', JSON.stringify(preferences));
+        localStorage.setItem('isAIRecommendation', 'true');
+        
+        navigate('/recommendation-results');
+        return;
+      } catch (aiError) {
+        console.error("Error getting AI recommendations, falling back to regular filtering:", aiError);
+        // Continue with fallback to regular filtering
+      }
+      
+      // Fallback to regular filtering if AI fails
+      const response = await UniversityAPI.filterRecommendations(formattedPreferences);
+      console.log("Regular filtered programs:", response.data);
       
       localStorage.setItem('filteredPrograms', JSON.stringify(response.data));
       localStorage.setItem('recommendationPreferences', JSON.stringify(preferences));
+      localStorage.setItem('isAIRecommendation', 'false');
       
       navigate('/recommendation-results');
       
     } catch (err) {
       console.error("Error generating recommendations:", err);
-      setError("Įvyko klaida generuojant rekomendacijas. Bandykite vėliau.");
+      if (err.response && err.response.data && err.response.data.errors) {
+        setError("Įvyko klaida: " + Object.values(err.response.data.errors).flat().join(", "));
+      } else {
+        setError("Įvyko klaida generuojant rekomendacijas. Bandykite vėliau.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -230,17 +272,58 @@ const RecommendationForm = () => {
     
     try {
       console.log("Testing filter with preferences:", preferences);
-      const response = await UniversityAPI.filterRecommendations(preferences);
-      console.log("Filtered programs:", response.data);
       
-      // Store both strict and relaxed programs in localStorage
+      // Map the numeric difficulty level to string values
+      const mapDifficultyLevel = (level) => {
+        if (level < 33) return 'easy';
+        if (level < 66) return 'moderate';
+        return 'challenging';
+      };
+      
+      // Format preferences for API
+      const formattedPreferences = {
+        ...preferences,
+        interests: Array.isArray(preferences.interests) ? preferences.interests.join(', ') : preferences.interests,
+        studyPreferences: {
+          ...preferences.studyPreferences,
+          difficultyLevel: mapDifficultyLevel(preferences.studyPreferences.difficultyLevel)
+        }
+      };
+      
+      console.log("Formatted preferences:", formattedPreferences);
+      
+      // First try AI recommendations
+      try {
+        console.log("Getting AI test recommendations...");
+        const aiResponse = await UniversityAPI.getAIRecommendations(formattedPreferences);
+        console.log("AI test recommendations:", aiResponse.data);
+        
+        localStorage.setItem('filteredPrograms', JSON.stringify(aiResponse.data));
+        localStorage.setItem('recommendationPreferences', JSON.stringify(preferences));
+        localStorage.setItem('isAIRecommendation', 'true');
+        
+        navigate('/recommendation-results');
+        return;
+      } catch (aiError) {
+        console.error("Error getting AI test recommendations, falling back to regular filtering:", aiError);
+      }
+      
+      // Fallback to regular filtering
+      const response = await UniversityAPI.filterRecommendations(formattedPreferences);
+      console.log("Regular test filtered programs:", response.data);
+      
       localStorage.setItem('filteredPrograms', JSON.stringify(response.data));
       localStorage.setItem('recommendationPreferences', JSON.stringify(preferences));
+      localStorage.setItem('isAIRecommendation', 'false');
       
       navigate('/recommendation-results');
     } catch (err) {
       console.error("Error testing filter:", err);
-      setError("Įvyko klaida testuojant filtrą: " + (err.response?.data?.error || err.message));
+      if (err.response && err.response.data && err.response.data.errors) {
+        setError("Įvyko klaida: " + Object.values(err.response.data.errors).flat().join(", "));
+      } else {
+        setError("Įvyko klaida testuojant filtrą: " + (err.response?.data?.error || err.message));
+      }
     } finally {
       setIsLoading(false);
     }

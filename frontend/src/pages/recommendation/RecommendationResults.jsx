@@ -14,18 +14,21 @@ const RecommendationResults = () => {
   const [expanded, setExpanded] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('strict');
+  const [isAIRecommendation, setIsAIRecommendation] = useState(false);
 
   useEffect(() => {
     const loadResults = () => {
       try {
         const storedPrograms = localStorage.getItem('filteredPrograms');
         const storedPreferences = localStorage.getItem('recommendationPreferences');
+        const storedIsAIRecommendation = localStorage.getItem('isAIRecommendation');
         
         if (!storedPrograms) {
           navigate('/recommendation');
           return;
         }
         
+        setIsAIRecommendation(storedIsAIRecommendation === 'true');
         const parsedData = JSON.parse(storedPrograms);
         
         if (storedPreferences) {
@@ -85,12 +88,10 @@ const RecommendationResults = () => {
         relevanceScore += 15;
       }
 
-      // Enhanced program size scoring - now it's a ranking factor instead of hard filter
       if (prefs.programSize) {
         let studentCount = 0;
         
         if (program.student_count) {
-          // Try to extract numbers from student_count field
           const matches = program.student_count.toString().match(/\d+/);
           if (matches && matches.length > 0) {
             studentCount = parseInt(matches[0], 10);
@@ -254,12 +255,22 @@ const RecommendationResults = () => {
     <div className="container mx-auto px-4 py-8 max-w-screen-xl">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-white text-3xl font-bold">Rekomenduojamos programos</h1>
-        <Link 
-          to="/rekomendacijos" 
-          className="bg-dark text-white px-4 py-2 rounded-lg hover:bg-dark/80 transition-colors"
-        >
-          Grįžti į formą
-        </Link>
+        <div className="flex gap-4 items-center">
+          {isAIRecommendation && (
+            <div className="flex items-center bg-dark rounded-full py-1 px-3 border border-lght-blue">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-lght-blue mr-2">
+                <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM9 7.5A.75.75 0 0 0 9 9h1.5c.98 0 1.813.626 2.122 1.5H9A.75.75 0 0 0 9 12h3.622a2.251 2.251 0 0 1-2.122 1.5H9a.75.75 0 0 0 0 1.5h1.5a3.75 3.75 0 0 0 3.75-3.75v-.75a.75.75 0 0 0-.75-.75h-1.5a.75.75 0 0 0-.75.75v.75a3.75 3.75 0 0 0 1.448 2.962A3.75 3.75 0 0 0 9 16.5h1.5a.75.75 0 0 0 0-1.5H9a2.25 2.25 0 0 1 0-4.5h1.5a.75.75 0 0 0 0-1.5H9z" clipRule="evenodd" />
+              </svg>
+              <span className="text-white text-sm">AI rekomendacijos</span>
+            </div>
+          )}
+          <Link 
+            to="/rekomendacijos" 
+            className="bg-dark text-white px-4 py-2 rounded-lg hover:bg-dark/80 transition-colors"
+          >
+            Grįžti į formą
+          </Link>
+        </div>
       </div>
 
       {/* Result tabs */}
@@ -439,6 +450,46 @@ const RecommendationResults = () => {
                                 <p className="text-lighter-grey mb-4">
                                   {program.description || "Aprašymas nepateiktas"}
                                 </p>
+                                
+                                {/* AI Explanation Section */}
+                                {isAIRecommendation && program.ai_explanation && (
+                                  <div className="mb-6 p-4 bg-dark rounded-lg border border-lght-blue">
+                                    <h4 className="text-white text-md font-medium mb-2 flex items-center">
+                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2 text-lght-blue">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                                      </svg>
+                                      AI rekomendacijos apžvalga
+                                    </h4>
+                                    <p className="text-lighter-grey mb-3">{program.ai_explanation.explanation}</p>
+                                    
+                                    {(program.ai_explanation.strengths && program.ai_explanation.strengths.length > 0) && (
+                                      <div className="mb-2">
+                                        <span className="text-lght-blue text-sm">Stipriosios pusės:</span>
+                                        <div className="flex flex-wrap gap-2 mt-1">
+                                          {program.ai_explanation.strengths.map((strength, index) => (
+                                            <span key={index} className="bg-dark/50 text-white px-2 py-1 rounded-md text-xs">
+                                              {strength}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    {(program.ai_explanation.weaknesses && program.ai_explanation.weaknesses.length > 0) && (
+                                      <div>
+                                        <span className="text-lght-blue text-sm">Silpnosios pusės:</span>
+                                        <div className="flex flex-wrap gap-2 mt-1">
+                                          {program.ai_explanation.weaknesses.map((weakness, index) => (
+                                            <span key={index} className="bg-dark/50 text-white px-2 py-1 rounded-md text-xs">
+                                              {weakness}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                                
                                 <div className="flex flex-wrap gap-4 mb-4">
                                   <div>
                                     <div className="text-lght-blue text-sm">Programos trukmė:</div>

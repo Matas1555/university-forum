@@ -10,6 +10,7 @@ export default {
       fontSize: {
         'xxs': '0.65rem',
         'xxxs': '0.5rem',
+        'md2': '0.9rem',
       },
       colors:{
         'blue':'#176B87',

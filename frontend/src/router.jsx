@@ -6,7 +6,6 @@ import Profile from "./pages/profile";
 import Post from "./pages/post";
 import Posts from "./pages/posts";
 import University from "./pages/university/university";
-import UniversityStatistics from "./pages/university/universityStatistics";
 import DefaultLayout from "./components/layout/defaultLayout";
 import CreatePost from "./pages/createPost";
 import ForumsList from "./pages/forums/forumsList";
@@ -16,6 +15,7 @@ import UniversitiesPage from "./pages/universities";
 import TooltipExample from "./components/TooltipExample";
 import RecommendationForm from "./pages/recommendation/RecommendationForm";
 import RecommendationResults from "./pages/recommendation/RecommendationResults";
+import SearchResults from "./pages/searchResults";
 
 const router = createBrowserRouter([
     {
@@ -39,12 +39,20 @@ const router = createBrowserRouter([
                 element: <ForumsList/>,
             },
             {
+                path: '/paieska',
+                element: <SearchResults/>,
+            },
+            {
                 path: '/:forumType',
                 element: <Posts/>,
             },
             {
                 path: 'forumai/universitetai/',
                 element: <Home/>,
+            },
+            {
+                path: '/forumai/bendros-diskusijos/irasai',
+                element: <Posts/>,
             },
             {
                 path: '/forumai/universitetai/:universityId/irasai',
@@ -65,6 +73,10 @@ const router = createBrowserRouter([
             {
                 path: '/forumai/kategorijos/:categoryId',
                 element: <Posts/>,
+            },
+            {
+                path: '/forumai/bendros-diskusijos/irasai/:postId',
+                element: <Post/>,
             },
             {
                 path: '/forumai/universitetai/:universityId/irasai/:postId',
@@ -101,10 +113,6 @@ const router = createBrowserRouter([
             {
                 path: '/universitetas/:universityId',
                 element: <University/>,
-            },
-            {
-                path: '/universitetas/:id/statistika',
-                element: <UniversityStatistics/>,
             },
             {
                 path: '/registracija',

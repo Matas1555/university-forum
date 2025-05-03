@@ -27,7 +27,7 @@ class Comment extends Model
     protected $hidden = ['created_at', 'updated_at'];
     public $timestamps = true;
 
-    protected $fillable = ['text', 'post_id', 'user_id', 'parent_id', 'level'];
+    protected $fillable = ['text', 'post_id', 'user_id', 'parent_id'];
 
     public function post()
     {

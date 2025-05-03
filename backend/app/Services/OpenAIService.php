@@ -12,7 +12,21 @@ class OpenAIService
     
     public function __construct()
     {
-        $this->client = OpenAI::client(config('services.openai.api_key'));
+        $apiKey = config('services.openai.api_key');
+        
+        if (app()->environment('local')) {
+        // disable SSL verification locally
+        $guzzle = new \GuzzleHttp\Client(['verify' => false]);
+
+        $this->client = OpenAI::factory()
+            ->withApiKey($apiKey)
+            ->withHttpClient($guzzle)        // ← set your custom Guzzle client here
+            ->make();
+        } else {
+            // simple production client
+            $this->client = OpenAI::client($apiKey);
+        }
+        
         $this->model = config('services.openai.model');
     }
     
@@ -24,17 +38,53 @@ class OpenAIService
         try {
             $prompt = $this->buildRecommendationPrompt($userPreferences, $programsData, $programForumData);
             
+            Log::info('Sending recommendation request to OpenAI');
+            
             $response = $this->client->chat()->create([
                 'model' => $this->model,
                 'messages' => [
-                    ['role' => 'system', 'content' => 'You are a university recommendation assistant for Lithuanian students. Your task is to analyze program data, reviews, forum discussions and match it with student preferences to provide personalized university and program recommendations.'],
+                    ['role' => 'system', 'content' => 'You are a university recommendation assistant for Lithuanian students. Your task is to analyze program data, reviews, forum discussions and match it with student preferences to provide personalized university and program recommendations. Always return your response as valid JSON.'],
                     ['role' => 'user', 'content' => $prompt]
                 ],
                 'temperature' => 0.7,
                 'max_tokens' => 1500,
+                'response_format' => ['type' => 'json_object'],
             ]);
             
-            return $response->choices[0]->message->content;
+            $content = $response->choices[0]->message->content;
+            
+            // Add debug log
+            Log::info('OpenAI raw response: ' . substr($content, 0, 500) . '...');
+            
+            // Parse JSON response
+            $parsed = json_decode($content, true);
+            
+            // If parsing failed, log error and return raw content
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                Log::error('Failed to parse OpenAI JSON response: ' . json_last_error_msg());
+                Log::error('Raw response: ' . $content);
+                return $content; // Return raw response as fallback
+            }
+            
+            // Validate the structured response
+            if (!isset($parsed['strict_programs']) || !is_array($parsed['strict_programs'])) {
+                Log::warning('OpenAI response missing strict_programs array');
+                $parsed['strict_programs'] = [];
+            }
+            
+            if (!isset($parsed['relaxed_programs']) || !is_array($parsed['relaxed_programs'])) {
+                Log::warning('OpenAI response missing relaxed_programs array');
+                $parsed['relaxed_programs'] = [];
+            }
+            
+            // Log examples of explanations if available
+            if (!empty($parsed['strict_programs'])) {
+                $exampleProgram = $parsed['strict_programs'][0];
+                Log::info('Example program explanation: ' . ($exampleProgram['explanation'] ?? 'No explanation provided'));
+                Log::info('Example program strengths: ' . json_encode($exampleProgram['strengths'] ?? []));
+            }
+            
+            return $parsed;
         } catch (\Exception $e) {
             Log::error('OpenAI API error: ' . $e->getMessage());
             return null;
@@ -251,6 +301,16 @@ class OpenAIService
             $prompt .= "- User interests: " . $userPreferences['interests'] . "\n";
         }
         
+        // Extracurricular activities interest
+        if (isset($userPreferences['extracurricularActivities'])) {
+            $prompt .= "- Extracurricular interests: " . $userPreferences['extracurricularActivities'] . "\n";
+        }
+        
+        // Career goals
+        if (isset($userPreferences['careerGoals']) && !empty($userPreferences['careerGoals'])) {
+            $prompt .= "- Career goals: " . implode(', ', $userPreferences['careerGoals']) . "\n";
+        }
+        
         // Program data
         $prompt .= "\nAvailable programs:\n";
         foreach ($programsData as $index => $program) {
@@ -297,7 +357,22 @@ class OpenAIService
             $prompt .= "\n";
         }
         
-        $prompt .= "Please recommend the top 3 programs for this student based on the provided preferences and all available information (program details, reviews, and forum discussions). For each recommendation, explain why it's a good match and any potential drawbacks. Provide the recommendations in Lithuanian language.";
+        $prompt .= "Analyze each program's fit for the student based on their preferences. For each program, provide a personalized explanation of why it may or may not be a good match.\n\n";
+        $prompt .= "Return a JSON response in the following format:\n";
+        $prompt .= "{\n";
+        $prompt .= "  \"strict_programs\": [\n";
+        $prompt .= "    {\n";
+        $prompt .= "      \"program_id\": <program_id>,\n";
+        $prompt .= "      \"match_percentage\": <0-100>,\n";
+        $prompt .= "      \"explanation\": \"<detailed explanation in Lithuanian about why this program matches the student>\",\n";
+        $prompt .= "      \"strengths\": [\"<strength 1>\", \"<strength 2>\", ...],\n";
+        $prompt .= "      \"weaknesses\": [\"<weakness 1>\", \"<weakness 2>\", ...]\n";
+        $prompt .= "    },\n";
+        $prompt .= "    ...\n";
+        $prompt .= "  ],\n";
+        $prompt .= "  \"relaxed_programs\": [...]\n";
+        $prompt .= "}\n";
+        $prompt .= "\nThe explanation for each program should be a concise paragraph written in Lithuanian that specifically addresses how the program aligns with the student's preferences. Limit each explanation to 2-3 sentences. Strengths and weaknesses should be short bullet points (1-3 words each).";
         
         return $prompt;
     }

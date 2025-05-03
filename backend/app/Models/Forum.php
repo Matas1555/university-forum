@@ -23,7 +23,7 @@ class Forum extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'entity_type', 'entity_id'];
+    protected $fillable = ['title', 'entity_type', 'entity_id','logo'];
     protected $hidden = ['created_at', 'updated_at'];
     public $timestamps = true;
 

@@ -28,7 +28,9 @@ Route::controller(AuthController::class)->group(function () {
 Route::get('/posts', [PostController::class, 'getPosts']); // View all posts (guest, user, etc.)
 Route::get('/postsExtended', [PostController::class, 'getPostsExtended']); // View all posts with additional information (guest, user, etc.)
 Route::get('/posts/{id}', [PostController::class, 'showPost']); // View a specific post
+Route::post('/posts/{id}/view', [PostController::class, 'incrementViews']); // Increment post view count
 Route::get('/posts/{post_id}/comments', [PostController::class, 'getPostComments']); // View comments for a specific post
+Route::get('/search', [PostController::class, 'searchPosts']); // Search posts with advanced filtering
 Route::get('/forums/{forum_id}/posts', [PostController::class, 'getPostsByForum']); // View posts by forum
 Route::get('/forums', [PostController::class, 'getForums']); // View forums
 Route::get('/comments', [PostController::class, 'getComments']); // View all comments
@@ -84,7 +86,6 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']); // Logout
     Route::post('/posts/{post}/like', [PostController::class, 'like']); //Likes a post
     Route::post('/posts/{post}/dislike', [PostController::class, 'dislike']); //Dislikes a post
-    Route::get('/user/post-interactions', [PostController::class, 'getUserPostInteractions']); // Get user's post interactions
 
     // Post routes
     Route::post('/posts', [PostController::class, 'insertPost']); // Create a new post
@@ -97,7 +98,6 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/comments/{comment}', [PostController::class, 'destroyComment']); // Delete a comment
     Route::post('/comments/{id}/like', [PostController::class, 'likeComment']);
     Route::post('/comments/{id}/dislike', [PostController::class, 'dislikeComment']);
-    Route::get('/user/comment-interactions', [PostController::class, 'getUserCommentInteractions']);
 
     // Forum routes
     Route::post('/forums', [PostController::class, 'insertForum']); // Create a new forum

@@ -1,24 +1,61 @@
 import axios from "axios";
+
+const requestControllers = new Map();
+
 const API = axios.create({
     baseURL: 'http://127.0.0.1:5000/api',
 });
+
+export const cancelPreviousRequest = (endpoint) => {
+    if (requestControllers.has(endpoint)) {
+        console.log(`Canceling previous request to: ${endpoint}`);
+        requestControllers.get(endpoint).abort();
+        requestControllers.delete(endpoint);
+    }
+};
+
+export const getRequestKey = (endpoint, params = {}) => {
+    const paramsString = params ? JSON.stringify(params) : '';
+    return `${endpoint}${paramsString ? '?' + paramsString : ''}`;
+};
 
 API.interceptors.request.use((config) => {
     const token = localStorage.getItem('ACCESS_TOKEN');
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    const controller = new AbortController();
+    config.signal = controller.signal;
+    
+    const requestKey = getRequestKey(config.url, config.params);
+    
+    cancelPreviousRequest(requestKey);
+    
+    requestControllers.set(requestKey, controller);
+    
     return config;
+}, (error) => {
+    return Promise.reject(error);
 });
 
 API.interceptors.response.use(
     (response) => {
+        const requestKey = getRequestKey(response.config.url, response.config.params);
+        if (requestControllers.has(requestKey)) {
+            requestControllers.delete(requestKey);
+        }
         return response;
     },
     async (error) => {
-        const { response } = error;
-        const originalRequest = error.config;
-
+        if (axios.isCancel(error)) {
+            console.log('Request canceled:', error.message);
+            return Promise.reject(error);
+        }
+        
+        const { response, config } = error;
+        const originalRequest = config;
+        
         if (response && response.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
@@ -43,6 +80,13 @@ API.interceptors.response.use(
                 localStorage.removeItem('ACCESS_TOKEN');
                 localStorage.removeItem('REFRESH_TOKEN');
                 return Promise.reject(refreshError);
+            }
+        }
+
+        if (originalRequest) {
+            const requestKey = getRequestKey(originalRequest.url, originalRequest.params);
+            if (requestControllers.has(requestKey)) {
+                requestControllers.delete(requestKey);
             }
         }
 
@@ -81,6 +125,15 @@ export const ForumAPI = {
     
     getForumPosts: (forumId) => {
         return API.get(`/forums/${forumId}/posts`);
+    },
+    
+    getGeneralDiscussionPosts: (sortBy = 'date', sortOrder = 'desc') => {
+        return API.get(`/forums/358/posts`, {
+            params: {
+                sort_by: sortBy,
+                sort_order: sortOrder
+            }
+        });
     },
     
     getUniversityPosts: (universityId, sortBy = 'date', sortOrder = 'desc') => {
@@ -168,9 +221,46 @@ export const ForumAPI = {
     dislikeComment: (commentId) => {
         return API.post(`/comments/${commentId}/dislike`);
     },
+
+    incrementPostViews: (postId) => {
+        return API.post(`/posts/${postId}/view`);
+    },
     
-    getUserCommentInteractions: () => {
-        return API.get('/user/comment-interactions');
+    searchPosts: (searchParams) => {
+        console.log('🔍 Search API call initiated with parameters:', searchParams);
+        
+        // Make sure we're using 'q' instead of 'keyword' for search term
+        const finalParams = {...searchParams};
+        if (finalParams.keyword) {
+            console.log('Converting "keyword" parameter to "q" for backend compatibility');
+            finalParams.q = finalParams.keyword;
+            delete finalParams.keyword;
+        }
+        
+        console.log('Final API search parameters:', finalParams);
+        const apiCall = API.get('/search', { params: finalParams });
+        
+        // Add promise handlers for debugging
+        apiCall.then(response => {
+            console.log('✅ Search API call successful:', {
+                total: response.data?.pagination?.total || 'No count available',
+                results: response.data?.data?.length || 0,
+                firstResult: response.data?.data?.[0] ? 
+                    `"${response.data.data[0].title}" by ${response.data.data[0].user}` : 
+                    'No results'
+            });
+            return response;
+        }).catch(error => {
+            console.error('❌ Search API call failed:', error);
+            console.error('Error details:', error.response || error.message || error);
+            throw error;
+        });
+        
+        return apiCall;
+    },
+    
+    getCategories: () => {
+        return API.get('/categories');
     }
 };
 
@@ -251,6 +341,10 @@ export const UniversityAPI = {
     
     filterRecommendations: async (preferences) => {
         return await API.post('/recommendations/filter', preferences);
+    },
+    
+    getAIRecommendations: async (preferences) => {
+        return await API.post('/recommendations/ai', preferences);
     }
 }; 
 

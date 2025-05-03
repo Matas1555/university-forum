@@ -6,7 +6,6 @@ import { useStateContext } from '../../context/contextProvider';
 
 const PostList = ({ posts: initialPosts }) => {
   const [posts, setPosts] = useState(initialPosts || []);
-  const [userInteractions, setUserInteractions] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   
@@ -19,30 +18,6 @@ const PostList = ({ posts: initialPosts }) => {
     setPosts(initialPosts || []);
   }, [initialPosts]);
   
-  useEffect(() => {
-    if (user && token) {
-      fetchUserInteractions();
-    }
-  }, [user, token]);
-  
-  const fetchUserInteractions = async () => {
-    try {
-      setIsLoading(true);
-      const response = await API.get('/user/post-interactions');
-      
-      const interactionsMap = {};
-      response.data.forEach(interaction => {
-        interactionsMap[interaction.post_id] = interaction.type;
-      });
-      
-      setUserInteractions(interactionsMap);
-    } catch (error) {
-      console.error('Failed to fetch user interactions', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleOpenPost = (post) => {
     const forumType = post.forumType;
     console.log(forumType);
@@ -77,7 +52,7 @@ const PostList = ({ posts: initialPosts }) => {
       return;
     }
     
-    const currentInteraction = userInteractions[post.id];
+    const currentInteraction = post.user_interaction;
     
     const updatedPosts = [...posts];
     const postIndex = updatedPosts.findIndex(p => p.id === post.id);
@@ -88,27 +63,14 @@ const PostList = ({ posts: initialPosts }) => {
     
     if (currentInteraction === 'like') {
       updatedPost.likes = Math.max(0, updatedPost.likes - 1);
-      
-      setUserInteractions(prev => {
-        const newInteractions = { ...prev };
-        delete newInteractions[post.id];
-        return newInteractions;
-      });
+      updatedPost.user_interaction = null;
     } else if (currentInteraction === 'dislike') {
       updatedPost.likes = updatedPost.likes + 1;
       updatedPost.dislikes = Math.max(0, updatedPost.dislikes - 1);
-      
-      setUserInteractions(prev => ({
-        ...prev,
-        [post.id]: 'like'
-      }));
+      updatedPost.user_interaction = 'like';
     } else {
       updatedPost.likes = updatedPost.likes + 1;
-      
-      setUserInteractions(prev => ({
-        ...prev,
-        [post.id]: 'like'
-      }));
+      updatedPost.user_interaction = 'like';
     }
     
     updatedPosts[postIndex] = updatedPost;
@@ -141,8 +103,6 @@ const PostList = ({ posts: initialPosts }) => {
       } else {
         setErrorMessage('Nepavyko įvertinti įrašo. Bandykite dar kartą.');
       }
-      
-      fetchUserInteractions();
     }
   };
   
@@ -154,7 +114,7 @@ const PostList = ({ posts: initialPosts }) => {
       return;
     }
     
-    const currentInteraction = userInteractions[post.id];
+    const currentInteraction = post.user_interaction;
     
     const updatedPosts = [...posts];
     const postIndex = updatedPosts.findIndex(p => p.id === post.id);
@@ -165,27 +125,14 @@ const PostList = ({ posts: initialPosts }) => {
     
     if (currentInteraction === 'dislike') {
       updatedPost.dislikes = Math.max(0, updatedPost.dislikes - 1);
-      
-      setUserInteractions(prev => {
-        const newInteractions = { ...prev };
-        delete newInteractions[post.id];
-        return newInteractions;
-      });
+      updatedPost.user_interaction = null;
     } else if (currentInteraction === 'like') {
       updatedPost.dislikes = updatedPost.dislikes + 1;
       updatedPost.likes = Math.max(0, updatedPost.likes - 1);
-      
-      setUserInteractions(prev => ({
-        ...prev,
-        [post.id]: 'dislike'
-      }));
+      updatedPost.user_interaction = 'dislike';
     } else {
       updatedPost.dislikes = updatedPost.dislikes + 1;
-      
-      setUserInteractions(prev => ({
-        ...prev,
-        [post.id]: 'dislike'
-      }));
+      updatedPost.user_interaction = 'dislike';
     }
     
     updatedPosts[postIndex] = updatedPost;
@@ -220,8 +167,6 @@ const PostList = ({ posts: initialPosts }) => {
       } else {
         setErrorMessage('Nepavyko įvertinti įrašo. Bandykite dar kartą.');
       }
-
-      fetchUserInteractions();
     }
   };
   
@@ -276,8 +221,11 @@ const PostList = ({ posts: initialPosts }) => {
 
   if (!posts || posts.length === 0) {
     return (
-      <div className="w-full flex justify-center items-center min-h-[200px]">
-        <p className="text-light-grey">Šiuo metu įrašų nėra.</p>
+      <div className="w-full flex flex-col justify-center items-center min-h-[200px] bg-grey rounded-lg p-8 text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mb-4 text-lighter-grey" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+        </svg>
+        <p className="text-lighter-grey text-lg">Šiuo metu įrašų nėra.</p>
       </div>
     );
   }
@@ -297,111 +245,77 @@ const PostList = ({ posts: initialPosts }) => {
       )}
       
       {posts.map((post, index) => (
-        <div key={post.id || index} className='cursor-pointer' onClick={() => handleOpenPost(post)}>
-          <div className="group flex flex-col justify-between items-start gap-5 bg-grey rounded-md p-5 m-2 border-2 border-dark hover:bg-dark hover:border-light-grey transition-colors duration-150 ease-linear">
-            <div className="flex flex-row gap-10 items-center w-full">
-              <div className="flex flex-col gap-2 w-full">
-                <div className="flex flex-row justify-between">
-                  {post.user && (
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <img 
-                          src={post.user_avatar ? `http://127.0.0.1:5000/storage/${post.user_avatar}` : profilePicture} 
-                          alt="User profile" 
-                          className="w-10 h-10 rounded-full object-cover border border-light-grey"
-                        />
-                      </div>
-                      <div className="flex flex-col">
-                        <p className="text-white text-sm">{post.user || post.username || 'Nežinomas'}</p>
-                        <p className="text-light-grey text-xs">{post.user_status?.name || 'Studentas'}</p>
-                      </div>
-                    </div>
-                  )}
-                  <div className='flex flex-row gap-10 justify-end items-center'>
-                    <div className="hidden flex-row gap-4 justify-end items-end lg:flex text-xs">
-                      {post.categories && post.categories.map((category, catIndex) => {
-                          const categoryName = typeof category === 'object' ? category.name : category;
-                          const color = category.color;
-                          return (
-                              <div
-                                  key={catIndex}
-                                  className={`ring-1 ring-${color} rounded-md p-1 px-2 font-medium text-${color}`}
-                              >
-                                  • {categoryName}
-                              </div>
-                          );
-                      })}
-                    </div>
-                    <button className='p-1 rounded-full text-white hover:bg-lght-blue transition-colors duration-150 ease-linear' onClick={(e) => e.stopPropagation()}>
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
-                      </svg>
-                    </button>
+        <div key={post.id || index} 
+            className="cursor-pointer hover:bg-dark/50 transition-colors duration-200 rounded-md border border-transparent hover:border-light-grey/30" 
+            onClick={() => handleOpenPost(post)}>
+          <div className="p-5 border-b border-light-grey/20 flex flex-col md:flex-row">
+            {/* Thread info - left side */}
+            <div className="flex-grow pr-4">
+              {/* Thread title and category tags */}
+              <div className="mb-3">               
+                {post.categories && post.categories.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {post.categories.map((category, catIndex) => {
+                      const categoryName = typeof category === 'object' ? category.name : category;
+                      const color = category.color || 'lght-blue';
+                      return (
+                        <div
+                          key={catIndex}
+                          className={`text-${color} ring-${color} ring-1 text-xs px-2 py-0.5 bg-dark/60 rounded-full`}
+                        >
+                          {categoryName}
+                        </div>
+                      );
+                    })}
                   </div>
+                )}
+                <h3 className="text-white font-semibold text-xl hover:text-lght-blue transition-colors duration-150 leading-tight">{post.title}</h3>
+              </div>
+              
+              {/* Thread author and stats */}
+              <div className="flex flex-wrap items-center text-xs text-lighter-grey gap-x-4 gap-y-1">
+                <div className="flex items-center">
+                  <img 
+                    src={post.user_avatar ? `http://127.0.0.1:5000/storage/${post.user_avatar}` : profilePicture} 
+                    alt="User profile" 
+                    className="w-6 h-6 rounded-full object-cover border border-light-grey mr-1"
+                  />
+                  <span className="text-lght-blue font-medium text-lg">{post.user || post.username || 'Nežinomas'}</span>
                 </div>
-                <h1 className="text-white font-medium text-2xl">{post.title}</h1> 
-                <p className="text-lighter-grey font-light text-xl">
-                  {(post.content || post.description || '').length > 250
-                    ? (post.content || post.description || '').slice(0,250) + "..."
-                    : (post.content || post.description || '')}
-                </p>
-                <div className="flex justify-end w-full">
-                  <p className="text-light-grey font-light italic text-md">
-                    {formatDate(post.created_at) || post.date || ''}
-                  </p>
+                <div className="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3 mr-1">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                  </svg>
+                  <span>{formatDate(post.created_at) || post.date || ''}</span>
+                </div>
+                <div className="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3 mr-1">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+                  </svg>
+                  <span>{post.comments_count || post.comment_count || 0} atsakymai</span>
+                </div>
+                <div className="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3 mr-1">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.633 10.25c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V2.75a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282m0 0h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23H5.904m10.598-9.75H14.25M5.904 18.5c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 0 1-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 9.953 4.167 9.5 5 9.5h1.053c.472 0 .745.556.5.96a8.958 8.958 0 0 0-1.302 4.665c0 1.194.232 2.333.654 3.375Z" />
+                  </svg>
+                  <span>{post.likes || post.like_count || 0} patinka</span>
                 </div>
               </div>
             </div>
-            <div className="flex flex-row w-full gap-3 border-t-2 pt-4 group-hover:border-t-light-grey border-t-dark justify-between transition-colors duration-150 ease-linear">
-              <div className="flex flex-row gap-8">
-                <div className='flex flex-row gap-2'>
-                  <div 
-                    className={`flex flex-row gap-2 p-2 rounded-md hover:bg-grey cursor-pointer
-                      ${userInteractions[post.id] === 'like' 
-                        ? 'bg-grey text-lght-blue' 
-                        : 'hover:text-lght-blue text-white transition-colors duration-150 ease-linear'}`}
-                    onClick={(e) => handleLike(e, post)}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
-                      <path fillRule="evenodd" d="M11.47 2.47a.75.75 0 0 1 1.06 0l7.5 7.5a.75.75 0 1 1-1.06 1.06l-6.22-6.22V21a.75.75 0 0 1-1.5 0V4.81l-6.22 6.22a.75.75 0 1 1-1.06-1.06l7.5-7.5Z" clipRule="evenodd" />
-                    </svg>
-                    <p className="flex gap-1">{post.likes || post.like_count || 0}</p>
-                  </div>
-                  <div 
-                    className={`flex flex-row gap-2 p-2 rounded-md  hover:bg-grey cursor-pointer
-                      ${userInteractions[post.id] === 'dislike' 
-                        ? 'bg-grey text-red' 
-                        : 'hover:text-red text-white transition-colors duration-150 ease-linear'}`}
-                    onClick={(e) => handleDislike(e, post)}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6 rotate-180">
-                      <path fillRule="evenodd" d="M11.47 2.47a.75.75 0 0 1 1.06 0l7.5 7.5a.75.75 0 1 1-1.06 1.06l-6.22-6.22V21a.75.75 0 0 1-1.5 0V4.81l-6.22 6.22a.75.75 0 1 1-1.06-1.06l7.5-7.5Z" clipRule="evenodd" />
-                    </svg>
-                    <p className="flex gap-1">{post.dislikes || 0}</p>
-                  </div>
-                </div>
-                <div 
-                  className="flex flex-row gap-2 p-2 rounded-md text-white hover:bg-grey hover:text-lght-blue transition-colors duration-150 ease-linear cursor-pointer"
-                  onClick={(e) => handleComment(e, post)}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
-                  </svg>
-                  <p className="flex gap-1">{post.comments_count || post.comment_count || 0}</p>
-                </div>
+            
+            {/* Thread stats - right side */}
+            <div className="flex mt-3 gap-5 md:mt-0 md:justify-end md:flex-col md:items-end md:w-56 md:pl-4 text-xs md:text-sm text-lighter-grey">
+              <div className=" flex gap-4 items-baseline text-start md:mb-2">
+                <div className="font-medium text-white">{post.comments_count || post.comment_count || 0}</div>
+                <div className="text-xs hidden md:block">Atsakymai</div>
               </div>
-              <div 
-                className="flex flex-row gap-2 p-2 rounded-md text-white hover:bg-grey hover:text-lght-blue transition-colors duration-150 ease-linear cursor-pointer"
-                onClick={(e) => handleShare(e, post)}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
-                  <path fillRule="evenodd" d="M15.75 4.5a3 3 0 1 1 .825 2.066l-8.421 4.679a3.002 3.002 0 0 1 0 1.51l8.421 4.679a3 3 0 1 1-.729 1.31l-8.421-4.678a3 3 0 1 1 0-4.132l8.421-4.679a3 3 0 0 1-.096-.755Z" clipRule="evenodd" />
-                </svg>
-                <p className="flex gap-1">Dalintis</p>
+              
+              <div className="flex gap-5 items-baseline text-start md:mb-2">
+                <div className="font-medium text-white">{post.views || 0}</div>
+                <div className="text-xs hidden md:block">Peržiūros</div>
               </div>
             </div>
           </div>
-          <div className="mt-8 mb-8 border-2 rounded-sm border-grey"></div>
         </div>
       ))}
     </div>

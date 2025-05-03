@@ -14,6 +14,8 @@ use App\Models\Faculty;
 use App\Models\Program;
 use App\Models\PostInteraction;
 use App\Models\CommentInteraction;
+use App\Http\Controllers\Controller;
+use App\Models\User;
 
 /**
  * @OA\Info(title="Post API", version="0.1")
@@ -85,11 +87,24 @@ class PostController extends Controller
             return response()->json(['message' => 'Forum not found'], 404);
         }
 
+        $userId = auth('api')->id();
+
         $posts = Post::where('forum_id', $forum_id)
             ->with(['user', 'user.status', 'categories'])
             ->withCount('comments')
             ->get()
-            ->map(function ($post) {
+            ->map(function ($post) use ($userId) {
+                // Get the user's interaction with this post
+                $userInteraction = null;
+                if ($userId) {
+                    $interaction = PostInteraction::where('user_id', $userId)
+                        ->where('post_id', $post->id)
+                        ->first();
+                    if ($interaction) {
+                        $userInteraction = $interaction->type;
+                    }
+                }
+
                 return [
                 'id' => $post->id,
                 'title' => $post->title,
@@ -110,6 +125,8 @@ class PostController extends Controller
                     }),
                 'likes' => $post->likes,
                 'dislikes' => $post->dislikes,
+                    'views' => $post->views,
+                    'user_interaction' => $userInteraction,
                     'comments_count' => $post->comments_count,
                 'created_at' => $post->created_at->format('Y-m-d'),
             ];
@@ -286,11 +303,15 @@ class PostController extends Controller
     public function getPosts(Request $request)
     {
         $query = Post::query();
+        $userId = auth('api')->id();
 
         if ($request->has('forum_id')) {
             $query->where('forum_id', $request->input('forum_id'));
         }
 
+        if ($request->has('user_id')) {
+            $query->where('user_id', $request->input('user_id'));
+        }
 
         // Add sorting options
         if ($request->has('sort_by')) {
@@ -299,6 +320,7 @@ class PostController extends Controller
 
             switch ($sortBy) {
                 case 'date':
+                case 'created_at':
                     $query->orderBy('created_at', $sortOrder);
                     break;
                 case 'likes':
@@ -316,12 +338,54 @@ class PostController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
+        // Apply limit if specified
+        if ($request->has('limit')) {
+            $query->limit($request->input('limit'));
+        }
+
         // Eager load relationships and count comments
         $posts = $query->with(['user', 'user.status', 'forum', 'categories'])
             ->withCount('comments')
             ->get();
 
-        $postData = $posts->map(function ($post) {
+        $postData = $posts->map(function ($post) use ($userId) {
+            // Get the user's interaction with this post
+            $userInteraction = null;
+            if ($userId) {
+                $interaction = PostInteraction::where('user_id', $userId)
+                    ->where('post_id', $post->id)
+                    ->first();
+                if ($interaction) {
+                    $userInteraction = $interaction->type;
+                }
+            }
+
+            // Build forum_info based on forum entity_type
+            $forumInfo = null;
+            if ($post->forum) {
+                $forumInfo = [
+                    'entity_type' => $post->forum->entity_type,
+                    'entity_id' => $post->forum->entity_id,
+                ];
+
+                // Add additional info based on entity type
+                if ($post->forum->entity_type === 'faculty') {
+                    $faculty = Faculty::find($post->forum->entity_id);
+                    if ($faculty) {
+                        $forumInfo['university_id'] = $faculty->university_id;
+                    }
+                } elseif ($post->forum->entity_type === 'program') {
+                    $program = Program::find($post->forum->entity_id);
+                    if ($program) {
+                        $faculty = Faculty::find($program->faculty_id);
+                        if ($faculty) {
+                            $forumInfo['faculty_id'] = $program->faculty_id;
+                            $forumInfo['university_id'] = $faculty->university_id;
+                        }
+                    }
+                }
+            }
+
             return [
                 'id' => $post->id,
                 'title' => $post->title,
@@ -336,8 +400,11 @@ class PostController extends Controller
                 'forum' => $post->forum->title,
                 'forumType' => $post->forum->entity_type,
                 'forum_id' => $post->forum_id,
+                'forum_info' => $forumInfo,
                 'likes' => $post->likes,
                 'dislikes' => $post->dislikes,
+                'views' => $post->views,
+                'user_interaction' => $userInteraction,
                 'categories' => $post->categories->map(function ($category) {
                     return [
                         'id' => $category->id,
@@ -431,6 +498,7 @@ class PostController extends Controller
                 'title' => 'required|string|max:255',
                 'description' => 'required|string',
                 'forum_id' => 'required|integer|exists:forums,id',
+                'categories' => 'nullable|array',
             ]);
 
             $post = Post::create([
@@ -440,11 +508,102 @@ class PostController extends Controller
                 'user_id' => $user->id,
             ]);
 
-            return response()->json(['message' => 'Post created successfully', 'post' => $post], 201);
+
+            $forum = Forum::findOrFail($validatedData['forum_id']);
+            
+            // Handle categories if provided
+            if (isset($validatedData['categories']) && !empty($validatedData['categories'])) {
+                foreach ($validatedData['categories'] as $categoryName) {
+                    // Determine color based on category
+                    $color = 'lght-blue'; // default color
+                    switch ($categoryName) {
+                        case 'Kursų apžvalgos':
+                            $color = 'red';
+                            break;
+                        case 'Socialinis gyvenimas ir renginiai':
+                            $color = 'orange';
+                            break;
+                        case 'Studijų medžiaga':
+                            $color = 'green';
+                            break;
+                        case 'Būstas ir apgyvendinimas':
+                            $color = 'purple';
+                            break;
+                        case 'Praktikos ir karjeros galimybės':
+                            $color = 'lght-blue';
+                            break;
+                        case 'Universiteto politika ir administracija':
+                            $color = 'red';
+                            break;
+                    }
+                    
+                    $category = Category::firstOrCreate(
+                        ['name' => $categoryName],
+                        [
+                            'color' => $color,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]
+                    );
+                    
+                    // Use the post_categories table through the relationship
+                    $post->categories()->attach($category->id);
+                }
+            }
+
+            // Prepare forum navigation info
+            $forumInfo = [
+                'id' => $forum->id,
+                'title' => $forum->title,
+                'entity_type' => $forum->entity_type,
+                'entity_id' => $forum->entity_id,
+            ];
+            
+            // Add specific entity information based on type
+            if ($forum->entity_type === 'university') {
+                $university = University::find($forum->entity_id);
+                $forumInfo['university_name'] = $university ? $university->name : null;
+                $forumInfo['navigation_path'] = "/forumai/universitetai/{$forum->entity_id}/irasai";
+            } 
+            elseif ($forum->entity_type === 'faculty') {
+                $faculty = Faculty::find($forum->entity_id);
+                if ($faculty) {
+                    $forumInfo['faculty_name'] = $faculty->name;
+                    $forumInfo['university_id'] = $faculty->university_id;
+                    $university = University::find($faculty->university_id);
+                    $forumInfo['university_name'] = $university ? $university->name : null;
+                    $forumInfo['navigation_path'] = "/forumai/universitetai/{$faculty->university_id}/fakultetai/{$forum->entity_id}/irasai";
+                }
+            } 
+            elseif ($forum->entity_type === 'program') {
+                $program = Program::find($forum->entity_id);
+                if ($program) {
+                    $forumInfo['program_name'] = $program->title;
+                    $forumInfo['faculty_id'] = $program->faculty_id;
+                    $forumInfo['university_id'] = $program->university_id;
+                    $faculty = Faculty::find($program->faculty_id);
+                    $university = University::find($program->university_id);
+                    $forumInfo['faculty_name'] = $faculty ? $faculty->name : null;
+                    $forumInfo['university_name'] = $university ? $university->name : null;
+                    $forumInfo['navigation_path'] = "/forumai/universitetai/{$program->university_id}/fakultetai/{$program->faculty_id}/programos/{$forum->entity_id}/irasai";
+                }
+            }
+
+            $post->load('categories');
+            
+            $forum->post_count = ($forum->post_count ?? 0) + 1;
+            $forum->save();
+
+            return response()->json([
+                'message' => 'Post created successfully', 
+                'post' => $post,
+                'forum' => $forumInfo
+            ], 201);
         } catch(\Illuminate\Validation\ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 422);
+        } catch(\Exception $e) {
+            return response()->json(['errors' => ['general' => $e->getMessage()]], 500);
         }
-
     }
 
 
@@ -475,6 +634,7 @@ class PostController extends Controller
      */
     public function showPost($id)
     {
+        $userId = auth('api')->id();
         $post = Post::with([
                 'user',
                 'user.status',
@@ -492,10 +652,56 @@ class PostController extends Controller
             return response()->json(['message' => 'Post not found'], 404);
         }
 
-        // Format comments hierarchically
-        $formattedComments = $post->comments->map(function ($comment) {
-            return $this->formatComment($comment);
+        $userInteraction = null;
+        if ($userId) {
+            $interaction = PostInteraction::where('user_id', $userId)
+                ->where('post_id', $post->id)
+                ->first();
+            if ($interaction) {
+                $userInteraction = $interaction->type;
+            }
+        }
+
+        $formattedComments = $post->comments->map(function ($comment) use ($userId) {
+            return $this->formatComment($comment, $userId);
         });
+
+        $forum = $post->forum;
+        $forumInfo = [
+            'id' => $forum->id,
+            'title' => $forum->title,
+            'entity_type' => $forum->entity_type,
+            'entity_id' => $forum->entity_id,
+        ];
+        
+        if ($forum->entity_type === 'university') {
+            $university = University::find($forum->entity_id);
+            $forumInfo['university_name'] = $university ? $university->name : null;
+            $forumInfo['navigation_path'] = "/forumai/universitetai/{$forum->entity_id}/irasai";
+        } 
+        elseif ($forum->entity_type === 'faculty') {
+            $faculty = Faculty::find($forum->entity_id);
+            if ($faculty) {
+                $forumInfo['faculty_name'] = $faculty->name;
+                $forumInfo['university_id'] = $faculty->university_id;
+                $university = University::find($faculty->university_id);
+                $forumInfo['university_name'] = $university ? $university->name : null;
+                $forumInfo['navigation_path'] = "/forumai/universitetai/{$faculty->university_id}/fakultetai/{$forum->entity_id}/irasai";
+            }
+        } 
+        elseif ($forum->entity_type === 'program') {
+            $program = Program::find($forum->entity_id);
+            if ($program) {
+                $forumInfo['program_name'] = $program->title;
+                $forumInfo['faculty_id'] = $program->faculty_id;
+                $forumInfo['university_id'] = $program->university_id;
+                $faculty = Faculty::find($program->faculty_id);
+                $university = University::find($program->university_id);
+                $forumInfo['faculty_name'] = $faculty ? $faculty->name : null;
+                $forumInfo['university_name'] = $university ? $university->name : null;
+                $forumInfo['navigation_path'] = "/forumai/universitetai/{$program->university_id}/fakultetai/{$program->faculty_id}/programos/{$forum->entity_id}/irasai";
+            }
+        }
 
         $formattedPost = [
             'id' => $post->id,
@@ -511,8 +717,11 @@ class PostController extends Controller
             ],
             'forum' => $post->forum->title,
             'forum_id' => $post->forum_id,
+            'forum_info' => $forumInfo,
             'likes' => $post->likes,
             'dislikes' => $post->dislikes,
+            'views' => $post->views,
+            'user_interaction' => $userInteraction,
             'categories' => $post->categories->map(function ($category) {
                 return [
                     'id' => $category->id,
@@ -619,9 +828,18 @@ class PostController extends Controller
 
         $this->authorize('delete', $post);
 
-        Comment::where('post_id', $post->id)->delete();
+        $forum = null;
+        if ($post->forum_id) {
+            $forum = Forum::find($post->forum_id);
+        }
 
+        Comment::where('post_id', $post->id)->delete();
         $post->delete();
+        
+        if ($forum) {
+            $forum->post_count = max(($forum->post_count ?? 0) - 1, 0);
+            $forum->save();
+        }
 
         return response()->json(['message' => 'Post deleted successfully'], 200);
     }
@@ -700,8 +918,8 @@ class PostController extends Controller
 
         $forums = $query->get();
 
-        // Add post count and entity information
         $forums->each(function ($forum) {
+            $forum->logo_path = $forum->logo;
 
             if ($forum->entity_type === 'university') {
                 $entity = University::find($forum->entity_id);
@@ -1040,24 +1258,11 @@ class PostController extends Controller
                 'parent_id' => 'nullable|integer|exists:comments,id',
             ]);
 
-            $level = 1;
-
-            if ($request->has('parent_id') && $request->parent_id) {
-                $parentComment = Comment::findOrFail($request->parent_id);
-
-                if ($request->has('level')) {
-                    $level = $request->level;
-                } else {
-                    $level = $parentComment->level + 1;
-                }
-            }
-
             $comment = Comment::create([
                 'text' => $validatedData['text'],
                 'post_id' => $validatedData['post_id'],
                 'user_id' => auth('api')->id(),
                 'parent_id' => $request->parent_id,
-                'level' => $level
             ]);
 
             $post = Post::findOrFail($validatedData['post_id']);
@@ -1068,25 +1273,6 @@ class PostController extends Controller
         }
 
         return response()->json(['message' => 'Comment created successfully', 'comment' => $comment], 201);
-    }
-
-    public function getUserPostInteractions()
-    {
-        $userId = auth('api')->id();
-
-        if (!$userId) {
-            return response()->json(['error' => 'User not authenticated'], 401);
-        }
-
-        try {
-            $interactions = PostInteraction::where('user_id', $userId)
-                ->select('post_id', 'type')
-                ->get();
-
-            return response()->json($interactions, 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to fetch interactions: ' . $e->getMessage()], 500);
-        }
     }
 
     /**
@@ -1117,17 +1303,16 @@ class PostController extends Controller
     public function getPostComments($postId)
     {
         $post = Post::findOrFail($postId);
+        $userId = auth('api')->id();
 
-        // Get top-level comments (parent_id is null)
         $comments = Comment::where('post_id', $postId)
             ->whereNull('parent_id')
             ->with(['user', 'replies.user', 'replies.replies.user'])
             ->orderBy('created_at', 'asc')
             ->get();
 
-        // Format the comments with their replies
-        $formattedComments = $comments->map(function ($comment) {
-            return $this->formatComment($comment);
+        $formattedComments = $comments->map(function ($comment) use ($userId) {
+            return $this->formatComment($comment, $userId);
         });
 
         return response()->json($formattedComments, 200);
@@ -1136,8 +1321,18 @@ class PostController extends Controller
     /**
      * Helper function to recursively format comments with their replies
      */
-    private function formatComment($comment)
+    private function formatComment($comment, $userId = null)
     {
+        $userInteraction = null;
+        if ($userId) {
+            $interaction = CommentInteraction::where('user_id', $userId)
+                ->where('comment_id', $comment->id)
+                ->first();
+            if ($interaction) {
+                $userInteraction = $interaction->type;
+            }
+        }
+
         $formattedComment = [
             'id' => $comment->id,
             'content' => $comment->text,
@@ -1145,14 +1340,15 @@ class PostController extends Controller
             'user' => $comment->user->username,
             'user_avatar' => $comment->user->avatar,
             'user_id' => $comment->user_id,
-            'level' => $comment->level,
+            'parent_id' => $comment->parent_id,
             'like_count' => $comment->like_count ?? 0,
             'dislike_count' => $comment->dislike_count ?? 0,
+            'user_interaction' => $userInteraction,
         ];
 
         if ($comment->replies && $comment->replies->count() > 0) {
-            $formattedComment['replies'] = $comment->replies->map(function ($reply) {
-                return $this->formatComment($reply);
+            $formattedComment['replies'] = $comment->replies->map(function ($reply) use ($userId) {
+                return $this->formatComment($reply, $userId);
             });
         } else {
             $formattedComment['replies'] = [];
@@ -1314,23 +1510,338 @@ class PostController extends Controller
         }
     }
 
-    public function getUserCommentInteractions()
+    /**
+     * @OA\Post(
+     *     path="/posts/{id}/view",
+     *     summary="Increment post view count",
+     *     description="Increment the view count for a specific post",
+     *     operationId="incrementViews",
+     *     tags={"Posts"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID of the post",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="View count updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="views", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Post not found"
+     *     )
+     * )
+     */
+    public function incrementViews($postId)
     {
+        try {
+            $post = Post::findOrFail($postId);
+            $post->views = ($post->views ?? 0) + 1;
+            $post->save();
+            
+            return response()->json([
+                'message' => 'View count updated successfully',
+                'views' => $post->views
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to update view count: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function getForumPosts($forumId)
+    {
+        $forum = Forum::find($forumId);
+
+        if (!$forum) {
+            return response()->json(['message' => 'Forum not found'], 404);
+        }
+
         $userId = auth('api')->id();
 
-        if (!$userId) {
-            return response()->json(['error' => 'User not authenticated'], 401);
+        $posts = Post::where('forum_id', $forumId)
+            ->with(['user', 'user.status', 'categories'])
+            ->withCount('comments')
+            ->get()
+            ->map(function ($post) use ($userId) {
+                $userInteraction = null;
+                if ($userId) {
+                    $interaction = PostInteraction::where('user_id', $userId)
+                        ->where('post_id', $post->id)
+                        ->first();
+                    if ($interaction) {
+                        $userInteraction = $interaction->type;
+                    }
+                }
+
+                return [
+                    'id' => $post->id,
+                    'title' => $post->title,
+                    'description' => $post->description,
+                    'user' => $post->user->username,
+                    'user_avatar' => $post->user->avatar,
+                    'user_id' => $post->user_id,
+                    'user_status' => [
+                        'id' => $post->user->status_id,
+                        'name' => $post->user->status ? $post->user->status->name : null
+                    ],
+                    'categories' => $post->categories->map(function ($category) {
+                        return [
+                            'id' => $category->id,
+                            'name' => $category->name,
+                            'color' => $category->color,
+                        ];
+                    }),
+                    'likes' => $post->likes,
+                    'dislikes' => $post->dislikes,
+                    'views' => $post->views,
+                    'user_interaction' => $userInteraction,
+                    'comments_count' => $post->comments_count,
+                    'created_at' => $post->created_at->format('Y-m-d'),
+                ];
+            });
+
+        return response()->json([
+            'forum_name' => $forum->title,
+            'forum_entity_type' => $forum->entity_type,
+            'forum_entity_id' => $forum->entity_id,
+            'posts' => $posts,
+        ], 200);
+    }
+
+    /**
+     * Search posts with advanced filtering options
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function searchPosts(Request $request)
+    {
+        $query = Post::query();
+        $userId = auth('api')->id();
+
+        // Log search parameters for debugging
+        \Log::info('Search params received:', $request->all());
+
+        // Check for either 'q' or 'keyword' parameter
+        if ($request->has('q') && !empty($request->q)) {
+            $keyword = $request->q;
+            \Log::info('Searching with q parameter: ' . $keyword);
+            $query->where(function($q) use ($keyword) {
+                $q->where('title', 'LIKE', "%{$keyword}%")
+                  ->orWhere('description', 'LIKE', "%{$keyword}%");
+            });
+        } 
+        // Fallback support for 'keyword' parameter
+        else if ($request->has('keyword') && !empty($request->keyword)) {
+            $keyword = $request->keyword;
+            \Log::info('Searching with keyword parameter: ' . $keyword);
+            $query->where(function($q) use ($keyword) {
+                $q->where('title', 'LIKE', "%{$keyword}%")
+                  ->orWhere('description', 'LIKE', "%{$keyword}%");
+            });
         }
 
-        try {
-            $interactions = CommentInteraction::where('user_id', $userId)
-                ->select('comment_id', 'type')
-                ->get();
-
-            return response()->json($interactions, 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to fetch comment interactions: ' . $e->getMessage()], 500);
+        if ($request->has('forum_id') && !empty($request->forum_id)) {
+            $query->where('forum_id', $request->forum_id);
         }
+
+        if ($request->has('university_id') && !empty($request->university_id)) {
+            $universityId = $request->university_id;
+            
+            $universityForums = Forum::where('entity_type', 'university')
+                ->where('entity_id', $universityId)
+                ->pluck('id');
+                
+
+            $facultyIds = Faculty::where('university_id', $universityId)->pluck('id');
+            $facultyForums = Forum::where('entity_type', 'faculty')
+                ->whereIn('entity_id', $facultyIds)
+                ->pluck('id');
+                
+            $programIds = Program::where('university_id', $universityId)->pluck('id');
+            $programForums = Forum::where('entity_type', 'program')
+                ->whereIn('entity_id', $programIds)
+                ->pluck('id');
+                
+            $allForumIds = $universityForums->concat($facultyForums)->concat($programForums);
+            
+            $query->whereIn('forum_id', $allForumIds);
+        }
+
+
+        if ($request->has('faculty_id') && !empty($request->faculty_id)) {
+            $facultyId = $request->faculty_id;
+            
+            $facultyForum = Forum::where('entity_type', 'faculty')
+                ->where('entity_id', $facultyId)
+                ->pluck('id');
+                
+            $programIds = Program::where('faculty_id', $facultyId)->pluck('id');
+            $programForums = Forum::where('entity_type', 'program')
+                ->whereIn('entity_id', $programIds)
+                ->pluck('id');
+                
+            $allForumIds = $facultyForum->concat($programForums);
+            
+            $query->whereIn('forum_id', $allForumIds);
+        }
+
+        if ($request->has('program_id') && !empty($request->program_id)) {
+            $programId = $request->program_id;
+            
+            $programForum = Forum::where('entity_type', 'program')
+                ->where('entity_id', $programId)
+                ->pluck('id');
+                
+            $query->whereIn('forum_id', $programForum);
+        }
+
+        if ($request->has('category_id') && !empty($request->category_id)) {
+            $categoryId = $request->category_id;
+            $query->whereHas('categories', function($q) use ($categoryId) {
+                $q->where('categories.id', $categoryId);
+            });
+        }
+
+        if ($request->has('from_date') && !empty($request->from_date)) {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+
+        if ($request->has('to_date') && !empty($request->to_date)) {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        if ($request->has('min_likes') && !empty($request->min_likes)) {
+            $query->where('likes', '>=', $request->min_likes);
+        }
+
+        if ($request->has('user_id') && !empty($request->user_id)) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        if ($request->has('sort_by')) {
+            $sortBy = $request->input('sort_by');
+            $sortOrder = $request->input('sort_order', 'desc');
+
+            switch ($sortBy) {
+                case 'date':
+                    $query->orderBy('created_at', $sortOrder);
+                    break;
+                case 'likes':
+                    $query->orderBy('likes', $sortOrder);
+                    break;
+                case 'comments':
+                    $query->withCount('comments')->orderBy('comments_count', $sortOrder);
+                    break;
+                case 'views':
+                    $query->orderBy('views', $sortOrder);
+                    break;
+                default:
+                    $query->orderBy('created_at', 'desc');
+                    break;
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $perPage = $request->input('per_page', 10);
+        $posts = $query->with(['user', 'user.status', 'forum', 'categories'])
+            ->withCount('comments')
+            ->paginate($perPage);
+
+        $formattedPosts = $posts->map(function ($post) use ($userId) {
+            $userInteraction = null;
+            if ($userId) {
+                $interaction = PostInteraction::where('user_id', $userId)
+                    ->where('post_id', $post->id)
+                    ->first();
+                if ($interaction) {
+                    $userInteraction = $interaction->type;
+                }
+            }
+
+            $forum = $post->forum;
+            $forumInfo = [
+                'id' => $forum->id,
+                'title' => $forum->title,
+                'entity_type' => $forum->entity_type,
+                'entity_id' => $forum->entity_id,
+            ];
+
+            if ($forum->entity_type === 'university') {
+                $university = University::find($forum->entity_id);
+                $forumInfo['university_name'] = $university ? $university->name : null;
+                $forumInfo['navigation_path'] = "/forumai/universitetai/{$forum->entity_id}/irasai";
+            } elseif ($forum->entity_type === 'faculty') {
+                $faculty = Faculty::find($forum->entity_id);
+                if ($faculty) {
+                    $forumInfo['faculty_name'] = $faculty->name;
+                    $forumInfo['university_id'] = $faculty->university_id;
+                    $university = University::find($faculty->university_id);
+                    $forumInfo['university_name'] = $university ? $university->name : null;
+                    $forumInfo['navigation_path'] = "/forumai/universitetai/{$faculty->university_id}/fakultetai/{$forum->entity_id}/irasai";
+                }
+            } elseif ($forum->entity_type === 'program') {
+                $program = Program::find($forum->entity_id);
+                if ($program) {
+                    $forumInfo['program_name'] = $program->title;
+                    $forumInfo['faculty_id'] = $program->faculty_id;
+                    $forumInfo['university_id'] = $program->university_id;
+                    $faculty = Faculty::find($program->faculty_id);
+                    $university = University::find($program->university_id);
+                    $forumInfo['faculty_name'] = $faculty ? $faculty->name : null;
+                    $forumInfo['university_name'] = $university ? $university->name : null;
+                    $forumInfo['navigation_path'] = "/forumai/universitetai/{$program->university_id}/fakultetai/{$program->faculty_id}/programos/{$forum->entity_id}/irasai";
+                }
+            }
+
+            return [
+                'id' => $post->id,
+                'title' => $post->title,
+                'description' => $post->description,
+                'user' => $post->user->username,
+                'user_avatar' => $post->user->avatar,
+                'user_id' => $post->user_id,
+                'user_status' => [
+                    'id' => $post->user->status_id,
+                    'name' => $post->user->status ? $post->user->status->name : null
+                ],
+                'forum' => $post->forum->title,
+                'forum_id' => $post->forum_id,
+                'forum_info' => $forumInfo,
+                'likes' => $post->likes,
+                'dislikes' => $post->dislikes,
+                'views' => $post->views,
+                'user_interaction' => $userInteraction,
+                'categories' => $post->categories->map(function ($category) {
+                    return [
+                        'id' => $category->id,
+                        'name' => $category->name,
+                        'color' => $category->color,
+                    ];
+                }),
+                'comments_count' => $post->comments_count,
+                'created_at' => $post->created_at->format('Y-m-d'),
+            ];
+        });
+
+        return response()->json([
+            'data' => $formattedPosts,
+            'pagination' => [
+                'total' => $posts->total(),
+                'per_page' => $posts->perPage(),
+                'current_page' => $posts->currentPage(),
+                'last_page' => $posts->lastPage(),
+                'from' => $posts->firstItem(),
+                'to' => $posts->lastItem(),
+            ],
+        ], 200);
     }
 }
 
