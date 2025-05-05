@@ -39,45 +39,63 @@ Sukurti universitetų forumų sistemą, kurioje naudotojai galės pasirinkti Lie
 
 ### Naudotojo sąsają
 
-| ![Pagrindinis puslapis](https://github.com/user-attachments/assets/bc92c246-ea51-4a38-b258-ed070f38a74c)|
+| ![Pagrindinis puslapis](![image](https://github.com/user-attachments/assets/7a12c783-8da9-4bfb-96a7-cf0bddd854e8)|
+![image](https://github.com/user-attachments/assets/868861bc-c8a4-4cdb-b07f-5feed0ff2949)
+
 | :--------------------------------------------------------: |
 |                   _Pagrindinis puslapis_                   |
 
 <br>
 
-| ![Registracijos puslapis](https://github.com/user-attachments/assets/904820f3-3805-4700-a97e-50def47f1b95)|
+| ![Registracijos puslapis](![image](https://github.com/user-attachments/assets/57495c89-3d03-4064-9548-45d82b0f0a30)
+)|
 | :--------------------------------------------------------: |
 |                  _Registracijos puslapis_                   |
 
 <br>
 
-| ![Universiteto puslapis](https://github.com/user-attachments/assets/bf8b1d1b-f49a-4e9a-b45a-3e5be5c1f9c8)|
+| ![Universiteto puslapis](![image](https://github.com/user-attachments/assets/f27e5eef-daee-4122-912f-1b3f25c6a049)
+)|
 | :--------------------------------------------------------: |
 |                  _Prisijungimo modulas_                   |
 
 <br>
 
-| ![Įrašo puslapis](https://github.com/user-attachments/assets/98858afc-f6b5-47f6-a3ed-0188ffcca709)|
+| ![Įrašų puslapis](![image](https://github.com/user-attachments/assets/04910edf-d1d2-4467-b626-b2946237d100)
+)|
+| :--------------------------------------------------------: |
+|                  _Įrašų puslapis_                          |
+
+<br>
+
+| ![Įrašo puslapis](![image](https://github.com/user-attachments/assets/b7189dff-1f1a-462e-a70b-7f8fcc2faad9)
+)|
 | :--------------------------------------------------------: |
 |                  _Įrašo puslapis_                          |
 
 <br>
 
-| ![Universitetų sąrašo puslapis](https://github.com/user-attachments/assets/837c689b-990d-43c5-a518-32e53163063f)|
+| ![Universitetų sąrašo puslapis](![image](https://github.com/user-attachments/assets/0b5a8b05-ac18-4856-bc2c-2c9d706490d0)
+)|
 | :--------------------------------------------------------: |
 |                  _Universitetų sąrašo puslapis_            |
 
 <br>
 
-| ![Universiteto puslapis](https://github.com/user-attachments/assets/c0f0bbbd-697f-4cf0-aeac-afc400eb13dd)|
+| ![Universiteto puslapis](![image](https://github.com/user-attachments/assets/3bcb064c-fa04-4084-9b3b-ba476a4c857f)
+)|
+![image](https://github.com/user-attachments/assets/eaea7d84-555b-4bcf-9b93-8486da0e9902)
+![image](https://github.com/user-attachments/assets/13f8bd86-1a32-4672-b69f-22d012eb2ad6)
+
 | :--------------------------------------------------------: |
 |                  _Universiteto puslapis_                   |
 
 <br>
 
-| ![Administratoriaus panele](https://github.com/user-attachments/assets/a4a58931-f6d8-45c1-ad21-afb7ea2083c2)|
+| ![Programų rekomendacijos puslapis](![image](https://github.com/user-attachments/assets/28e38181-ebef-4631-ab88-db87d58114fb)
+)|
 | :--------------------------------------------------------: |
-|                  _Administratoriaus panele_                |
+|                  _Programų rekomendacijos puslapis_        |
 
 <br>
 
