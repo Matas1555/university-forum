@@ -40,8 +40,7 @@ Sukurti universitetų forumų sistemą, kurioje naudotojai galės pasirinkti Lie
 ### Naudotojo sąsają
 
 | ![Pagrindinis puslapis](![image](https://github.com/user-attachments/assets/7a12c783-8da9-4bfb-96a7-cf0bddd854e8)|
-![image](https://github.com/user-attachments/assets/868861bc-c8a4-4cdb-b07f-5feed0ff2949)
-
+|![image](https://github.com/user-attachments/assets/868861bc-c8a4-4cdb-b07f-5feed0ff2949)|
 | :--------------------------------------------------------: |
 |                   _Pagrindinis puslapis_                   |
 
