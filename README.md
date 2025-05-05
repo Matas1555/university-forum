@@ -39,29 +39,26 @@ Sukurti universitetų forumų sistemą, kurioje naudotojai galės pasirinkti Lie
 
 ### Naudotojo sąsają
 
-| ![Pagrindinis puslapis](![image](https://github.com/user-attachments/assets/7a12c783-8da9-4bfb-96a7-cf0bddd854e8)|
+|![image](https://github.com/user-attachments/assets/7a12c783-8da9-4bfb-96a7-cf0bddd854e8)|
 |![image](https://github.com/user-attachments/assets/868861bc-c8a4-4cdb-b07f-5feed0ff2949)|
 | :--------------------------------------------------------: |
 |                   _Pagrindinis puslapis_                   |
 
 <br>
 
-| ![Registracijos puslapis](![image](https://github.com/user-attachments/assets/57495c89-3d03-4064-9548-45d82b0f0a30)
-)|
+|![Registracijos puslapis](![image](https://github.com/user-attachments/assets/57495c89-3d03-4064-9548-45d82b0f0a30)|
 | :--------------------------------------------------------: |
-|                  _Registracijos puslapis_                   |
+|                  _Registracijos puslapis_                  |
 
 <br>
 
-| ![Universiteto puslapis](![image](https://github.com/user-attachments/assets/f27e5eef-daee-4122-912f-1b3f25c6a049)
-)|
-| :--------------------------------------------------------: |
+|![Universiteto puslapis](![image](https://github.com/user-attachments/assets/f27e5eef-daee-4122-912f-1b3f25c6a049)|
+| :--------------------------------------------------------:|
 |                  _Prisijungimo modulas_                   |
 
 <br>
 
-| ![Įrašų puslapis](![image](https://github.com/user-attachments/assets/04910edf-d1d2-4467-b626-b2946237d100)
-)|
+| ![Įrašų puslapis](![image](https://github.com/user-attachments/assets/04910edf-d1d2-4467-b626-b2946237d100)|
 | :--------------------------------------------------------: |
 |                  _Įrašų puslapis_                          |
 
